@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GAME HUD">
+  <rect width="128" height="128" rx="14" fill="#0a0a0c"/>
+  <rect x="10" y="10" width="108" height="108" rx="8" fill="none" stroke="#2a2a35" stroke-width="4"/>
+  <polyline points="22,86 40,70 54,78 70,48 86,58 106,34" fill="none" stroke="#00e5ff" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="22" y="96" width="84" height="8" fill="#f5a623"/>
+</svg>

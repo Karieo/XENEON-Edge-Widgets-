@@ -28,6 +28,8 @@ Source of truth used: Corsair's **WidgetBuilder Kit** (skill file + docs snapsho
 - `iCUE.fpsLimit` defaults to **30** fps for widget rendering; keep animations cheap.
 - Personalization order Corsair expects: textColor, accentColor, backgroundColor, (backgroundMedia, bgBrightness, glassBlur), transparency, placed in the last settings group. The Edge adds a "Custom Style" toggle to that group; **with Custom Style off, iCUE substitutes its own colors**, so turn it on to get the DATACORE palette.
 - `onUpdateRequested`-style programmatic refreshes: max 10/s.
+- **Widget scripts are plain global scripts, so never name a top-level variable after a browser global.** `var history = []` silently keeps `window.history` (the History object), and the next `history.push()` throws. GAME HUD hit this in testing. Top-level names are now checked against `history`, `name`, `status`, `location`, `top`, `parent`, `self`, `origin`, `event`, and similar.
+- Widgets with no touch controls should set `"interactive": false`, so taps on them can't steal game focus (GAME HUD does this).
 
 ### 0.3 Day-1 hardware results (fill in on the PC)
 

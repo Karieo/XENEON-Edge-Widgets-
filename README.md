@@ -8,6 +8,7 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **DATACORE** | v0.1, untested on hardware | CPU/GPU temps + fans, now playing, big ASK CLAUDE button |
 | **OKTAI** | v0.1, untested on hardware | Oktai's table tracker for Drakkenheim (2014 rules): HP, ki, superiority dice, Action Surge, Second Wind, contamination, rests, dice |
 | **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only), round counter, session timer, random complications and NPCs |
+| **GAME HUD** | v0.1, untested on hardware | Huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -76,6 +77,17 @@ Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiori
 1. Whether the anon key can read `encounters` depends on DATACORE's RLS, which I couldn't see. If the panel shows "NO ACTIVE ENCOUNTER" during a fight, RLS is blocking it. There's a proposed fix, but it needs your OK before anything runs.
 2. DATACORE doesn't save whose turn it is (it's local state in the tracker page), so no row is highlighted yet. The widget highlights automatically once the encounter row has an `active_id`.
 
+## GAME HUD
+
+Big glanceable stats for mid-game. FPS is the hero: cyan at or above your target, amber down to 60% of it, red below that. Under it is a 60-second trace with the target as a dashed line, plus the 60-second average and low. Tiles show GPU load, GPU temp, and CPU temp with the same warm/hot colors as DATACORE.
+
+- **No touch.** The manifest sets `interactive: false`, so a tap on the HUD can't pull focus from your game.
+- **Sensors match themselves.** Any sensor left on iCUE's default is swapped for the right kind automatically (`fps`, `gpu-load`, `gpu-temp`, `cpu-temp`/`package`). If you pick one yourself, it's kept.
+- **FPS only exists while a game runs.** With no game, the FPS reads `--` and the panel dims. It picks the game back up when iCUE reports the sensor again.
+- Slot sizes: XL shows everything. L and S show FPS + GPU temp. M shows FPS only.
+
+Settings: FPS (sensor), GPU Load, GPU Temperature, CPU Temperature, FPS Target (default 120), Warm At / Hot At (70 / 85 °C), Scanlines, plus the usual colors.
+
 ## Known limits
 
 - **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
@@ -97,6 +109,7 @@ widgets/
   EdgeTestKit/
   Oktai/
   StratumDM/
+  GameHud/
 tools/build.mjs
 RESEARCH.md
 ```

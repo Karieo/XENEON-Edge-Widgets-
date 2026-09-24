@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('GAME HUD')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('DATACORE')" />
+
+  <meta name="x-icue-property" content="fpsSensor" data-label="tr('FPS')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('fps')" />
+  <meta name="x-icue-property" content="gpuLoadSensor" data-label="tr('GPU Load')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('load')" />
+  <meta name="x-icue-property" content="gpuTempSensor" data-label="tr('GPU Temperature')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('temperature')" />
+  <meta name="x-icue-property" content="cpuTempSensor" data-label="tr('CPU Temperature')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('temperature')" />
+  <meta name="x-icue-property" content="fpsTarget" data-label="tr('FPS Target')" data-type="slider" data-default="120" data-min="30" data-max="360" data-step="10" />
+  <meta name="x-icue-property" content="warmAt" data-label="tr('Warm At')" data-type="slider" data-default="70" data-min="40" data-max="100" data-step="1" data-unit-label="'°C'" />
+  <meta name="x-icue-property" content="hotAt" data-label="tr('Hot At')" data-type="slider" data-default="85" data-min="50" data-max="110" data-step="1" data-unit-label="'°C'" />
+  <meta name="x-icue-property" content="showScanlines" data-label="tr('Scanlines')" data-type="switch" data-default="true" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0efe4'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#f5a623'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0a0a0c'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('GAME HUD')",
+      "properties": ["fpsSensor", "gpuLoadSensor", "gpuTempSensor", "cpuTempSensor", "fpsTarget", "warmAt", "hotAt", "showScanlines"],
+      "info": "tr('Sensors left on their defaults are matched automatically by kind.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/datacore.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame scanlines" data-fps="idle">
+    <section class="panel panel--fps">
+      <header class="dc-label">HUD://FRAMERATE <span id="fpsName"></span></header>
+      <div class="fps">
+        <div class="fps__hero"><span id="fpsNum">--</span><span class="fps__unit">FPS</span></div>
+        <div class="fps__stats">
+          <div><span class="dc-label">AVG 60s</span><b id="fpsAvg">--</b></div>
+          <div><span class="dc-label">LOW 60s</span><b id="fpsLow">--</b></div>
+          <div><span class="dc-label">TARGET</span><b id="fpsTargetOut">120</b></div>
+        </div>
+      </div>
+      <div class="trace" id="trace"><i class="trace__target" id="traceTarget"></i></div>
+    </section>
+
+    <section class="panel tile" id="gpuLoad" data-kind="load">
+      <header class="dc-label">GPU LOAD</header>
+      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">%</span></div></div>
+      <div class="meter"><i></i></div>
+      <div class="tile__name"></div>
+    </section>
+
+    <section class="panel tile" id="gpuTemp" data-kind="temp">
+      <header class="dc-label">GPU TEMP</header>
+      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">°</span></div></div>
+      <div class="meter"><i></i></div>
+      <div class="tile__name"></div>
+    </section>
+
+    <section class="panel tile" id="cpuTemp" data-kind="temp">
+      <header class="dc-label">CPU TEMP</header>
+      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">°</span></div></div>
+      <div class="meter"><i></i></div>
+      <div class="tile__name"></div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
