@@ -79,7 +79,7 @@ Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiori
 
 ## GAME HUD
 
-Big glanceable stats for mid-game. FPS is the hero: cyan at or above your target, amber down to 60% of it, red below that. Under it is a 60-second trace with the target as a dashed line, plus the 60-second average and low. Tiles show GPU load, GPU temp, and CPU temp with the same warm/hot colors as DATACORE.
+Big glanceable stats for mid-game. FPS is the hero: cyan at or above your target, amber down to 60% of it, red below that. Under it is a 60-second trace with the target as a dashed line, plus the 60-second average and low. Tiles show GPU load, GPU temp, and CPU temp in big numbers, each with its own 60-second trend graph (so you can see a GPU that is still climbing), using the same warm/hot colors as DATACORE.
 
 - **No touch.** The manifest sets `interactive: false`, so a tap on the HUD can't pull focus from your game.
 - **Sensors match themselves.** Any sensor left on iCUE's default is swapped for the right kind automatically (`fps`, `gpu-load`, `gpu-temp`, `cpu-temp`/`package`). If you pick one yourself, it's kept.

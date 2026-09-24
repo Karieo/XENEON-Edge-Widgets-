@@ -23,6 +23,8 @@ var bound = {}; // slot -> sensorId
 var latest = {}; // sensorId -> number
 var units = {}; // sensorId -> units string
 var fpsHistory = []; // FPS samples, oldest first (null = no reading)
+var TILES = ["gpuLoad", "gpuTemp", "cpuTemp"];
+var tileHistory = { gpuLoad: [], gpuTemp: [], cpuTemp: [] }; // { pct, state } per second
 var idleFor = IDLE_AFTER;
 var timers = {};
 
@@ -152,8 +154,15 @@ setInterval(function () {
   idleFor = live ? 0 : idleFor + 1;
   fpsHistory.push(live ? v : null);
   if (fpsHistory.length > WINDOW) fpsHistory.shift();
+  TILES.forEach(function (key) {
+    var t = latest[bound[key]];
+    var ok = bound[key] && typeof t === "number" && !isNaN(t);
+    tileHistory[key].push(ok ? tileLevel(key, t) : null);
+    if (tileHistory[key].length > WINDOW) tileHistory[key].shift();
+  });
   renderFpsStats();
   renderTrace();
+  renderSparks();
 }, 1000);
 
 // ---- Render --------------------------------------------------------------
@@ -168,24 +177,55 @@ function renderSlots() {
   $("fpsNum").textContent = live ? Math.round(fps) : "--";
   $("frame").dataset.fps = live ? fpsState(fps) : (idleFor >= IDLE_AFTER ? "idle" : $("frame").dataset.fps);
 
-  ["gpuLoad", "gpuTemp", "cpuTemp"].forEach(function (key) {
+  TILES.forEach(function (key) {
     var tile = $(key);
     var id = bound[key];
     var v = latest[id];
     var ok = id && typeof v === "number" && !isNaN(v);
     tile.querySelector(".tile__num").textContent = ok ? Math.round(v) : "--";
-    var meter = tile.querySelector(".meter i");
-    if (tile.dataset.kind === "load") {
-      meter.style.width = ok ? Math.min(100, Math.max(0, v)) + "%" : "0%";
-      tile.dataset.state = ok ? (v >= 95 ? "warm" : "normal") : "idle";
-    } else {
-      var u = units[id] || "";
-      tile.querySelector(".tile__unit").textContent = /F/i.test(u) ? "°F" : "°C";
-      var t = toC(v, u);
-      meter.style.width = ok ? Math.min(100, Math.max(0, (t - 30) / (cfg.hotAt + 10 - 30) * 100)) + "%" : "0%";
-      tile.dataset.state = ok ? (t >= cfg.hotAt ? "hot" : t >= cfg.warmAt ? "warm" : "normal") : "idle";
+    if (tile.dataset.kind !== "load") {
+      tile.querySelector(".tile__unit").textContent = /F/i.test(units[id] || "") ? "°F" : "°C";
+    }
+    tile.dataset.state = ok ? tileLevel(key, v).state : "idle";
+  });
+}
+
+// Where a tile reading sits on its bar (0-100) and which color it gets.
+function tileLevel(key, v) {
+  if ($(key).dataset.kind === "load") {
+    return { pct: Math.min(100, Math.max(0, v)), state: v >= 95 ? "warm" : "normal" };
+  }
+  var t = toC(v, units[bound[key]]);
+  return {
+    pct: Math.min(100, Math.max(0, (t - 30) / (cfg.hotAt + 10 - 30) * 100)),
+    state: t >= cfg.hotAt ? "hot" : t >= cfg.warmAt ? "warm" : "normal",
+  };
+}
+
+function renderSparks() {
+  TILES.forEach(function (key) {
+    var spark = $(key).querySelector(".spark");
+    var bars = ensureBars(spark);
+    var hist = tileHistory[key];
+    var offset = WINDOW - hist.length;
+    for (var j = 0; j < WINDOW; j++) {
+      var smp = j >= offset ? hist[j - offset] : null;
+      bars[j].style.height = smp ? Math.max(3, smp.pct) + "%" : "0";
+      bars[j].dataset.state = smp ? smp.state : "";
     }
   });
+}
+
+function ensureBars(container) {
+  var bars = container.querySelectorAll(".bar");
+  if (bars.length === WINDOW) return bars;
+  Array.prototype.forEach.call(bars, function (b) { b.remove(); });
+  for (var i = 0; i < WINDOW; i++) {
+    var b = document.createElement("span");
+    b.className = "bar";
+    container.appendChild(b);
+  }
+  return container.querySelectorAll(".bar");
 }
 
 function toC(v, u) {
@@ -215,17 +255,7 @@ function renderFpsStats() {
 }
 
 function renderTrace() {
-  var trace = $("trace");
-  var bars = trace.querySelectorAll(".bar");
-  if (bars.length !== WINDOW) {
-    Array.prototype.forEach.call(bars, function (b) { b.remove(); });
-    for (var i = 0; i < WINDOW; i++) {
-      var b = document.createElement("span");
-      b.className = "bar";
-      trace.appendChild(b);
-    }
-    bars = trace.querySelectorAll(".bar");
-  }
+  var bars = ensureBars($("trace"));
   var peak = Math.max.apply(null, fpsHistory.filter(function (v) { return v !== null; }).concat([0]));
   var scale = Math.max(cfg.fpsTarget * 1.25, peak * 1.05, 1);
   var offset = WINDOW - fpsHistory.length; // newest sample sits at the right edge

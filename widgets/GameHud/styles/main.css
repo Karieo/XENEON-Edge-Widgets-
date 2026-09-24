@@ -32,8 +32,8 @@
 
 .fps {
   display: flex;
-  align-items: flex-end;
-  gap: calc(var(--u) * 5);
+  align-items: center;
+  gap: calc(var(--u) * 6);
   flex: 1;
   min-height: 0;
 }
@@ -49,21 +49,20 @@
 }
 
 #fpsNum {
-  font-size: calc(var(--u) * 40);
+  font-size: calc(var(--u) * 54);
   min-width: 3ch;
 }
 
 .fps__unit {
   margin-left: calc(var(--u) * 1.5);
-  font-size: calc(var(--u) * 8);
+  font-size: calc(var(--u) * 10);
   opacity: 0.75;
 }
 
 .fps__stats {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--u) * 1.5);
-  padding-bottom: calc(var(--u) * 1);
+  gap: calc(var(--u) * 2.2);
 }
 
 .fps__stats div {
@@ -74,20 +73,20 @@
 .fps__stats b {
   font-family: var(--font-terminal);
   font-weight: 400;
-  font-size: calc(var(--u) * 8);
+  font-size: calc(var(--u) * 10);
   line-height: 0.9;
   color: var(--text-color);
 }
 
-.fps__stats .dc-label { font-size: calc(var(--u) * 2.8); }
+.fps__stats .dc-label { font-size: calc(var(--u) * 3.2); white-space: nowrap; }
 
 .trace {
   position: relative;
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: calc(var(--u) * 14);
-  margin-top: calc(var(--u) * 2);
+  height: calc(var(--u) * 20);
+  margin-top: calc(var(--u) * 1.5);
   border-bottom: 1px solid var(--dc-border);
 }
 
@@ -139,11 +138,11 @@
   align-items: flex-start;
 }
 
-.tile__num { font-size: calc(var(--u) * 28); }
+.tile__num { font-size: calc(var(--u) * 42); }
 
 .tile__unit {
-  margin-top: calc(var(--u) * 2.5);
-  margin-left: calc(var(--u) * 0.8);
+  margin-top: calc(var(--u) * 4);
+  margin-left: calc(var(--u) * 1);
   font-size: calc(var(--u) * 8);
   opacity: 0.75;
 }
@@ -154,19 +153,16 @@
   50% { opacity: 0.55; }
 }
 
-.meter {
-  height: calc(var(--u) * 2);
-  background: var(--dc-bg);
-  border: 1px solid var(--dc-border);
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: calc(var(--u) * 16);
+  border-bottom: 1px solid var(--dc-border);
 }
 
-.meter i {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: var(--state-color);
-  transition: width 400ms ease, background 300ms linear;
-}
+.spark .bar { opacity: 0.7; }
+.spark .bar:last-child { opacity: 1; }
 
 .tile__name {
   margin-top: calc(var(--u) * 1.2);
@@ -192,5 +188,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tile[data-state="hot"] .tile__value { animation: none; }
-  .bar, .meter i { transition: none; }
+  .bar { transition: none; }
 }
