@@ -29,6 +29,7 @@ Source of truth used: Corsair's **WidgetBuilder Kit** (skill file + docs snapsho
 - Personalization order Corsair expects: textColor, accentColor, backgroundColor, (backgroundMedia, bgBrightness, glassBlur), transparency, placed in the last settings group. The Edge adds a "Custom Style" toggle to that group; **with Custom Style off, iCUE substitutes its own colors**, so turn it on to get the DATACORE palette.
 - `onUpdateRequested`-style programmatic refreshes: max 10/s.
 - **Widget scripts are plain global scripts, so never name a top-level variable after a browser global.** `var history = []` silently keeps `window.history` (the History object), and the next `history.push()` throws. GAME HUD hit this in testing. Top-level names are now checked against `history`, `name`, `status`, `location`, `top`, `parent`, `self`, `origin`, `event`, and similar.
+- **OBS control without Stream Deck:** OBS 28+ ships obs-websocket v5 (`ws://127.0.0.1:4455`). A widget can open a WebSocket to it directly, with SHA-256 challenge auth, requests, and events including `InputVolumeMeters` for real audio levels. ON AIR uses this in place of the Stream Deck plugin route from §3. **TEST on hardware:** that iCUE allows a WebSocket to localhost (it may prompt), and whether `crypto.subtle` exists in iCUE's page context (ON AIR has a verified pure-JS SHA-256 fallback either way).
 - Widgets with no touch controls should set `"interactive": false`, so taps on them can't steal game focus (GAME HUD does this).
 
 ### 0.3 Day-1 hardware results (fill in on the PC)

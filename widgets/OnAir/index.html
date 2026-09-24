@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('ON AIR')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="obsAddress" data-label="tr('OBS Address')" data-type="textfield" data-default="'ws://127.0.0.1:4455'" />
+  <meta name="x-icue-property" content="obsPassword" data-label="tr('OBS WebSocket Password')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="micSource" data-label="tr('Mic Source')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="desktopSource" data-label="tr('Desktop Audio Source')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="showStream" data-label="tr('Show Stream Button')" data-type="switch" data-default="true" />
+  <meta name="x-icue-property" content="chapterName" data-label="tr('Chapter Name')" data-type="textfield" data-default="''" />
+
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#ff2b2b'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('ON AIR')",
+      "properties": ["obsAddress", "obsPassword", "micSource", "desktopSource", "showStream", "chapterName"],
+      "info": "tr('In OBS: Tools > WebSocket Server Settings > Enable. Leave sources blank to use the OBS Mic/Aux and Desktop Audio.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["accentColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/broadcast.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-conn="offline" data-rec="off" data-stream="off">
+    <section class="bc-panel onair">
+      <div class="onair__top">
+        <div class="light" id="light"><i></i>ON AIR</div>
+        <div class="conn" id="conn">Connecting&#8230;</div>
+      </div>
+      <div class="tc" id="recTc">00:00:00</div>
+      <div class="row">
+        <button class="btn rec" id="recBtn"><i class="dot"></i><span id="recLabel">Rec</span></button>
+        <button class="btn pause" id="pauseBtn">Pause</button>
+      </div>
+      <div class="stream" id="streamRow">
+        <button class="btn live" id="streamBtn">Go live</button>
+        <span class="stream__tc" id="streamTc"></span>
+      </div>
+    </section>
+
+    <section class="bc-panel scenes">
+      <div class="bc-label">Scenes <span class="scenes__live" id="sceneLive"></span></div>
+      <div class="scenes__grid" id="scenes"></div>
+    </section>
+
+    <section class="bc-panel audio">
+      <div class="strips">
+        <div class="strip" id="micStrip">
+          <div class="bc-label strip__name">Mic</div>
+          <div class="meter"><i class="meter__cover"></i><i class="meter__peak"></i></div>
+          <button class="btn mute" id="micBtn">Mute</button>
+        </div>
+        <div class="strip" id="deskStrip">
+          <div class="bc-label strip__name">Desktop</div>
+          <div class="meter"><i class="meter__cover"></i><i class="meter__peak"></i></div>
+          <button class="btn mute" id="deskBtn">Mute</button>
+        </div>
+      </div>
+      <div class="tools">
+        <button class="btn tool" id="markBtn">Mark</button>
+        <button class="btn tool" id="clipBtn">Clip</button>
+      </div>
+      <div class="health" id="health">&#8212;</div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/obs.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

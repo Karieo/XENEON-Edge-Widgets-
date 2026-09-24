@@ -11,8 +11,9 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **GAME HUD** | v0.1, untested on hardware | Motorsport-telemetry look: shift lights, huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
 | **FORGE** | v0.1, untested on hardware | Mini Forge Dad painting-session timer: session clock, per-stage splits, paint dry timer, who's painting, weekly/all-time log |
 | **CREATOR** | v0.1, untested on hardware | YouTube channel stats: subscribers, views, 14-day views chart, latest upload, recent uploads. Light or dark |
+| **ON AIR** | v0.1, untested on hardware | OBS control: record/stream with timers (hold to stop), scene buttons, mic/desktop mute with live meters, chapter marks, replay clips, recording health |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, and CREATOR looks like a clean creator-studio dashboard (light or dark). Themes live in `shared/styles/` on top of a common `base.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), and ON AIR looks like a broadcast console. Themes live in `shared/styles/` on top of a common `base.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -140,6 +141,30 @@ Settings: Channel, YouTube API Key, Refresh Every (5–60 min, default 15), Them
 
 Slot sizes: XL shows all four cards. L and S show channel + views. M shows the channel card only.
 
+## ON AIR
+
+OBS control over OBS's built-in WebSocket (OBS 28+). Nothing extra to install, and no Stream Deck app. Broadcast-console look: a glowing ON AIR light, tally-lit scene buttons, and segmented meters.
+
+| Control | Tap | Hold |
+|---|---|---|
+| REC | start recording | stop recording (about 1 s, so a bump can't end a take) |
+| Pause | pause / resume the recording | |
+| Go live | start streaming | end the stream |
+| Scene button | switch OBS to that scene (the live scene has a red border) | |
+| Mic / Desktop | mute / unmute | |
+| Mark | add a chapter marker to the recording | |
+| Clip / Start buffer | save the replay buffer (or start it if it's off) | |
+
+- **Live meters:** mic and desktop levels come straight from OBS, so you can catch a muted or dead mic before a long take. Tick marks show the peak, and the meter outlines red when you clip.
+- **Health line:** FPS, dropped frames (amber at 1%+), CPU, and free disk space (amber under 10 GB).
+- **Mark** only shows on OBS 30.2+ and needs **Hybrid MP4** as the recording format. **Clip** only shows if the replay buffer is enabled in OBS (Settings → Output → Replay Buffer). Both hide themselves when OBS doesn't support them.
+- Up to 8 scenes, in the same order as OBS's scene list. OBS scene changes, mutes, and recording state update live from OBS events.
+- If OBS isn't running, the widget retries every few seconds (backing off to 30 s) and reconnects on its own. A wrong password shows a clear message and doesn't keep retrying.
+
+**Setup:** in OBS, open **Tools → WebSocket Server Settings**, tick **Enable WebSocket server**, then click **Show Connect Info** and copy the password into the widget's **OBS WebSocket Password** setting. Leave **OBS Address** as `ws://127.0.0.1:4455` unless you changed the port. Mic Source and Desktop Audio Source can stay blank to use OBS's Mic/Aux and Desktop Audio, or name specific OBS sources. Chapter Name (optional) names chapters "Name 1", "Name 2", and so on.
+
+Slot sizes: XL shows everything. L and S show on-air + scenes. M shows the on-air panel only.
+
 ## Known limits
 
 - **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
@@ -158,7 +183,8 @@ shared/              one copy of the style, fonts, and iCUE adapter
   styles/motorsport.css  GAME HUD theme
   styles/workshop.css    FORGE theme
   styles/studio.css      CREATOR theme (light + dark)
-  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat, Inter (SIL OFL, licenses included)
+  styles/broadcast.css   ON AIR theme
+  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat, Inter, Oswald, JetBrains Mono (SIL OFL, licenses included)
 widgets/
   Datacore/
   EdgeTestKit/
@@ -167,6 +193,7 @@ widgets/
   GameHud/
   Forge/
   Creator/
+  OnAir/
 tools/build.mjs
 RESEARCH.md
 ```
@@ -176,4 +203,4 @@ RESEARCH.md
 - iCUE widget rules and plugin APIs: Corsair's WidgetBuilder documentation and `icuewidget-cli` (Apache-2.0).
 - Design ideas (not code) from [Xenon](https://github.com/marcimastro98/Xenon) by Marcello Mastroeni, and from [vardek-widgets](https://github.com/vardekapp/vardek-widgets) (MIT).
 - Palette and fonts from the DATACORE app (Karieo/DnD-Website).
-- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), all SIL Open Font License 1.1.
+- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), Oswald (Vernon Adams), JetBrains Mono (JetBrains), all SIL Open Font License 1.1.

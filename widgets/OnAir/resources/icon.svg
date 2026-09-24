@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="ON AIR">
+  <rect width="128" height="128" rx="18" fill="#121314"/>
+  <rect x="14" y="40" width="100" height="48" rx="10" fill="#2a0c0c" stroke="#ff2b2b" stroke-width="4"/>
+  <circle cx="36" cy="64" r="10" fill="#ff2b2b"/>
+  <text x="54" y="73" font-family="Arial Black, Arial" font-size="24" font-weight="900" fill="#ff2b2b">AIR</text>
+</svg>

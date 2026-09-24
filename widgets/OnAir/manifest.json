@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.onair",
+  "name": "ON AIR",
+  "description": "OBS control for the Xeneon Edge over OBS's built-in WebSocket: record/stream with timers, scene buttons, mic and desktop mute with live meters, chapter markers, replay clips, and recording health.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}
