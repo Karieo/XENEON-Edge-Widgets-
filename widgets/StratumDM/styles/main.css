@@ -1,0 +1,273 @@
+/* STRATUM DM layout. Primary target: Edge XL horizontal (2536x696). */
+
+.frame {
+  display: flex;
+  gap: calc(var(--u) * 2.5);
+  padding: calc(var(--u) * 3.5) calc(var(--u) * 4);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 2.5) calc(var(--u) * 3);
+  border: 1px solid var(--dc-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dc-bg-panel) 70%, transparent);
+}
+
+.panel > header,
+.panel > .dc-label { color: var(--accent-color); }
+
+.row {
+  display: flex;
+  gap: calc(var(--u) * 1.8);
+}
+
+.row .btn { flex: 1; padding: 0; }
+
+/* ---- Initiative ---- */
+
+:root { --max-chips: 3; } /* read by main.js */
+
+.panel--init { flex: 1.6; }
+
+.init__head {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--u) * 2.5);
+  margin-bottom: calc(var(--u) * 1.5);
+}
+
+.init__enc {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 5);
+  letter-spacing: 0.04em;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.1em;
+  padding: calc(var(--u) * 0.4) calc(var(--u) * 1.4);
+  border: 1px solid var(--dc-text-dim);
+  color: var(--dc-text-dim);
+}
+
+.tag[data-state="on"] { border-color: var(--dc-cyan); color: var(--dc-cyan); }
+.tag[data-state="on"]::before { content: "\25CF  "; animation: blink 2s steps(1) infinite; }
+.tag[data-state="off"] { border-color: var(--dc-rust); color: var(--dc-rust); }
+
+.init__list {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1);
+}
+
+.init__empty {
+  margin-top: calc(var(--u) * 2);
+  font-size: calc(var(--u) * 3.6);
+}
+
+.cb {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 2);
+  min-height: calc(var(--u) * 11);
+  padding: 0 calc(var(--u) * 2);
+  border-left: calc(var(--u) * 0.8) solid var(--dc-cyan);
+  background: var(--dc-bg-raised);
+}
+
+.cb--enemy { border-left-color: var(--dc-rust); }
+.cb--hidden { opacity: 0.55; border-left-style: dashed; }
+.cb--active {
+  background: color-mix(in srgb, var(--accent-color) 16%, var(--dc-bg-raised));
+  box-shadow: inset 0 0 0 2px var(--accent-color);
+}
+.cb--dead .cb__name { text-decoration: line-through; color: var(--dc-text-dim); }
+
+.cb__init {
+  flex: 0 0 calc(var(--u) * 7);
+  font-family: var(--font-terminal);
+  font-size: calc(var(--u) * 7);
+  line-height: 1;
+  color: var(--accent-color);
+  text-align: right;
+}
+
+.cb__name {
+  flex: 1 1 auto;
+  min-width: calc(var(--u) * 28);
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 7);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cb--pc .cb__name { color: var(--dc-cyan); }
+
+.cb__conds {
+  display: flex;
+  gap: calc(var(--u) * 0.8);
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chip {
+  font-size: calc(var(--u) * 2.6);
+  letter-spacing: 0.08em;
+  padding: calc(var(--u) * 0.3) calc(var(--u) * 1);
+  border: 1px solid var(--dc-magenta);
+  color: var(--dc-magenta);
+  white-space: nowrap;
+}
+
+.chip--more { border-color: var(--dc-text-dim); color: var(--dc-text-dim); }
+
+.cb__hp {
+  flex: 0 0 calc(var(--u) * 34);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.5);
+}
+
+.cb__bar {
+  flex: 1;
+  height: calc(var(--u) * 2);
+  background: var(--dc-bg);
+  border: 1px solid var(--dc-border);
+}
+
+.cb__bar i {
+  display: block;
+  height: 100%;
+  background: var(--dc-cyan);
+  transition: width 300ms ease;
+}
+
+.cb__bar[data-level="mid"] i { background: var(--dc-amber); }
+.cb__bar[data-level="low"] i { background: var(--dc-rust); }
+
+.cb__hpnum {
+  flex: 0 0 calc(var(--u) * 12);
+  font-family: var(--font-terminal);
+  font-size: calc(var(--u) * 5);
+  text-align: right;
+}
+
+/* ---- Round + timer ---- */
+
+.panel--clock {
+  flex: 0.62;
+  text-align: center;
+}
+
+.round {
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 22);
+  line-height: 0.95;
+  color: var(--text-color);
+}
+
+.panel--clock .row .btn { font-size: calc(var(--u) * 10); font-family: var(--font-mono); }
+
+.clock__label { margin-top: auto; }
+.clock__hint { opacity: 0.7; font-size: 0.8em; letter-spacing: 0.06em; }
+
+.timer {
+  margin: calc(var(--u) * 0.5) 0 calc(var(--u) * 1.5);
+  font-family: var(--font-terminal);
+  font-size: calc(var(--u) * 10);
+  line-height: 1;
+  color: var(--dc-text-dim);
+}
+
+.timer-running .timer { color: var(--dc-cyan); }
+
+#timerBtn { font-size: calc(var(--u) * 6); }
+
+/* ---- Generators ---- */
+
+.panel--gen { flex: 1.15; }
+
+.gen__out {
+  flex: 1;
+  min-height: 0;
+  margin: calc(var(--u) * 1.5) 0 calc(var(--u) * 2);
+  overflow: hidden;
+}
+
+.gen__out p { margin: 0; }
+
+.gen__idle {
+  font-size: calc(var(--u) * 4);
+  color: var(--dc-text-dim);
+}
+
+.gen__text {
+  font-size: calc(var(--u) * 5.2);
+  line-height: 1.3;
+  color: var(--text-color);
+}
+
+.gen__name {
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 11);
+  line-height: 1;
+  color: var(--dc-cyan);
+}
+
+.gen__role {
+  margin: calc(var(--u) * 0.5) 0 calc(var(--u) * 1.5) !important;
+  font-size: calc(var(--u) * 4);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+.gen__out.flash { animation: gen-in 280ms ease-out; }
+
+@keyframes gen-in {
+  0% { opacity: 0; transform: translateX(-1.5%); }
+  100% { opacity: 1; transform: none; }
+}
+
+.gen__btn { font-size: calc(var(--u) * 7); }
+.gen__btn--npc { flex: 0.6 !important; --accent-color: var(--dc-cyan); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large and Small: initiative + clock only. */
+@media (max-aspect-ratio: 3/1) {
+  .panel--gen { display: none; }
+}
+
+/* Medium and vertical: initiative only, sized from width. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.9vw; }
+  .panel--clock { display: none; }
+  .cb__hp { flex-basis: calc(var(--u) * 26); }
+  :root { --max-chips: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gen__out.flash { animation: none; }
+  .tag[data-state="on"]::before { animation: none; }
+}

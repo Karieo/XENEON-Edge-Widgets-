@@ -33,11 +33,12 @@
   ]
   </script>
 
+  <link rel="stylesheet" href="shared/styles/base.css" />
   <link rel="stylesheet" href="shared/styles/datacore.css" />
   <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body>
-  <main id="frame" class="dc-frame scanlines">
+  <main id="frame" class="frame scanlines">
     <section class="panel panel--system">
       <header class="dc-label">SYS://MONITOR</header>
       <div class="temps">
@@ -63,15 +64,15 @@
         <div class="track__artist" id="trackArtist">&#8212;</div>
       </div>
       <div class="controls">
-        <button class="dc-button ctl" id="btnPrev" aria-label="Previous track">&#9664;&#9664;</button>
-        <button class="dc-button ctl ctl--main" id="btnPlay" aria-label="Play or pause">&#9654;&#10074;&#10074;</button>
-        <button class="dc-button ctl" id="btnNext" aria-label="Next track">&#9654;&#9654;</button>
+        <button class="btn ctl" id="btnPrev" aria-label="Previous track">&#9664;&#9664;</button>
+        <button class="btn ctl ctl--main" id="btnPlay" aria-label="Play or pause">&#9654;&#10074;&#10074;</button>
+        <button class="btn ctl" id="btnNext" aria-label="Next track">&#9654;&#9654;</button>
       </div>
     </section>
 
     <section class="panel panel--comms">
       <header class="dc-label">COMMS://UPLINK</header>
-      <button class="dc-button ask" id="btnClaude">
+      <button class="btn ask" id="btnClaude">
         <span class="ask__text">ASK CLAUDE</span>
       </button>
       <div class="comms-status dc-label"><span id="commsStatus">&gt; READY</span><span class="dc-cursor"></span></div>

@@ -186,5 +186,24 @@
     el.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   };
 
+  // Fires only after a full hold, so a stray tap mid-game can't trigger it.
+  // Pair with the .btn.hold CSS, which fills the button while held.
+  Edge.hold = function (el, onConfirm, ms) {
+    ms = ms || 900;
+    el.classList.add("hold");
+    el.style.setProperty("--hold-ms", ms + "ms");
+    Edge.press(el, null, onConfirm, ms);
+  };
+
+  // Uniform integer in [1, sides], without modulo bias.
+  Edge.roll = function (sides) {
+    var c = global.crypto;
+    if (!c || !c.getRandomValues) return 1 + Math.floor(Math.random() * sides);
+    var buf = new Uint32Array(1);
+    var limit = Math.floor(0x100000000 / sides) * sides;
+    do { c.getRandomValues(buf); } while (buf[0] >= limit);
+    return 1 + (buf[0] % sides);
+  };
+
   global.Edge = Edge;
 })(window);

@@ -1,4 +1,4 @@
-.dc-frame {
+.frame {
   display: flex;
   gap: calc(var(--u) * 3);
   padding: calc(var(--u) * 4);
@@ -64,5 +64,5 @@
 
 @media (max-aspect-ratio: 3/2) {
   :root { --u: 0.8vw; }
-  .dc-frame { flex-direction: column; }
+  .frame { flex-direction: column; }
 }

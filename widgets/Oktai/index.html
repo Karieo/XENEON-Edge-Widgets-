@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('OKTAI')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Drakkenheim')" />
+
+  <meta name="x-icue-property" content="maxHp" data-label="tr('Max HP')" data-type="slider" data-default="60" data-min="1" data-max="200" data-step="1" />
+  <meta name="x-icue-property" content="kiMax" data-label="tr('Ki Points')" data-type="slider" data-default="6" data-min="0" data-max="20" data-step="1" />
+  <meta name="x-icue-property" content="supMax" data-label="tr('Superiority Dice')" data-type="slider" data-default="4" data-min="0" data-max="6" data-step="1" />
+  <meta name="x-icue-property" content="supDie" data-label="tr('Superiority Die')" data-type="combobox" data-default="'d8'" data-values="['d6', 'd8', 'd10', 'd12']" />
+  <meta name="x-icue-property" content="surgeMax" data-label="tr('Action Surge')" data-type="slider" data-default="1" data-min="0" data-max="2" data-step="1" />
+  <meta name="x-icue-property" content="windMax" data-label="tr('Second Wind')" data-type="slider" data-default="1" data-min="0" data-max="2" data-step="1" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#ddd4c2'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#c8a45a'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0c0d0f'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('OKTAI')",
+      "properties": ["maxHp", "kiMax", "supMax", "supDie", "surgeMax", "windMax"],
+      "info": "tr('Maxes come from your sheet. Spending is saved on this PC.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/drakkenheim.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame hazed">
+    <section class="contam dk-panel" aria-label="Contamination">
+      <div class="dk-label">Contam</div>
+      <div class="contam__track" id="contamTrack"></div>
+      <div class="contam__level" id="contamLevel">0</div>
+    </section>
+
+    <section class="hp dk-panel">
+      <header class="dk-label">Oktai Khang &#183; Hit Points</header>
+      <div class="hp__main">
+        <span class="hp__cur" id="hpCur">60</span><span class="hp__max" id="hpMax">/60</span>
+      </div>
+      <div class="hp__bar"><div class="hp__fill" id="hpFill"></div><div class="hp__temp" id="hpTempBar"></div></div>
+      <div class="hp__row">
+        <button class="btn hp__btn hp__btn--dmg" id="btnDmg">&#8722; DMG</button>
+        <button class="btn hp__btn" id="btnHeal">+ HEAL</button>
+      </div>
+      <div class="hp__row">
+        <button class="btn hp__btn hp__btn--temp" id="btnTempDown">&#8722; TEMP</button>
+        <div class="hp__tempval"><span class="dk-label">Temp</span><span id="hpTemp">0</span></div>
+        <button class="btn hp__btn hp__btn--temp" id="btnTempUp">+ TEMP</button>
+      </div>
+      <div class="hint dk-label">Tap 1 &#183; hold 5</div>
+    </section>
+
+    <section class="res">
+      <div class="res__grid">
+        <button class="res__tile dk-panel" data-key="ki"><span class="dk-label">Ki</span><span class="res__count"></span><span class="pips"></span></button>
+        <button class="res__tile dk-panel" data-key="sup"><span class="dk-label">Superiority <b class="supDieLabel">d8</b></span><span class="res__count"></span><span class="pips"></span></button>
+        <button class="res__tile dk-panel" data-key="surge"><span class="dk-label">Action Surge</span><span class="res__count"></span><span class="pips"></span></button>
+        <button class="res__tile dk-panel" data-key="wind"><span class="dk-label">Second Wind</span><span class="res__count"></span><span class="pips"></span></button>
+      </div>
+      <div class="rest">
+        <button class="btn rest__btn" id="btnShort">Short Rest</button>
+        <button class="btn rest__btn" id="btnLong">Long Rest</button>
+      </div>
+    </section>
+
+    <section class="dice dk-panel">
+      <header class="dk-label">Dice</header>
+      <div class="dice__result">
+        <span class="dice__num" id="diceNum">&#8212;</span>
+        <span class="dice__detail" id="diceDetail">tap a die</span>
+      </div>
+      <div class="dice__history" id="diceHistory"></div>
+      <div class="dice__grid">
+        <button class="btn die" data-roll="d20">d20</button>
+        <button class="btn die" data-roll="adv">ADV</button>
+        <button class="btn die" data-roll="dis">DIS</button>
+        <button class="btn die" data-roll="sup"><span class="supDieLabel">d8</span></button>
+        <button class="btn die" data-roll="d6">d6</button>
+        <button class="btn die" data-roll="d4">d4</button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

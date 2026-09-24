@@ -58,6 +58,54 @@ Import `dist/EdgeTestKit.icuewidget`, put it on the Edge at XL size, and tap thr
 | Bebas Neue, Share Tech Mono, VT323 | SIL OFL 1.1 | Bundled in `shared/fonts/` with their license files. |
 | Corsair WidgetBuilder docs (via Xenon repo) | Corsair documentation | Read for reference only. |
 
+
+Fonts added for OKTAI: Cinzel and Barlow Condensed, both SIL OFL 1.1, bundled with their license files.
+
+### 0.5 Persistence decision (Part 2)
+
+OKTAI and STRATUM DM save state with **`localStorage`, keyed by the injected `uniqueId`**: one JSON object per widget instance, plus a `storage` listener so two copies stay in sync. No file permissions. OKTAI stores *spent* counts (not remaining), so changing a max in settings never loses progress. The STRATUM session timer stores a start timestamp plus banked time, so it keeps counting through an iCUE restart. This relies on test 4 passing on hardware.
+
+### 0.6 STRATUM DM findings (2026-09-24)
+
+- **The kit's Supabase project ID is wrong for STRATUM.** `vmgtaxapklstqytygwyb` holds `campaigns`, `chronicles`, `characters`: the dndetail/Drakkenheim chronicles DB, not DATACORE. DATACORE reads its project from `VITE_SUPABASE_URL` in its `.env`, and that project isn't visible to the Supabase connector used in this session. So the widget takes the URL and anon key as **settings**, and nothing is hard-coded.
+- **Data shape:** one row per encounter in `encounters` (`id, name, active, round, combatants jsonb, created_at, updated_at`). Each combatant: `id, name, type ('pc'|'enemy'), initiative, hp_current, hp_max, ac, conditions[] (lowercase names), is_dead, hidden, death_saves…`. The widget uses the same query as DATACORE's dashboard: `active=eq.true`, newest `updated_at`, limit 1.
+- **Current turn isn't stored.** `CombatTracker.jsx` keeps `activeId` in React state only. To show it on the Edge, DATACORE would need to write it to the row, e.g. an `active_id text` column updated in `nextTurn()`. The widget already highlights `active_id` if present. That's a DATACORE change plus a migration, so it waits for your OK.
+- **Realtime:** DATACORE's code already subscribes to `postgres_changes` on `encounters`, so Realtime may be enabled now. The widget polls anyway (default 4 s, pauses when hidden). Simpler, and it works either way.
+- **RLS / security (unverified).** If `encounters` only allows `authenticated` reads, the anon key gets `[]` and the panel says "NO ACTIVE ENCOUNTER". The obvious fix, an anon `SELECT` policy on `encounters`, has a real downside: **the anon key ships in DATACORE's public JS bundle, so any player could read hidden enemies and exact enemy HP.** Safer option: a narrow read-only function that only returns what players could already see. **Proposed SQL (NOT run; needs your OK):**
+
+```sql
+-- Returns the newest active encounter with hidden enemies removed.
+-- Read-only, exposes nothing else, callable with the anon key.
+create or replace function public.edge_active_encounter()
+returns json
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select json_build_object(
+    'id', e.id,
+    'name', e.name,
+    'round', e.round,
+    'updated_at', e.updated_at,
+    'combatants', coalesce((
+      select json_agg(c)
+      from jsonb_array_elements(e.combatants) c
+      where c->>'type' = 'pc' or coalesce((c->>'hidden')::boolean, false) = false
+    ), '[]'::json)
+  )
+  from encounters e
+  where e.active
+  order by e.updated_at desc
+  limit 1
+$$;
+
+revoke all on function public.edge_active_encounter() from public;
+grant execute on function public.edge_active_encounter() to anon;
+```
+
+  If you go this route, the widget switches to `POST /rest/v1/rpc/edge_active_encounter` (a small change), and "Show Hidden Enemies" stops doing anything, since hidden enemies never leave the database.
+
 ---
 
 

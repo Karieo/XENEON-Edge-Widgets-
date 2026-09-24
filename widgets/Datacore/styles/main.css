@@ -1,6 +1,6 @@
 /* DATACORE layout. Primary target: Edge XL horizontal (2536x696). */
 
-.dc-frame {
+.frame {
   display: flex;
   gap: calc(var(--u) * 2.5);
   padding: calc(var(--u) * 4) calc(var(--u) * 5);
@@ -212,7 +212,7 @@
 /* Medium and vertical slots: stack system over comms, size from width. */
 @media (max-aspect-ratio: 3/2) {
   :root { --u: 0.8vw; }
-  .dc-frame { flex-direction: column; }
+  .frame { flex-direction: column; }
   .panel--comms { flex: 0 0 auto; }
   .temp__num { font-size: calc(var(--u) * 18); }
   .temp__unit { margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 6); }

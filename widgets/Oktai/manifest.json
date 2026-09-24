@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.oktai",
+  "name": "OKTAI",
+  "description": "Table tracker for Oktai Khang (Monk 6 / Fighter 3 Battle Master, 2014 rules) in Dragons of Drakkenheim: HP, ki, superiority dice, Action Surge, Second Wind, contamination, rests, and dice.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}
