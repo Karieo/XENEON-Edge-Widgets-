@@ -1,0 +1,98 @@
+/*
+ * workshop.css — warm hobby-desk theme (FORGE). Load after base.css.
+ * Dark walnut desk, parchment cards, brass fittings, paint-pot accents,
+ * and a handwritten notebook font for the log.
+ */
+
+@font-face {
+  font-family: "Zilla Slab";
+  src: url("../fonts/zilla-slab-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caveat";
+  src: url("../fonts/caveat-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --ws-walnut-0: #1e140e;
+  --ws-walnut-1: #2b1d14;
+  --ws-walnut-2: #3a281b;
+  --ws-paper: #f0e4c8;
+  --ws-paper-2: #e3d2ad;
+  --ws-ink: #2a1f17;
+  --ws-ink-soft: #6b5846;
+  --ws-brass: #c9973f;
+  --ws-brass-hi: #e8bd64;
+  --ws-red: #b3261e;
+  --ws-blue: #2f5aa8;
+  --ws-green: #3f8a4b;
+
+  --text-color: var(--ws-paper);
+  --accent-color: var(--ws-brass);
+  --bg-color: var(--ws-walnut-0);
+
+  --font-slab: "Zilla Slab", "Rockwell", Georgia, serif;
+  --font-hand: "Caveat", "Segoe Print", cursive;
+  --btn-font: var(--font-slab);
+  --btn-radius: 10px;
+}
+
+body {
+  font-family: var(--font-slab);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums; /* Zilla's default digits dip below the line */
+}
+
+/* Wood grain: long soft streaks, pure CSS. */
+.frame.wood {
+  background:
+    repeating-linear-gradient(92deg, rgba(255, 220, 170, 0.035) 0 2px, transparent 2px 23px),
+    repeating-linear-gradient(88deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 41px),
+    linear-gradient(180deg, var(--ws-walnut-1), var(--ws-walnut-0));
+}
+
+/* A parchment card pinned to the desk. */
+.ws-card {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--ws-paper), var(--ws-paper-2));
+  color: var(--ws-ink);
+  box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(120, 90, 50, 0.25);
+}
+
+/* Brass plate for labels. */
+.ws-plate {
+  display: inline-block;
+  padding: calc(var(--u) * 0.5) calc(var(--u) * 2);
+  border-radius: 6px;
+  background: linear-gradient(180deg, var(--ws-brass-hi), var(--ws-brass));
+  color: var(--ws-ink);
+  font-family: var(--font-slab);
+  font-size: calc(var(--u) * 3.2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.ws-hand {
+  font-family: var(--font-hand);
+  font-weight: 700;
+}
+
+/* Buttons look like paint-pot lids: round-cornered, chunky. */
+.btn {
+  border-width: 3px;
+  background: color-mix(in srgb, var(--accent-color) 14%, var(--ws-walnut-2));
+  color: var(--ws-paper);
+  letter-spacing: 0.03em;
+}
+
+.btn.is-pressed,
+.btn:active {
+  background: color-mix(in srgb, var(--accent-color) 45%, var(--ws-walnut-2));
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('FORGE')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="project" data-label="tr('Current Project')" data-type="textfield" data-default="'Space Marine Captain'" />
+  <meta name="x-icue-property" content="painterA" data-label="tr('Painter A')" data-type="textfield" data-default="'Dad'" />
+  <meta name="x-icue-property" content="painterB" data-label="tr('Painter B')" data-type="textfield" data-default="'Kiddo'" />
+  <meta name="x-icue-property" content="dryMinutes" data-label="tr('Dry Timer')" data-type="slider" data-default="5" data-min="1" data-max="30" data-step="1" data-unit-label="'min'" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0e4c8'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#c9973f'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#1e140e'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('FORGE')",
+      "properties": ["project", "painterA", "painterB", "dryMinutes"],
+      "info": "tr('Session and stage times are saved on this PC.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/workshop.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame wood" data-run="idle">
+    <section class="ws-card session">
+      <div class="session__top">
+        <span class="ws-plate">On the desk</span>
+        <button class="who" id="who"></button>
+      </div>
+      <div class="project ws-hand" id="project">Space Marine Captain</div>
+      <div class="clock" id="clock">0:00:00</div>
+      <div class="stage-now" id="stageNow">Pick a stage to start</div>
+      <div class="started ws-hand" id="started"></div>
+      <div class="row">
+        <button class="btn run" id="runBtn">Start</button>
+        <button class="btn finish" id="finishBtn">Finish</button>
+      </div>
+    </section>
+
+    <section class="stages" id="stages">
+      <button class="btn stage" data-stage="Prime" style="--paint:#8c8f94">Prime</button>
+      <button class="btn stage" data-stage="Basecoat" style="--paint:#2f5aa8">Basecoat</button>
+      <button class="btn stage" data-stage="Wash" style="--paint:#6b3f22">Wash</button>
+      <button class="btn stage" data-stage="Layer" style="--paint:#3f8a4b">Layer</button>
+      <button class="btn stage" data-stage="Highlight" style="--paint:#e8bd64">Highlight</button>
+      <button class="btn stage" data-stage="Basing" style="--paint:#8a6a3a">Basing</button>
+      <button class="btn stage" data-stage="Varnish" style="--paint:#c9d2dc">Varnish</button>
+      <button class="btn dry" id="dryBtn"><span class="dry__label">Dry</span><span class="dry__time" id="dryTime">5:00</span></button>
+    </section>
+
+    <section class="ws-card log">
+      <div class="log__stats">
+        <div><span class="ws-plate">This week</span><b id="statWeek">0m</b></div>
+        <div><span class="ws-plate">All time</span><b id="statAll">0m</b></div>
+        <div><span class="ws-plate">Sessions</span><b id="statCount">0</b></div>
+      </div>
+      <div class="splits" id="splits"></div>
+      <ol class="history ws-hand" id="history"></ol>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
