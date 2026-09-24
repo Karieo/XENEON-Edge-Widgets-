@@ -1,0 +1,78 @@
+/*
+ * drakkenheim.css — grim iron theme for the Drakkenheim widgets. Load after base.css.
+ * Dark iron and bone, rust for danger, and a sickly purple/green haze that
+ * thickens with contamination (set --haze from 0 to 1).
+ */
+
+@font-face {
+  font-family: "Cinzel";
+  src: url("../fonts/cinzel-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("../fonts/barlow-condensed-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --dk-iron-0: #0c0d0f;
+  --dk-iron-1: #15171a;
+  --dk-iron-2: #202328;
+  --dk-iron-3: #33373e;
+  --dk-bone: #ddd4c2;
+  --dk-bone-dim: #8f8778;
+  --dk-rust: #b4532a;
+  --dk-blood: #9e1f1f;
+  --dk-gold: #c8a45a;
+  --dk-haze-purple: #8a3cff;
+  --dk-haze-green: #7dff4a;
+
+  --text-color: var(--dk-bone);
+  --accent-color: var(--dk-gold);
+  --bg-color: var(--dk-iron-0);
+
+  --font-title: "Cinzel", "Georgia", serif;
+  --font-num: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --btn-font: var(--font-title);
+  --btn-radius: 2px;
+
+  --haze: 0;
+}
+
+body {
+  font-family: var(--font-num);
+  font-weight: 700;
+}
+
+/* Contamination haze: purple from the edges, green rising from below. */
+.frame.hazed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: var(--haze);
+  background:
+    radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--dk-haze-green) 28%, transparent), transparent 60%),
+    radial-gradient(ellipse at 50% 50%, transparent 45%, color-mix(in srgb, var(--dk-haze-purple) 40%, transparent) 100%);
+  transition: opacity 600ms ease;
+}
+
+.dk-label {
+  font-family: var(--font-title);
+  font-size: calc(var(--u) * 3.4);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dk-bone-dim);
+}
+
+.dk-panel {
+  box-sizing: border-box;
+  border: 1px solid var(--dk-iron-3);
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--dk-iron-2), var(--dk-iron-1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -2px 0 rgba(0, 0, 0, 0.5);
+}

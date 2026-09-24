@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('STRATUM DM')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('DATACORE')" />
+
+  <meta name="x-icue-property" content="supabaseUrl" data-label="tr('Supabase Project URL')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="anonKey" data-label="tr('Supabase Anon Key')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="pollSeconds" data-label="tr('Refresh Every')" data-type="slider" data-default="4" data-min="3" data-max="10" data-step="1" data-unit-label="'s'" />
+  <meta name="x-icue-property" content="showHidden" data-label="tr('Show Hidden Enemies')" data-type="switch" data-default="false" />
+  <meta name="x-icue-property" content="showScanlines" data-label="tr('Scanlines')" data-type="switch" data-default="true" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0efe4'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#f5a623'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0a0a0c'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('STRATUM DM')",
+      "properties": ["pollSeconds", "showHidden", "showScanlines"]
+    },
+    {
+      "title": "tr('DATACORE Link')",
+      "properties": ["supabaseUrl", "anonKey"],
+      "info": "tr('Read-only. Use the anon (publishable) key only, never the service key.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/datacore.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame scanlines">
+    <section class="panel panel--init">
+      <header class="init__head">
+        <span class="dc-label">COMBAT://INITIATIVE</span>
+        <span class="init__enc" id="encName"></span>
+        <span class="tag" id="linkTag">OFFLINE</span>
+      </header>
+      <ol class="init__list" id="initList"></ol>
+      <div class="init__empty dc-label" id="initEmpty">&gt; NO LINK :: SET SUPABASE URL + ANON KEY IN SETTINGS</div>
+    </section>
+
+    <section class="panel panel--clock">
+      <div class="dc-label">ROUND</div>
+      <div class="round" id="round">1</div>
+      <div class="row">
+        <button class="btn" id="roundDown">&#8722;</button>
+        <button class="btn" id="roundUp">+</button>
+      </div>
+      <div class="dc-label clock__label">SESSION <span class="clock__hint">hold to reset</span></div>
+      <div class="timer" id="timer">0:00:00</div>
+      <button class="btn" id="timerBtn">START</button>
+    </section>
+
+    <section class="panel panel--gen">
+      <header class="dc-label" id="genLabel">GEN://OUTPUT</header>
+      <div class="gen__out" id="genOut"><span class="gen__idle">&gt; Tap for a complication or an NPC<span class="dc-cursor"></span></span></div>
+      <div class="row">
+        <button class="btn gen__btn" id="btnComp">COMPLICATION</button>
+        <button class="btn gen__btn gen__btn--npc" id="btnNpc">NPC</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/tables.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

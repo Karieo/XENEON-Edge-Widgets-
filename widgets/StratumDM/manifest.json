@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.stratumdm",
+  "name": "STRATUM DM",
+  "description": "DM panel for Stratum: read-only live initiative from DATACORE, round counter, session timer, and random complications and NPCs.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}
