@@ -43,6 +43,7 @@ Import `dist/EdgeTestKit.icuewidget`, put it on the Edge at XL size, and tap thr
 | 5b | `claude://` launches desktop app | CLAUDE:// | _pending_ |
 | 6 | Supabase fetch: prompt? data? (401 = reachable) | SUPABASE | _pending_ |
 | 7 | Mic prompt; `getUserMedia` returns audio | MIC | _pending_ |
+| 8 | Apple Music link: which form (https, music://, musics://, itmss://) opens the Windows app? Does it play? Set your playlist link in widget settings; each tap tries the next form | APPLE MUSIC | _pending_ |
 | + | Media plugin reads song/artist | MEDIA | _pending_ |
 | i | Chromium version, viewport, plugin flags | ENV | _pending_ |
 

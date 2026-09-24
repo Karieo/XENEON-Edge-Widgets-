@@ -158,6 +158,27 @@ Edge.press($("tMic"), function () {
   });
 });
 
+// ---- 8. Apple Music ---------------------------------------------------------
+
+// Each tap tries the next URL form of the same link, to learn which one opens
+// the Apple Music app on Windows instead of the web player.
+var musicTry = 0;
+Edge.press($("tMusic"), function () {
+  var link = String(Edge.prop("musicLink", "https://music.apple.com/us/browse")).trim();
+  var rest = link.replace(/^[a-z]+:\/\//i, "");
+  var variants = [
+    "https://" + rest,
+    "music://" + rest,
+    "musics://" + rest,
+    "itmss://" + rest,
+  ];
+  var i = musicTry % variants.length;
+  musicTry++;
+  var url = variants[i];
+  log("MUSIC try " + (i + 1) + "/" + variants.length + ": " + url + " via " + Edge.openLink(url) +
+    " — did the Apple Music app, a browser, or nothing open? Did it start playing?");
+});
+
 Edge.press($("tEnv"), logEnv);
 
 // Opened outside iCUE (dev), log env right away.

@@ -6,6 +6,15 @@
   <title>tr('Edge Test Kit')</title>
   <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
   <meta name="x-icue-widget-group" content="tr('DATACORE')" />
+  <meta name="x-icue-property" content="musicLink" data-label="tr('Apple Music Link')" data-type="textfield" data-default="'https://music.apple.com/us/browse'" />
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Edge Test Kit')",
+      "properties": ["musicLink"]
+    }
+  ]
+  </script>
   <link rel="stylesheet" href="shared/styles/datacore.css" />
   <link rel="stylesheet" href="styles/main.css" />
 </head>
@@ -20,6 +29,7 @@
       <button class="dc-button t" id="tMedia"><b>+</b>MEDIA</button>
       <button class="dc-button t" id="tFetch"><b>6</b>SUPABASE</button>
       <button class="dc-button t" id="tMic"><b>7</b>MIC</button>
+      <button class="dc-button t" id="tMusic"><b>8</b>APPLE MUSIC</button>
       <button class="dc-button t t--dim" id="tEnv"><b>i</b>ENV</button>
     </section>
     <section class="out">
