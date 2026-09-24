@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('DATACORE')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('DATACORE')" />
+
+  <meta name="x-icue-property" content="cpuSensor" data-label="tr('CPU Temperature')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('temperature')" />
+  <meta name="x-icue-property" content="gpuSensor" data-label="tr('GPU Temperature')" data-type="sensors-combobox" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('temperature')" />
+  <meta name="x-icue-property" content="extraSensors" data-label="tr('Extra Sensors (fans, load)')" data-type="sensors-factory" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('fan')" />
+  <meta name="x-icue-property" content="warmAt" data-label="tr('Warm At')" data-type="slider" data-default="70" data-min="40" data-max="100" data-step="1" data-unit-label="'°C'" />
+  <meta name="x-icue-property" content="hotAt" data-label="tr('Hot At')" data-type="slider" data-default="85" data-min="50" data-max="110" data-step="1" data-unit-label="'°C'" />
+  <meta name="x-icue-property" content="claudeTarget" data-label="tr('ASK CLAUDE Opens')" data-type="combobox" data-default="'web'" data-values="[{'key':'web','value':tr('claude.ai in browser')},{'key':'app','value':tr('Claude desktop app')}]" />
+  <meta name="x-icue-property" content="showScanlines" data-label="tr('Scanlines')" data-type="switch" data-default="true" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0efe4'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#f5a623'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0a0a0c'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('DATACORE')",
+      "properties": ["cpuSensor", "gpuSensor", "extraSensors", "warmAt", "hotAt", "claudeTarget", "showScanlines"]
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/datacore.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="dc-frame scanlines">
+    <section class="panel panel--system">
+      <header class="dc-label">SYS://MONITOR</header>
+      <div class="temps">
+        <div class="temp" id="cpu" data-state="idle">
+          <div class="temp__label dc-label">CPU</div>
+          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
+          <div class="temp__name"></div>
+        </div>
+        <div class="temp" id="gpu" data-state="idle">
+          <div class="temp__label dc-label">GPU</div>
+          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
+          <div class="temp__name"></div>
+        </div>
+      </div>
+      <ul class="extras" id="extras"></ul>
+      <div class="sys-status dc-label" id="sysStatus">&gt; AWAITING SENSOR BUS</div>
+    </section>
+
+    <section class="panel panel--media">
+      <header class="dc-label">AUDIO://NOW_PLAYING</header>
+      <div class="track">
+        <div class="track__title" id="trackTitle">NO SIGNAL</div>
+        <div class="track__artist" id="trackArtist">&#8212;</div>
+      </div>
+      <div class="controls">
+        <button class="dc-button ctl" id="btnPrev" aria-label="Previous track">&#9664;&#9664;</button>
+        <button class="dc-button ctl ctl--main" id="btnPlay" aria-label="Play or pause">&#9654;&#10074;&#10074;</button>
+        <button class="dc-button ctl" id="btnNext" aria-label="Next track">&#9654;&#9654;</button>
+      </div>
+    </section>
+
+    <section class="panel panel--comms">
+      <header class="dc-label">COMMS://UPLINK</header>
+      <button class="dc-button ask" id="btnClaude">
+        <span class="ask__text">ASK CLAUDE</span>
+      </button>
+      <div class="comms-status dc-label"><span id="commsStatus">&gt; READY</span><span class="dc-cursor"></span></div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueInitialized,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    if (typeof iCUE_initialized !== "undefined" && iCUE_initialized) {
+      onIcueInitialized();
+    } else {
+      onIcueDataUpdated();
+    }
+  </script>
+</body>
+</html>

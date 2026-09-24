@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('Edge Test Kit')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('DATACORE')" />
+  <link rel="stylesheet" href="shared/styles/datacore.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="dc-frame scanlines">
+    <section class="grid">
+      <button class="dc-button t" id="tTap"><b>1</b>TAP</button>
+      <button class="dc-button t" id="tSensors"><b>3</b>SENSORS</button>
+      <button class="dc-button t" id="tStorage"><b>4</b>STORAGE</button>
+      <button class="dc-button t" id="tWeb"><b>5a</b>CLAUDE.AI</button>
+      <button class="dc-button t" id="tApp"><b>5b</b>CLAUDE://</button>
+      <button class="dc-button t" id="tMedia"><b>+</b>MEDIA</button>
+      <button class="dc-button t" id="tFetch"><b>6</b>SUPABASE</button>
+      <button class="dc-button t" id="tMic"><b>7</b>MIC</button>
+      <button class="dc-button t t--dim" id="tEnv"><b>i</b>ENV</button>
+    </section>
+    <section class="out">
+      <header class="dc-label">TEST://LOG <span id="boot"></span></header>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueInitialized,
+      onDataUpdated: function () {}
+    };
+
+    if (typeof iCUE_initialized !== "undefined" && iCUE_initialized) {
+      onIcueInitialized();
+    }
+  </script>
+</body>
+</html>

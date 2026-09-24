@@ -1,0 +1,224 @@
+/* DATACORE layout. Primary target: Edge XL horizontal (2536x696). */
+
+.dc-frame {
+  display: flex;
+  gap: calc(var(--u) * 2.5);
+  padding: calc(var(--u) * 4) calc(var(--u) * 5);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 3) calc(var(--u) * 4);
+  border: 1px solid var(--dc-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dc-bg-panel) 70%, transparent);
+}
+
+.panel > header {
+  margin-bottom: calc(var(--u) * 2);
+  color: var(--accent-color);
+}
+
+.panel--system { flex: 1.35; }
+.panel--media { flex: 1; }
+.panel--comms { flex: 0.8; }
+
+/* ---- System ---- */
+
+.temps {
+  display: flex;
+  gap: calc(var(--u) * 3);
+  flex: 1;
+  min-height: 0;
+}
+
+.temp {
+  --state-color: var(--dc-text-dim);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-left: calc(var(--u) * 3);
+  border-left: calc(var(--u) * 1) solid var(--state-color);
+  transition: border-color 300ms linear;
+}
+
+.temp[data-state="normal"] { --state-color: var(--state-normal); }
+.temp[data-state="warm"] { --state-color: var(--state-warm); }
+.temp[data-state="hot"] { --state-color: var(--state-hot); }
+
+.temp__value {
+  display: flex;
+  align-items: flex-start;
+  color: var(--state-color);
+  font-family: var(--font-display);
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+.temp__num {
+  font-size: calc(var(--u) * 30);
+  font-weight: 700;
+}
+
+.temp__unit {
+  margin-top: calc(var(--u) * 2.5);
+  font-size: calc(var(--u) * 9);
+  opacity: 0.8;
+}
+
+.temp[data-state="hot"] .temp__value {
+  animation: hot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hot-pulse {
+  50% { opacity: 0.55; }
+}
+
+.temp__name {
+  margin-top: calc(var(--u) * 1);
+  font-size: calc(var(--u) * 3.4);
+  color: var(--dc-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.extras {
+  display: flex;
+  gap: calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.extras:empty { display: none; }
+
+.extra {
+  --extra-color: var(--dc-cyan);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--u) * 1) calc(var(--u) * 1.5);
+  border-top: 2px solid var(--extra-color);
+}
+
+.extra__name {
+  font-size: calc(var(--u) * 3);
+  color: var(--dc-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.extra__value {
+  font-family: var(--font-terminal);
+  font-size: calc(var(--u) * 7);
+  line-height: 1;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.sys-status {
+  margin-top: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 3);
+}
+
+/* ---- Media ---- */
+
+.track {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.track__title {
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 13);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--dc-text-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.has-track .track__title { color: var(--text-color); }
+
+.track__artist {
+  margin-top: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 5);
+  color: var(--dc-cyan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  gap: calc(var(--u) * 2);
+}
+
+.ctl {
+  flex: 1;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: calc(var(--u) * 6);
+  letter-spacing: -0.1em;
+}
+
+.ctl--main { flex: 1.4; }
+
+/* ---- Comms ---- */
+
+.ask {
+  flex: 1;
+  width: 100%;
+  font-size: calc(var(--u) * 14);
+  line-height: 0.95;
+  text-align: center;
+  box-shadow: inset 0 0 calc(var(--u) * 6) color-mix(in srgb, var(--accent-color) 18%, transparent);
+}
+
+.ask.is-firing {
+  background: var(--accent-color);
+  color: var(--bg-color);
+}
+
+.comms-status {
+  margin-top: calc(var(--u) * 2);
+  font-size: calc(var(--u) * 3.4);
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large (1688x696) and Small (840x344): drop the media panel. */
+@media (max-aspect-ratio: 3/1) {
+  .panel--media { display: none; }
+}
+
+/* Medium and vertical slots: stack system over comms, size from width. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.8vw; }
+  .dc-frame { flex-direction: column; }
+  .panel--comms { flex: 0 0 auto; }
+  .temp__num { font-size: calc(var(--u) * 18); }
+  .temp__unit { margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 6); }
+  .ask { min-height: var(--touch-min); font-size: calc(var(--u) * 11); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .temp[data-state="hot"] .temp__value { animation: none; }
+}
