@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('CREATOR')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="channel" data-label="tr('Channel')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="apiKey" data-label="tr('YouTube API Key')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="refreshMinutes" data-label="tr('Refresh Every')" data-type="slider" data-default="15" data-min="5" data-max="60" data-step="5" data-unit-label="'min'" />
+  <meta name="x-icue-property" content="theme" data-label="tr('Theme')" data-type="tab-buttons" data-default="'light'" data-values="[{'key':'light','value':tr('Light')},{'key':'dark','value':tr('Dark')}]" />
+
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#ff0033'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('CREATOR')",
+      "properties": ["channel", "apiKey", "refreshMinutes", "theme"],
+      "info": "tr('Handle (@name) or channel ID. The key is a YouTube Data API v3 key; keep it restricted to that API.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["accentColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="shared/styles/studio.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-state="setup">
+    <section class="st-card chan" id="chanCard">
+      <div class="chan__head">
+        <img class="chan__avatar" id="avatar" alt="" />
+        <div class="chan__id">
+          <div class="chan__name" id="chanName">CREATOR</div>
+          <div class="chan__handle" id="chanHandle">Set a channel + API key in settings</div>
+        </div>
+      </div>
+      <div class="st-label">Subscribers</div>
+      <div class="st-big chan__subs" id="subs">&#8212;</div>
+      <div class="chips"><span class="st-chip" id="subsToday">today &#8212;</span><span class="st-chip" id="subs7">7d &#8212;</span></div>
+      <div class="chan__foot">
+        <span><b id="videoCount">&#8212;</b> videos</span>
+        <span class="status" id="status"></span>
+      </div>
+    </section>
+
+    <section class="st-card views">
+      <div class="views__top">
+        <div>
+          <div class="st-label">Total views</div>
+          <div class="st-big views__total" id="views">&#8212;</div>
+        </div>
+        <div class="views__today">
+          <div class="st-label">Today</div>
+          <div class="st-big views__todayNum" id="viewsToday">&#8212;</div>
+        </div>
+      </div>
+      <div class="st-label views__cap">Views per day &#183; last 14 days</div>
+      <div class="daily" id="daily"></div>
+      <div class="daily__axis"><span id="axisStart"></span><span>today</span></div>
+    </section>
+
+    <section class="st-card latest" id="latest">
+      <div class="st-label">Latest upload</div>
+      <div class="latest__thumb"><img id="latestThumb" alt="" /><span class="latest__age" id="latestAge"></span></div>
+      <div class="latest__title" id="latestTitle">&#8212;</div>
+      <div class="latest__stats">
+        <span><b id="latestViews">&#8212;</b> views</span>
+        <span><b id="latestLikes">&#8212;</b> likes</span>
+        <span><b id="latestComments">&#8212;</b> comments</span>
+      </div>
+      <span class="st-chip" id="latestDelta">since yesterday &#8212;</span>
+    </section>
+
+    <section class="st-card recent">
+      <div class="st-label">Recent uploads</div>
+      <ol class="recent__list" id="recent"></ol>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

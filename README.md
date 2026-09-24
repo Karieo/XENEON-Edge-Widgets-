@@ -10,8 +10,10 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only) with an encounter summary, round counter + round time, session timer, random complications and NPCs |
 | **GAME HUD** | v0.1, untested on hardware | Motorsport-telemetry look: shift lights, huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
 | **FORGE** | v0.1, untested on hardware | Mini Forge Dad painting-session timer: session clock, per-stage splits, paint dry timer, who's painting, weekly/all-time log |
+| **CREATOR** | v0.1, untested on hardware | YouTube channel stats: subscribers, views, 14-day views chart, latest upload, recent uploads. Light or dark |
+| **ON AIR** | v0.1, untested on hardware | OBS control: record/stream with timers (hold to stop), scene buttons, mic/desktop mute with live meters, chapter marks, replay clips, recording health |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, and FORGE looks like a hobby desk. Themes live in `shared/styles/` on top of a common `base.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), and ON AIR looks like a broadcast console. Themes live in `shared/styles/` on top of a common `base.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -116,6 +118,53 @@ Settings: Current Project (shown on the card and saved with each session), Paint
 
 Slot sizes: XL shows everything. L and S drop the log. M shows the session card only.
 
+## CREATOR
+
+YouTube channel stats for Mini Forge Dad (or any channel), in a clean "studio" look with rounded cards, Inter, and YouTube red. Theme setting: Light (default) or Dark.
+
+- **Channel card:** avatar, name, subscribers (big), gains today and over 7 days, and video count. Tap it to open YouTube Studio.
+- **Views card:** total views, views gained today, and a 14-day views-per-day bar chart (today in red).
+- **Latest upload:** thumbnail, title, age, views/likes/comments, and views since yesterday. Tap it to open the video.
+- **Recent uploads:** the next 4 videos with view bars. Tap one to open it.
+
+**How the trend works:** YouTube's API only gives current totals, so the widget saves one reading per day on this PC and compares them. The daily chart and the "today" numbers fill in after it has run for a day or two. YouTube rounds subscriber counts above 1,000, so small subscriber changes can show as +0 for a while.
+
+**Setup (about 5 minutes):**
+1. Go to [console.cloud.google.com](https://console.cloud.google.com/) and create a project (any name).
+2. APIs & Services → Library → enable **YouTube Data API v3**.
+3. APIs & Services → Credentials → **Create credentials → API key**. Then edit the key → **API restrictions → Restrict key → YouTube Data API v3**. That way a leaked key can't be used for anything else.
+4. In the widget settings, paste the key into **YouTube API Key** and set **Channel** to your handle (`@yourhandle`), channel ID (`UC…`), or channel URL.
+
+No sign-in or OAuth, and only public numbers are read. Each refresh uses 3 of the free 10,000 daily API units, so the default 15-minute refresh uses under 300 a day. Quick iCUE restarts reuse the last data instead of calling the API again. If a refresh fails (quota, bad key, offline), the last numbers stay on screen and the status line says why.
+
+Settings: Channel, YouTube API Key, Refresh Every (5–60 min, default 15), Theme, Accent Color, Background Transparency.
+
+Slot sizes: XL shows all four cards. L and S show channel + views. M shows the channel card only.
+
+## ON AIR
+
+OBS control over OBS's built-in WebSocket (OBS 28+). Nothing extra to install, and no Stream Deck app. Broadcast-console look: a glowing ON AIR light, tally-lit scene buttons, and segmented meters.
+
+| Control | Tap | Hold |
+|---|---|---|
+| REC | start recording | stop recording (about 1 s, so a bump can't end a take) |
+| Pause | pause / resume the recording | |
+| Go live | start streaming | end the stream |
+| Scene button | switch OBS to that scene (the live scene has a red border) | |
+| Mic / Desktop | mute / unmute | |
+| Mark | add a chapter marker to the recording | |
+| Clip / Start buffer | save the replay buffer (or start it if it's off) | |
+
+- **Live meters:** mic and desktop levels come straight from OBS, so you can catch a muted or dead mic before a long take. Tick marks show the peak, and the meter outlines red when you clip.
+- **Health line:** FPS, dropped frames (amber at 1%+), CPU, and free disk space (amber under 10 GB).
+- **Mark** only shows on OBS 30.2+ and needs **Hybrid MP4** as the recording format. **Clip** only shows if the replay buffer is enabled in OBS (Settings → Output → Replay Buffer). Both hide themselves when OBS doesn't support them.
+- Up to 8 scenes, in the same order as OBS's scene list. OBS scene changes, mutes, and recording state update live from OBS events.
+- If OBS isn't running, the widget retries every few seconds (backing off to 30 s) and reconnects on its own. A wrong password shows a clear message and doesn't keep retrying.
+
+**Setup:** in OBS, open **Tools → WebSocket Server Settings**, tick **Enable WebSocket server**, then click **Show Connect Info** and copy the password into the widget's **OBS WebSocket Password** setting. Leave **OBS Address** as `ws://127.0.0.1:4455` unless you changed the port. Mic Source and Desktop Audio Source can stay blank to use OBS's Mic/Aux and Desktop Audio, or name specific OBS sources. Chapter Name (optional) names chapters "Name 1", "Name 2", and so on.
+
+Slot sizes: XL shows everything. L and S show on-air + scenes. M shows the on-air panel only.
+
 ## Known limits
 
 - **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
@@ -133,7 +182,9 @@ shared/              one copy of the style, fonts, and iCUE adapter
   styles/drakkenheim.css OKTAI theme
   styles/motorsport.css  GAME HUD theme
   styles/workshop.css    FORGE theme
-  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat (SIL OFL, licenses included)
+  styles/studio.css      CREATOR theme (light + dark)
+  styles/broadcast.css   ON AIR theme
+  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat, Inter, Oswald, JetBrains Mono (SIL OFL, licenses included)
 widgets/
   Datacore/
   EdgeTestKit/
@@ -141,6 +192,8 @@ widgets/
   StratumDM/
   GameHud/
   Forge/
+  Creator/
+  OnAir/
 tools/build.mjs
 RESEARCH.md
 ```
@@ -150,4 +203,4 @@ RESEARCH.md
 - iCUE widget rules and plugin APIs: Corsair's WidgetBuilder documentation and `icuewidget-cli` (Apache-2.0).
 - Design ideas (not code) from [Xenon](https://github.com/marcimastro98/Xenon) by Marcello Mastroeni, and from [vardek-widgets](https://github.com/vardekapp/vardek-widgets) (MIT).
 - Palette and fonts from the DATACORE app (Karieo/DnD-Website).
-- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), all SIL Open Font License 1.1.
+- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), Oswald (Vernon Adams), JetBrains Mono (JetBrains), all SIL Open Font License 1.1.

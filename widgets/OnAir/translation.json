@@ -1,0 +1,15 @@
+{
+  "widget_name": "ON AIR",
+  "ON AIR": "ON AIR",
+  "Mini Forge Dad": "Mini Forge Dad",
+  "OBS Address": "OBS Address",
+  "OBS WebSocket Password": "OBS WebSocket Password",
+  "Mic Source": "Mic Source",
+  "Desktop Audio Source": "Desktop Audio Source",
+  "Show Stream Button": "Show Stream Button",
+  "Chapter Name": "Chapter Name",
+  "In OBS: Tools > WebSocket Server Settings > Enable. Leave sources blank to use the OBS Mic/Aux and Desktop Audio.": "In OBS: Tools > WebSocket Server Settings > Enable. Leave sources blank to use the OBS Mic/Aux and Desktop Audio.",
+  "Widget Personalization": "Widget Personalization",
+  "Accent Color": "Accent Color",
+  "Background Transparency": "Background Transparency"
+}

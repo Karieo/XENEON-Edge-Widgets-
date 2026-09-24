@@ -1,0 +1,337 @@
+/* ON AIR — broadcast-booth layout. Primary target: Edge XL horizontal (2536x696). */
+
+.frame {
+  display: flex;
+  gap: calc(var(--u) * 2.6);
+  padding: calc(var(--u) * 3.5) calc(var(--u) * 4);
+}
+
+.frame > section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: calc(var(--u) * 2.8) calc(var(--u) * 3.2);
+}
+
+/* ---- On-air panel ---- */
+
+.onair { flex: 1.05; }
+
+.onair__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2);
+}
+
+.light {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.4);
+  padding: calc(var(--u) * 1) calc(var(--u) * 2.6);
+  border: 2px solid #3a1414;
+  border-radius: 8px;
+  background: #1c0d0d;
+  color: #5a2424;
+  font-size: calc(var(--u) * 5);
+  letter-spacing: 0.16em;
+  transition: all 200ms;
+}
+
+.light i {
+  width: calc(var(--u) * 2.6);
+  height: calc(var(--u) * 2.6);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+[data-rec="on"] .light,
+[data-stream="on"] .light {
+  border-color: var(--bc-red);
+  background: color-mix(in srgb, var(--bc-red) 22%, #1c0d0d);
+  color: #fff;
+  box-shadow: 0 0 calc(var(--u) * 5) color-mix(in srgb, var(--bc-red) 60%, transparent), inset 0 0 calc(var(--u) * 3) color-mix(in srgb, var(--bc-red) 50%, transparent);
+  text-shadow: 0 0 calc(var(--u) * 2) var(--bc-red);
+}
+
+[data-rec="on"] .light i { color: var(--bc-red); animation: rec-blink 1s steps(1) infinite; }
+[data-rec="paused"] .light { border-color: var(--bc-amber); color: var(--bc-amber); }
+
+@keyframes rec-blink {
+  50% { opacity: 0.2; }
+}
+
+.conn {
+  font-size: calc(var(--u) * 3.2);
+  color: var(--bc-dim);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-conn="connected"] .conn { color: var(--bc-green); }
+[data-conn="auth"] .conn { color: var(--bc-amber); }
+
+.tc {
+  margin: auto 0;
+  font-family: var(--font-tc);
+  font-weight: 700;
+  font-size: calc(var(--u) * 17);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #4a4f55;
+}
+
+[data-rec="on"] .tc { color: #fff; }
+[data-rec="paused"] .tc { color: var(--bc-amber); }
+
+.row {
+  display: flex;
+  gap: calc(var(--u) * 1.8);
+}
+
+.rec {
+  flex: 1.6;
+  gap: calc(var(--u) * 1.6);
+  font-size: calc(var(--u) * 6);
+  border-color: color-mix(in srgb, var(--bc-red) 60%, var(--bc-line));
+  --accent-color: var(--bc-red);
+}
+
+.rec .dot {
+  width: calc(var(--u) * 4);
+  height: calc(var(--u) * 4);
+  border-radius: 50%;
+  background: var(--bc-red);
+  box-shadow: 0 0 calc(var(--u) * 2) var(--bc-red);
+  flex: none;
+}
+
+[data-rec="on"] .rec, [data-rec="paused"] .rec {
+  background: color-mix(in srgb, var(--bc-red) 30%, var(--bc-panel-2));
+  font-size: calc(var(--u) * 4.4);
+}
+
+[data-rec="on"] .rec .dot { border-radius: 3px; } /* becomes a stop square */
+
+.pause { flex: 1; font-size: calc(var(--u) * 4.6); --accent-color: var(--bc-amber); }
+
+.stream {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 2);
+  margin-top: calc(var(--u) * 1.8);
+}
+
+.stream[hidden] { display: none; }
+
+.live {
+  flex: 1;
+  min-height: calc(var(--touch-min) * 0.95);
+  font-size: calc(var(--u) * 4.6);
+  --accent-color: var(--bc-blue);
+}
+
+[data-stream="on"] .live { background: color-mix(in srgb, var(--bc-blue) 30%, var(--bc-panel-2)); border-color: var(--bc-blue); }
+[data-stream="reconnecting"] .live { border-color: var(--bc-amber); color: var(--bc-amber); }
+
+.stream__tc:empty { display: none; }
+
+.stream__tc {
+  font-family: var(--font-tc);
+  font-size: calc(var(--u) * 5);
+  color: var(--bc-blue);
+  min-width: 8ch;
+}
+
+.btn.hold::before { background: color-mix(in srgb, #fff 18%, transparent); }
+
+/* ---- Scenes ---- */
+
+.scenes { flex: 1.5; }
+
+.scenes__live { color: var(--bc-text); letter-spacing: 0.06em; }
+
+.scenes__grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: calc(var(--u) * 1.8);
+  margin-top: calc(var(--u) * 1.8);
+  min-height: 0;
+}
+
+.scenes__grid[data-count="1"], .scenes__grid[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+.scenes__grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); }
+.scenes__grid[data-count="0"]::after {
+  content: "No scenes yet";
+  grid-column: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  color: var(--bc-dim);
+  font-size: calc(var(--u) * 4);
+}
+
+.scene {
+  min-height: 0;
+  padding: 0 calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 4.4);
+  line-height: 1.1;
+  text-align: center;
+  overflow: hidden;
+  border-width: 3px;
+}
+
+/* Tally light: red border + glow on the program scene. */
+.scene.program {
+  border-color: var(--bc-red);
+  background: color-mix(in srgb, var(--bc-red) 18%, var(--bc-panel-2));
+  box-shadow: 0 0 calc(var(--u) * 3) color-mix(in srgb, var(--bc-red) 45%, transparent);
+  color: #fff;
+}
+
+/* ---- Audio + tools ---- */
+
+.audio { flex: 1.2; }
+
+.strips {
+  flex: 1;
+  display: flex;
+  gap: calc(var(--u) * 2.4);
+  min-height: 0;
+}
+
+.strip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.2);
+  min-width: 0;
+}
+
+.strip[hidden] { display: none; }
+
+.strip__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meter {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 6px;
+  /* Full-height color scale; the cover hides everything above the level. */
+  background: linear-gradient(0deg, var(--bc-green) 0%, var(--bc-green) 66%, var(--bc-amber) 80%, var(--bc-red) 95%);
+  overflow: hidden;
+}
+
+.meter__cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background: #0d0e0f;
+  transition: height 60ms linear;
+}
+
+.meter__peak {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #fff;
+  opacity: 0.85;
+  transition: bottom 120ms linear;
+}
+
+.meter::after {
+  /* segment gaps drawn over the level */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 calc(var(--u) * 1.6), rgba(0, 0, 0, 0.55) calc(var(--u) * 1.6) calc(var(--u) * 2));
+  pointer-events: none;
+}
+
+.strip[data-level="clip"] .meter { box-shadow: 0 0 0 2px var(--bc-red); }
+
+.mute { font-size: calc(var(--u) * 4.4); --accent-color: var(--bc-green); color: var(--bc-green); }
+
+.strip.muted .mute {
+  --accent-color: var(--bc-red);
+  background: color-mix(in srgb, var(--bc-red) 28%, var(--bc-panel-2));
+  border-color: var(--bc-red);
+  color: #fff;
+}
+
+.strip.muted .meter { opacity: 0.35; }
+
+.tools {
+  display: flex;
+  gap: calc(var(--u) * 1.8);
+  margin-top: calc(var(--u) * 1.8);
+}
+
+.tool { flex: 1; font-size: calc(var(--u) * 4.4); --accent-color: var(--bc-amber); }
+.tool[hidden] { display: none; }
+.tools:has(.tool:not([hidden])) { display: flex; }
+.tools:not(:has(.tool:not([hidden]))) { display: none; }
+
+.health {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(var(--u) * 1.5);
+  margin-top: calc(var(--u) * 1.6);
+  font-family: var(--font-tc);
+  font-size: calc(var(--u) * 2.9);
+  color: var(--bc-dim);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.health .warn { color: var(--bc-amber); }
+
+/* ---- Toast ---- */
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--u) * 1.2);
+  z-index: 20;
+  transform: translate(-50%, -20px);
+  padding: calc(var(--u) * 1.4) calc(var(--u) * 4);
+  border-radius: 8px;
+  border: 1px solid var(--bc-line);
+  background: #000;
+  color: #fff;
+  font-size: calc(var(--u) * 3.8);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms, transform 200ms;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large and Small: on-air + scenes. */
+@media (max-aspect-ratio: 3/1) {
+  .frame > .audio { display: none; }
+}
+
+/* Medium and vertical: on-air panel only, sized from width. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.9vw; }
+  .frame > .scenes { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-rec="on"] .light i { animation: none; }
+}

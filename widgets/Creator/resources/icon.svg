@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="CREATOR">
+  <rect width="128" height="128" rx="24" fill="#ffffff"/>
+  <rect x="18" y="34" width="92" height="62" rx="18" fill="#ff0033"/>
+  <path d="M56 50 L80 65 L56 80 Z" fill="#ffffff"/>
+  <rect x="24" y="104" width="12" height="10" rx="2" fill="#606060"/>
+  <rect x="42" y="98" width="12" height="16" rx="2" fill="#606060"/>
+  <rect x="60" y="92" width="12" height="22" rx="2" fill="#606060"/>
+</svg>
