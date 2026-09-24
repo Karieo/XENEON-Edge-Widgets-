@@ -1,0 +1,192 @@
+/* GAME HUD layout. Primary target: Edge XL horizontal (2536x696). */
+
+.frame {
+  display: flex;
+  gap: calc(var(--u) * 2.5);
+  padding: calc(var(--u) * 3.5) calc(var(--u) * 4);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 2.5) calc(var(--u) * 3);
+  border: 1px solid var(--dc-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dc-bg-panel) 70%, transparent);
+}
+
+.panel > header { color: var(--accent-color); }
+#fpsName { color: var(--dc-text-dim); }
+
+/* ---- FPS ---- */
+
+.panel--fps { flex: 1.9; }
+
+.frame { --fps-color: var(--dc-text-dim); }
+.frame[data-fps="normal"] { --fps-color: var(--state-normal); }
+.frame[data-fps="warm"] { --fps-color: var(--state-warm); }
+.frame[data-fps="hot"] { --fps-color: var(--state-hot); }
+
+.fps {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 6);
+  flex: 1;
+  min-height: 0;
+}
+
+.fps__hero {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  line-height: 0.82;
+  color: var(--fps-color);
+  white-space: nowrap;
+  transition: color 250ms linear;
+}
+
+#fpsNum {
+  font-size: calc(var(--u) * 54);
+  min-width: 3ch;
+}
+
+.fps__unit {
+  margin-left: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 10);
+  opacity: 0.75;
+}
+
+.fps__stats {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 2.2);
+}
+
+.fps__stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.fps__stats b {
+  font-family: var(--font-terminal);
+  font-weight: 400;
+  font-size: calc(var(--u) * 10);
+  line-height: 0.9;
+  color: var(--text-color);
+}
+
+.fps__stats .dc-label { font-size: calc(var(--u) * 3.2); white-space: nowrap; }
+
+.trace {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: calc(var(--u) * 20);
+  margin-top: calc(var(--u) * 1.5);
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.bar {
+  flex: 1;
+  height: 0;
+  background: var(--dc-text-dim);
+  opacity: 0.85;
+  transition: height 300ms ease;
+}
+
+.bar[data-state="normal"] { background: var(--state-normal); }
+.bar[data-state="warm"] { background: var(--state-warm); }
+.bar[data-state="hot"] { background: var(--state-hot); }
+
+.trace__target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed color-mix(in srgb, var(--accent-color) 70%, transparent);
+  z-index: 1;
+}
+
+/* ---- Tiles ---- */
+
+.tile {
+  flex: 1;
+  --state-color: var(--dc-text-dim);
+}
+
+.tile[data-state="normal"] { --state-color: var(--state-normal); }
+.tile[data-state="warm"] { --state-color: var(--state-warm); }
+.tile[data-state="hot"] { --state-color: var(--state-hot); }
+
+.tile__value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-display);
+  line-height: 0.85;
+  color: var(--state-color);
+  white-space: nowrap;
+  transition: color 300ms linear;
+}
+
+.tile__read {
+  display: flex;
+  align-items: flex-start;
+}
+
+.tile__num { font-size: calc(var(--u) * 42); }
+
+.tile__unit {
+  margin-top: calc(var(--u) * 4);
+  margin-left: calc(var(--u) * 1);
+  font-size: calc(var(--u) * 8);
+  opacity: 0.75;
+}
+
+.tile[data-state="hot"] .tile__value { animation: hot-pulse 1.2s ease-in-out infinite; }
+
+@keyframes hot-pulse {
+  50% { opacity: 0.55; }
+}
+
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: calc(var(--u) * 16);
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.spark .bar { opacity: 0.7; }
+.spark .bar:last-child { opacity: 1; }
+
+.tile__name {
+  margin-top: calc(var(--u) * 1.2);
+  font-size: calc(var(--u) * 2.8);
+  color: var(--dc-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large and Small: FPS + GPU temp only. */
+@media (max-aspect-ratio: 3/1) {
+  #gpuLoad, #cpuTemp { display: none; }
+}
+
+/* Medium and vertical: FPS only, sized from width. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.9vw; }
+  .tile { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile[data-state="hot"] .tile__value { animation: none; }
+  .bar { transition: none; }
+}

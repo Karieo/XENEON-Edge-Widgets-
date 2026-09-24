@@ -1,0 +1,16 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.gamehud",
+  "name": "GAME HUD",
+  "description": "Big glanceable in-game stats for the Xeneon Edge: FPS with a 60-second trace, GPU load, GPU temp, and CPU temp. No touch controls.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": false,
+  "required_plugins": [
+    "widgetbuilder.sensorsdataprovider:Sensors:1.0"
+  ]
+}
