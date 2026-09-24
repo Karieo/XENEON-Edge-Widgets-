@@ -108,6 +108,9 @@ grant execute on function public.edge_active_encounter() to anon;
 
   If you go this route, the widget switches to `POST /rest/v1/rpc/edge_active_encounter` (a small change), and "Show Hidden Enemies" stops doing anything, since hidden enemies never leave the database.
 
+- **Update (approved by Clay):** the function now lives in `sql/edge_active_encounter.sql` in DATACORE's SQL-file style. It was tested on real Postgres (PGlite) against a mock `encounters` table: it applies cleanly and re-runs safely, returns null with no active fight, picks the newest active encounter, strips hidden enemies but keeps PCs, anon still can't read `encounters` or any other table, and PUBLIC has no execute grant. The STRATUM widget now calls the function first and falls back to the table on 404. **Not yet applied to DATACORE's database**, because DATACORE's Supabase project isn't reachable from the Supabase connector used in these sessions (only an unrelated project is listed). Either paste the file in the SQL editor, or connect the right Supabase account and have Claude apply it.
+- DATACORE's existing RLS style is `TO authenticated USING (is_dm())` (see `datacore/supabase/dm-view-as-rls.sql`), which confirms that anon can't read the tables directly. The function is what makes the widget work at all, not just a safer option.
+
 ---
 
 

@@ -80,9 +80,9 @@ Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiori
 
 **Setup:** in the widget settings, fill in **Supabase Project URL** (`https://<ref>.supabase.co`) and **Supabase Anon Key** from DATACORE's `.env` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). Anon/publishable key only, never the service key. It polls every 4 s by default (3–10 s setting) and pauses when hidden.
 
-**Two open items before this is fully live** (details in `RESEARCH.md` §0.6):
-1. Whether the anon key can read `encounters` depends on DATACORE's RLS, which I couldn't see. If the panel shows "NO ACTIVE ENCOUNTER" during a fight, RLS is blocking it. There's a proposed fix, but it needs your OK before anything runs.
-2. DATACORE doesn't save whose turn it is (it's local state in the tracker page), so no row is highlighted yet. The widget highlights automatically once the encounter row has an `active_id`.
+**Install the feed function (one time).** DATACORE's tables are only readable when you're signed in, so the anon key can't see `encounters` directly. Open DATACORE's Supabase project → SQL editor → paste all of `sql/edge_active_encounter.sql` → Run. It adds one read-only function that returns just the newest active fight with hidden enemies removed. It doesn't change any tables or policies, it's safe to re-run, and the file ends with a check query and an undo line. The widget uses the function automatically. Until it exists, the widget falls back to the table (which will likely come back empty), shows an install hint, and checks for the function again every minute.
+
+**Still open:** DATACORE doesn't save whose turn it is (it's local state in the tracker page), so no row is highlighted yet. The widget highlights automatically once the encounter row has an `active_id` (the function would need that field added too).
 
 ## GAME HUD
 
