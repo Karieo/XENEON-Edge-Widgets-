@@ -1,0 +1,96 @@
+/*
+ * studio.css — clean "creator studio" theme (CREATOR). Load after base.css.
+ * Rounded cards, Inter, YouTube-red accents. Light by default; set
+ * data-theme="dark" on <html> for the dark variant.
+ */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
+  font-display: block;
+}
+
+:root {
+  --st-red: #ff0033;
+  --st-red-soft: color-mix(in srgb, var(--st-red) 12%, transparent);
+  --st-green: #0f9d58;
+  --st-bg: #eef0f3;
+  --st-card: #ffffff;
+  --st-ink: #0f0f0f;
+  --st-ink-2: #606060;
+  --st-line: #e3e5e8;
+  --st-bar: #d9dce1;
+  --st-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 calc(var(--u) * 0.8) calc(var(--u) * 3) rgba(0, 0, 0, 0.07);
+
+  --text-color: var(--st-ink);
+  --accent-color: var(--st-red);
+  --bg-color: var(--st-bg);
+
+  --font-ui: "Inter", "Segoe UI", system-ui, sans-serif;
+  --btn-font: var(--font-ui);
+  --btn-radius: 12px;
+}
+
+:root[data-theme="dark"] {
+  --st-bg: #0f0f0f;
+  --st-card: #1c1c1f;
+  --st-ink: #f1f1f1;
+  --st-ink-2: #aaaaaa;
+  --st-line: #2c2c30;
+  --st-bar: #34343a;
+  --st-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  --text-color: var(--st-ink);
+  --bg-color: var(--st-bg);
+}
+
+body {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.st-card {
+  box-sizing: border-box;
+  border-radius: calc(var(--u) * 2.6);
+  background: var(--st-card);
+  box-shadow: var(--st-shadow);
+  color: var(--st-ink);
+}
+
+.st-label {
+  font-size: calc(var(--u) * 3);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--st-ink-2);
+}
+
+.st-big {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--st-ink);
+}
+
+.st-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: calc(var(--u) * 0.6) calc(var(--u) * 1.6);
+  border-radius: 999px;
+  background: var(--st-line);
+  color: var(--st-ink-2);
+  font-size: calc(var(--u) * 3.2);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.st-chip.up { background: color-mix(in srgb, var(--st-green) 14%, transparent); color: var(--st-green); }
+.st-chip.down { background: var(--st-red-soft); color: var(--st-red); }

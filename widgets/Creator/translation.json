@@ -1,0 +1,14 @@
+{
+  "widget_name": "CREATOR",
+  "CREATOR": "CREATOR",
+  "Channel": "Channel",
+  "YouTube API Key": "YouTube API Key",
+  "Refresh Every": "Refresh Every",
+  "Theme": "Theme",
+  "Light": "Light",
+  "Dark": "Dark",
+  "Handle (@name) or channel ID. The key is a YouTube Data API v3 key; keep it restricted to that API.": "Handle (@name) or channel ID. The key is a YouTube Data API v3 key; keep it restricted to that API.",
+  "Widget Personalization": "Widget Personalization",
+  "Accent Color": "Accent Color",
+  "Background Transparency": "Background Transparency"
+}
