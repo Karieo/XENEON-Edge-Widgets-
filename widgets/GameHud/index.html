@@ -14,18 +14,17 @@
   <meta name="x-icue-property" content="fpsTarget" data-label="tr('FPS Target')" data-type="slider" data-default="120" data-min="30" data-max="360" data-step="10" />
   <meta name="x-icue-property" content="warmAt" data-label="tr('Warm At')" data-type="slider" data-default="70" data-min="40" data-max="100" data-step="1" data-unit-label="'°C'" />
   <meta name="x-icue-property" content="hotAt" data-label="tr('Hot At')" data-type="slider" data-default="85" data-min="50" data-max="110" data-step="1" data-unit-label="'°C'" />
-  <meta name="x-icue-property" content="showScanlines" data-label="tr('Scanlines')" data-type="switch" data-default="true" />
 
-  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0efe4'" />
-  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#f5a623'" />
-  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0a0a0c'" />
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f4f5f7'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#e8202a'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#07080a'" />
   <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
 
   <script id="x-icue-groups" type="application/json">
   [
     {
       "title": "tr('GAME HUD')",
-      "properties": ["fpsSensor", "gpuLoadSensor", "gpuTempSensor", "cpuTempSensor", "fpsTarget", "warmAt", "hotAt", "showScanlines"],
+      "properties": ["fpsSensor", "gpuLoadSensor", "gpuTempSensor", "cpuTempSensor", "fpsTarget", "warmAt", "hotAt"],
       "info": "tr('Sensors left on their defaults are matched automatically by kind.')"
     },
     {
@@ -36,44 +35,51 @@
   </script>
 
   <link rel="stylesheet" href="shared/styles/base.css" />
-  <link rel="stylesheet" href="shared/styles/datacore.css" />
+  <link rel="stylesheet" href="shared/styles/motorsport.css" />
   <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body>
-  <main id="frame" class="frame scanlines" data-fps="idle">
-    <section class="panel panel--fps">
-      <header class="dc-label">HUD://FRAMERATE <span id="fpsName"></span></header>
-      <div class="fps">
-        <div class="fps__hero"><span id="fpsNum">--</span><span class="fps__unit">FPS</span></div>
-        <div class="fps__stats">
-          <div><span class="dc-label">AVG 60s</span><b id="fpsAvg">--</b></div>
-          <div><span class="dc-label">LOW 60s</span><b id="fpsLow">--</b></div>
-          <div><span class="dc-label">TARGET</span><b id="fpsTargetOut">120</b></div>
+  <main id="frame" class="frame carbon" data-fps="idle">
+    <div class="rev" id="rev" aria-hidden="true"></div>
+    <div class="dash">
+      <section class="ms-panel fpsbox">
+        <div class="fpsbox__head"><span class="ms-label fpsbox__title">FPS</span><span class="ms-label" id="fpsName"></span></div>
+        <div class="fpsbox__main">
+          <span class="ms-num fps__num" id="fpsNum">--</span>
+          <div class="fps__stats">
+            <div class="st"><span class="ms-label">AVG</span><b class="ms-num" id="fpsAvg">--</b></div>
+            <div class="st st--best"><span class="ms-label">BEST</span><b class="ms-num" id="fpsBest">--</b></div>
+            <div class="st"><span class="ms-label">LOW</span><b class="ms-num" id="fpsLow">--</b></div>
+            <div class="st"><span class="ms-label">TARGET</span><b class="ms-num" id="fpsTargetOut">120</b></div>
+          </div>
         </div>
-      </div>
-      <div class="trace" id="trace"><i class="trace__target" id="traceTarget"></i></div>
-    </section>
-
-    <section class="panel tile" id="gpuLoad" data-kind="load">
-      <header class="dc-label">GPU LOAD</header>
-      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">%</span></div></div>
-      <div class="spark"></div>
-      <div class="tile__name"></div>
-    </section>
-
-    <section class="panel tile" id="gpuTemp" data-kind="temp">
-      <header class="dc-label">GPU TEMP</header>
-      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">°</span></div></div>
-      <div class="spark"></div>
-      <div class="tile__name"></div>
-    </section>
-
-    <section class="panel tile" id="cpuTemp" data-kind="temp">
-      <header class="dc-label">CPU TEMP</header>
-      <div class="tile__value"><div class="tile__read"><span class="tile__num">--</span><span class="tile__unit">°</span></div></div>
-      <div class="spark"></div>
-      <div class="tile__name"></div>
-    </section>
+        <svg class="trace" id="trace" viewBox="0 0 600 100" preserveAspectRatio="none">
+          <line class="trace__target" id="traceTarget" x1="0" x2="600" y1="20" y2="20"></line>
+          <path class="line__fill"></path><path class="line__stroke"></path>
+        </svg>
+      </section>
+      <section class="ms-panel tile" id="gpuLoad" data-kind="load">
+        <div class="ms-label">GPU LOAD</div>
+        <div class="tile__read"><span class="ms-num tile__num">--</span><span class="ms-num tile__unit">%</span></div>
+        <div class="tbar"><i></i></div>
+        <svg class="spark" viewBox="0 0 600 100" preserveAspectRatio="none"><path class="line__fill"></path><path class="line__stroke"></path></svg>
+        <div class="tile__name ms-label"></div>
+      </section>
+      <section class="ms-panel tile" id="gpuTemp" data-kind="temp">
+        <div class="ms-label">GPU TEMP</div>
+        <div class="tile__read"><span class="ms-num tile__num">--</span><span class="ms-num tile__unit">°</span></div>
+        <div class="tbar"><i></i></div>
+        <svg class="spark" viewBox="0 0 600 100" preserveAspectRatio="none"><path class="line__fill"></path><path class="line__stroke"></path></svg>
+        <div class="tile__name ms-label"></div>
+      </section>
+      <section class="ms-panel tile" id="cpuTemp" data-kind="temp">
+        <div class="ms-label">CPU TEMP</div>
+        <div class="tile__read"><span class="ms-num tile__num">--</span><span class="ms-num tile__unit">°</span></div>
+        <div class="tbar"><i></i></div>
+        <svg class="spark" viewBox="0 0 600 100" preserveAspectRatio="none"><path class="line__fill"></path><path class="line__stroke"></path></svg>
+        <div class="tile__name ms-label"></div>
+      </section>
+    </div>
   </main>
 
   <script src="shared/scripts/icue-adapter.js"></script>

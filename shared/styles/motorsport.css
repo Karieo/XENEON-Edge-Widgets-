@@ -1,0 +1,86 @@
+/*
+ * motorsport.css — race-telemetry theme. Load after base.css.
+ * Carbon black, white numbers, red accents, green/yellow/red status,
+ * purple for "best" (like a fastest sector).
+ */
+
+@font-face {
+  font-family: "Titillium Web";
+  src: url("../fonts/titillium-web-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("../fonts/barlow-condensed-latin-800-italic.woff2") format("woff2");
+  font-weight: 800;
+  font-style: italic;
+  font-display: block;
+}
+
+:root {
+  --ms-carbon-0: #07080a;
+  --ms-carbon-1: #0f1114;
+  --ms-carbon-2: #181b20;
+  --ms-line: #2a2e35;
+  --ms-white: #f4f5f7;
+  --ms-grey: #8b919b;
+  --ms-red: #e8202a;
+  --ms-green: #19d15f;
+  --ms-yellow: #ffd21f;
+  --ms-purple: #a95cff;
+
+  --text-color: var(--ms-white);
+  --accent-color: var(--ms-red);
+  --bg-color: var(--ms-carbon-0);
+
+  --state-normal: var(--ms-green);
+  --state-warm: var(--ms-yellow);
+  --state-hot: var(--ms-red);
+
+  --font-label: "Titillium Web", "Segoe UI", sans-serif;
+  --font-race: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --btn-font: var(--font-label);
+  --btn-radius: 3px;
+}
+
+body {
+  font-family: var(--font-label);
+  font-weight: 700;
+}
+
+/* Carbon-fiber weave, pure CSS. */
+.frame.carbon {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%) 0 0 / 8px 8px,
+    linear-gradient(225deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%) 0 0 / 8px 8px,
+    linear-gradient(315deg, rgba(0, 0, 0, 0.35) 25%, transparent 25%) 0 0 / 8px 8px,
+    color-mix(in srgb, var(--bg-color) calc(var(--widget-opacity) * 100%), transparent);
+}
+
+.ms-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: calc(var(--u) * 3.4);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ms-grey);
+}
+
+.ms-num {
+  font-family: var(--font-race);
+  font-weight: 800;
+  font-style: italic;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Panel with a red top edge, like a team-livery dash module. */
+.ms-panel {
+  position: relative;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, var(--ms-carbon-2), var(--ms-carbon-1));
+  border: 1px solid var(--ms-line);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 3px;
+}

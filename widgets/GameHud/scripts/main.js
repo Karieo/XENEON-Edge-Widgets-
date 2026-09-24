@@ -35,10 +35,9 @@ function onIcueDataUpdated() {
     fpsTarget: Number(Edge.prop("fpsTarget", 120)),
     warmAt: Number(Edge.prop("warmAt", 70)),
     hotAt: Number(Edge.prop("hotAt", 85)),
-    showScanlines: Edge.prop("showScanlines", true) !== false,
-    textColor: Edge.prop("textColor", "#f0efe4"),
-    accentColor: Edge.prop("accentColor", "#f5a623"),
-    backgroundColor: Edge.prop("backgroundColor", "#0a0a0c"),
+    textColor: Edge.prop("textColor", "#f4f5f7"),
+    accentColor: Edge.prop("accentColor", "#e8202a"),
+    backgroundColor: Edge.prop("backgroundColor", "#07080a"),
     transparency: Number(Edge.prop("transparency", 0)),
   };
   var root = document.documentElement.style;
@@ -46,7 +45,6 @@ function onIcueDataUpdated() {
   root.setProperty("--accent-color", cfg.accentColor);
   root.setProperty("--bg-color", cfg.backgroundColor);
   root.setProperty("--widget-opacity", String(1 - cfg.transparency / 100));
-  $("frame").classList.toggle("scanlines", cfg.showScanlines);
   $("fpsTargetOut").textContent = cfg.fpsTarget;
   bindSlots();
   renderTrace();
@@ -175,6 +173,7 @@ function renderSlots() {
   var fps = latest[bound.fps];
   var live = typeof fps === "number" && !isNaN(fps) && fps > 0;
   $("fpsNum").textContent = live ? Math.round(fps) : "--";
+  renderRev(live ? fps : null);
   $("frame").dataset.fps = live ? fpsState(fps) : (idleFor >= IDLE_AFTER ? "idle" : $("frame").dataset.fps);
 
   TILES.forEach(function (key) {
@@ -186,7 +185,9 @@ function renderSlots() {
     if (tile.dataset.kind !== "load") {
       tile.querySelector(".tile__unit").textContent = /F/i.test(units[id] || "") ? "°F" : "°C";
     }
-    tile.dataset.state = ok ? tileLevel(key, v).state : "idle";
+    var lvl = ok ? tileLevel(key, v) : null;
+    tile.dataset.state = lvl ? lvl.state : "idle";
+    tile.querySelector(".tbar i").style.width = lvl ? lvl.pct + "%" : "0";
   });
 }
 
@@ -204,7 +205,7 @@ function tileLevel(key, v) {
 
 function renderSparks() {
   TILES.forEach(function (key) {
-    Edge.drawBars($(key).querySelector(".spark"), tileHistory[key], WINDOW);
+    drawLine($(key).querySelector(".spark"), tileHistory[key]);
   });
 }
 
@@ -223,23 +224,79 @@ function renderFpsStats() {
   if (!vals.length) {
     $("fpsAvg").textContent = "--";
     $("fpsLow").textContent = "--";
+    $("fpsBest").textContent = "--";
     if (idleFor >= IDLE_AFTER) {
       $("fpsNum").textContent = "--";
       $("frame").dataset.fps = "idle";
+      renderRev(null);
     }
     return;
   }
   var sum = vals.reduce(function (a, b) { return a + b; }, 0);
   $("fpsAvg").textContent = Math.round(sum / vals.length);
   $("fpsLow").textContent = Math.round(Math.min.apply(null, vals));
+  $("fpsBest").textContent = Math.round(Math.max.apply(null, vals));
 }
 
 function renderTrace() {
   var vals = fpsHistory.filter(function (v) { return v !== null; });
   var peak = Math.max.apply(null, vals.concat([0]));
   var scale = Math.max(cfg.fpsTarget * 1.25, peak * 1.05, 1);
-  Edge.drawBars($("trace"), fpsHistory.map(function (v) {
+  drawLine($("trace"), fpsHistory.map(function (v) {
     return v ? { pct: v / scale * 100, state: fpsState(v) } : null;
-  }), WINDOW);
-  $("traceTarget").style.bottom = (cfg.fpsTarget / scale * 100) + "%";
+  }));
+  var y = 100 - cfg.fpsTarget / scale * 100;
+  $("traceTarget").setAttribute("y1", y);
+  $("traceTarget").setAttribute("y2", y);
+}
+
+// Telemetry-style line trace in an SVG with viewBox 0 0 600 100.
+// Gaps (null samples) break the line. Newest sample sits at the right edge.
+function drawLine(svg, samples) {
+  var n = WINDOW;
+  var offset = n - samples.length;
+  var stroke = "";
+  var fill = "";
+  var seg = [];
+  var last = null;
+  function flush() {
+    if (!seg.length) return;
+    stroke += "M" + seg.join("L");
+    fill += "M" + seg[0].split(",")[0] + ",100L" + seg.join("L") + "L" + seg[seg.length - 1].split(",")[0] + ",100Z";
+    seg = [];
+  }
+  for (var i = 0; i < n; i++) {
+    var smp = i >= offset ? samples[i - offset] : null;
+    if (!smp) { flush(); continue; }
+    var x = (i / (n - 1) * 600).toFixed(1);
+    var y = (100 - Math.max(2, Math.min(100, smp.pct))).toFixed(1);
+    seg.push(x + "," + y);
+    last = smp;
+  }
+  flush();
+  svg.querySelector(".line__stroke").setAttribute("d", stroke);
+  svg.querySelector(".line__fill").setAttribute("d", fill);
+  svg.dataset.state = last ? last.state : "";
+}
+
+// ---- Shift lights ------------------------------------------------------------
+
+// 15 LEDs fill left to right as FPS approaches the target, in the current
+// status color. The last three only light (purple) when you're well above it.
+var REV_LEDS = 15;
+
+function renderRev(fps) {
+  var rev = $("rev");
+  if (rev.childElementCount !== REV_LEDS) {
+    rev.innerHTML = "";
+    for (var i = 0; i < REV_LEDS; i++) rev.appendChild(document.createElement("i"));
+  }
+  var live = typeof fps === "number" && !isNaN(fps) && fps > 0;
+  var ratio = live ? fps / cfg.fpsTarget : 0;
+  var lit = Math.min(REV_LEDS, Math.round(ratio * 12));
+  var state = live ? fpsState(fps) : "";
+  Array.prototype.forEach.call(rev.children, function (led, i) {
+    var on = i < lit;
+    led.className = on ? (i >= 12 ? "on best" : "on " + state) : "";
+  });
 }

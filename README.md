@@ -8,7 +8,9 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **DATACORE** | v0.1, untested on hardware | CPU/GPU temps with 60 s trends + fans, now playing, clock, big ASK CLAUDE button |
 | **OKTAI** | v0.1, untested on hardware | Oktai's table tracker for Drakkenheim (2014 rules): HP, hit dice, ki, superiority dice, Action Surge, Second Wind, contamination, rests, dice |
 | **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only) with an encounter summary, round counter + round time, session timer, random complications and NPCs |
-| **GAME HUD** | v0.1, untested on hardware | Huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
+| **GAME HUD** | v0.1, untested on hardware | Motorsport-telemetry look: shift lights, huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
+
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, and GAME HUD looks like race telemetry. Themes live in `shared/styles/` on top of a common `base.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -83,14 +85,14 @@ Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiori
 
 ## GAME HUD
 
-Big glanceable stats for mid-game. FPS is the hero: cyan at or above your target, amber down to 60% of it, red below that. Under it is a 60-second trace with the target as a dashed line, plus the 60-second average and low. Tiles show GPU load, GPU temp, and CPU temp in big numbers, each with its own 60-second trend graph (so you can see a GPU that is still climbing), using the same warm/hot colors as DATACORE.
+Big glanceable stats for mid-game, styled like a race-car dash display (its own theme, not DATACORE). A row of 15 **shift lights** across the top fills as FPS climbs toward your target: green at or above it, yellow down to 60% of it, red below that, and the last three light purple when you're well past the target. FPS is the hero number, with the 60-second average, low, best (purple, like a fastest sector), and target beside it, and a 60-second line trace underneath with the target as a dashed line. Tiles show GPU load, GPU temp, and CPU temp in big numbers, each with a gauge bar and its own 60-second line trace (so you can see a GPU that is still climbing). Hot readings flash.
 
 - **No touch.** The manifest sets `interactive: false`, so a tap on the HUD can't pull focus from your game.
 - **Sensors match themselves.** Any sensor left on iCUE's default is swapped for the right kind automatically (`fps`, `gpu-load`, `gpu-temp`, `cpu-temp`/`package`). If you pick one yourself, it's kept.
 - **FPS only exists while a game runs.** With no game, the FPS reads `--` and the panel dims. It picks the game back up when iCUE reports the sensor again.
 - Slot sizes: XL shows everything. L and S show FPS + GPU temp. M shows FPS only.
 
-Settings: FPS (sensor), GPU Load, GPU Temperature, CPU Temperature, FPS Target (default 120), Warm At / Hot At (70 / 85 °C), Scanlines, plus the usual colors.
+Settings: FPS (sensor), GPU Load, GPU Temperature, CPU Temperature, FPS Target (default 120), Warm At / Hot At (70 / 85 °C), plus the usual colors.
 
 ## Known limits
 
@@ -107,7 +109,8 @@ shared/              one copy of the style, fonts, and iCUE adapter
   styles/base.css        structure shared by every widget
   styles/datacore.css    DATACORE theme
   styles/drakkenheim.css OKTAI theme
-  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed (SIL OFL, licenses included)
+  styles/motorsport.css  GAME HUD theme
+  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web (SIL OFL, licenses included)
 widgets/
   Datacore/
   EdgeTestKit/
@@ -123,4 +126,4 @@ RESEARCH.md
 - iCUE widget rules and plugin APIs: Corsair's WidgetBuilder documentation and `icuewidget-cli` (Apache-2.0).
 - Design ideas (not code) from [Xenon](https://github.com/marcimastro98/Xenon) by Marcello Mastroeni, and from [vardek-widgets](https://github.com/vardekapp/vardek-widgets) (MIT).
 - Palette and fonts from the DATACORE app (Karieo/DnD-Website).
-- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), all SIL Open Font License 1.1.
+- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), all SIL Open Font License 1.1.
