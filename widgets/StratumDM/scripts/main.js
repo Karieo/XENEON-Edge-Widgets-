@@ -3,7 +3,7 @@
 var $ = function (id) { return document.getElementById(id); };
 var cfg = {};
 var local = loadLocal();
-var poll = { timer: null, lastKey: "", encounter: null, inFlight: false };
+var poll = { timer: null, lastKey: "", encounter: null, inFlight: false, mode: "rpc", rpcRetryAt: 0 };
 var lastPick = { comp: -1, npc: -1 };
 var genCurrent = null; // { kind, text } now on screen
 var genHistory = []; // earlier results, newest first
@@ -41,6 +41,8 @@ function onIcueDataUpdated() {
 function startPolling() {
   clearInterval(poll.timer);
   poll.lastKey = "";
+  poll.mode = "rpc";
+  poll.rpcRetryAt = 0;
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(cfg.supabaseUrl) || !cfg.anonKey) {
     setTag("NO LINK", "off");
     poll.encounter = null;
@@ -53,26 +55,67 @@ function startPolling() {
   }, cfg.pollSeconds * 1000);
 }
 
-function fetchEncounter() {
-  if (poll.inFlight) return;
-  poll.inFlight = true;
-  // Same query DATACORE's dashboard uses: newest active encounter.
-  var url = cfg.supabaseUrl + "/rest/v1/encounters?select=*&active=eq.true&order=updated_at.desc&limit=1";
-  fetch(url, {
-    headers: { apikey: cfg.anonKey, Authorization: "Bearer " + cfg.anonKey, Accept: "application/json" },
+// Preferred source: the edge_active_encounter() function (sql/edge_active_encounter.sql).
+// It returns only the newest active fight with hidden enemies removed, and it
+// works with the anon key. If it isn't installed yet (404), fall back to reading
+// the table directly, and retry the function every RPC_RETRY_MS.
+var RPC_RETRY_MS = 60 * 1000;
+
+function supabaseFetch(path, opts) {
+  var headers = { apikey: cfg.anonKey, Authorization: "Bearer " + cfg.anonKey, Accept: "application/json" };
+  if (opts && opts.body) headers["Content-Type"] = "application/json";
+  return fetch(cfg.supabaseUrl + path, {
+    method: (opts && opts.method) || "GET",
+    headers: headers,
+    body: opts && opts.body,
     cache: "no-store",
-  }).then(function (res) {
+  });
+}
+
+function loadViaRpc() {
+  return supabaseFetch("/rest/v1/rpc/edge_active_encounter", { method: "POST", body: "{}" }).then(function (res) {
+    if (res.status === 404) { var err = new Error("rpc missing"); err.rpcMissing = true; throw err; }
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }).then(function (enc) {
+    if (Array.isArray(enc)) return enc[0] || null;
+    return enc && typeof enc === "object" ? enc : null;
+  });
+}
+
+function loadViaTable() {
+  // Same query DATACORE's dashboard uses: newest active encounter.
+  return supabaseFetch("/rest/v1/encounters?select=*&active=eq.true&order=updated_at.desc&limit=1").then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   }).then(function (rows) {
-    var enc = Array.isArray(rows) && rows.length ? rows[0] : null;
-    setTag("LIVE", "on");
+    return Array.isArray(rows) && rows.length ? rows[0] : null;
+  });
+}
+
+function fetchEncounter() {
+  if (poll.inFlight) return;
+  poll.inFlight = true;
+  var useRpc = poll.mode !== "table" || Date.now() >= poll.rpcRetryAt;
+  var load = useRpc
+    ? loadViaRpc().then(function (enc) { poll.mode = "rpc"; return enc; }, function (err) {
+        if (!err.rpcMissing) throw err;
+        poll.mode = "table";
+        poll.rpcRetryAt = Date.now() + RPC_RETRY_MS;
+        return loadViaTable();
+      })
+    : loadViaTable();
+
+  load.then(function (enc) {
+    setTag("LIVE", "on", poll.mode === "rpc" ? "via edge_active_encounter()" : "via encounters table");
     // Skip DOM work when nothing changed since the last poll.
     var key = enc ? enc.id + "|" + (enc.updated_at || JSON.stringify(enc.combatants) + enc.round + enc.active_id) : "none";
     if (key === poll.lastKey) return;
     poll.lastKey = key;
     poll.encounter = enc;
-    renderEncounter(enc, "> NO ACTIVE ENCOUNTER");
+    renderEncounter(enc, poll.mode === "table"
+      ? "> NO ACTIVE ENCOUNTER :: IF A FIGHT IS RUNNING, INSTALL edge_active_encounter (SEE README)"
+      : "> NO ACTIVE ENCOUNTER");
   }).catch(function (err) {
     // Keep showing the last good data, just mark it stale.
     setTag("OFFLINE", "off", err && err.message);
