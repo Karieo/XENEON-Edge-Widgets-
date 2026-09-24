@@ -24,6 +24,7 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
   gap: calc(var(--u) * 1.2);
   padding: calc(var(--u) * 2.5) calc(var(--u) * 2);
   text-align: center;
+  z-index: 10 !important; /* the warning itself stays above the haze */
 }
 
 .contam > .dk-label {

@@ -124,6 +124,8 @@ function renderContam() {
   });
   $("contamLevel").textContent = state.contam;
   document.documentElement.style.setProperty("--haze", String(state.contam / CONTAM_MAX));
+  // Drifting fog kicks in at level 3 and is full at 6.
+  document.documentElement.style.setProperty("--fog", String(Math.max(0, state.contam - 2) / (CONTAM_MAX - 2)));
 }
 
 function bindContam(seg, lvl) {

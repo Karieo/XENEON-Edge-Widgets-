@@ -47,18 +47,60 @@ body {
   font-weight: 700;
 }
 
-/* Contamination haze: purple from the edges, green rising from below. */
+/*
+ * Contamination haze. Sits ON TOP of the panels (pointer-events: none) so it
+ * actually shows, but keeps the middle of the strip clear so numbers stay
+ * readable: purple closes in from the edges, green rises from below.
+ * Strength follows --haze (0 at level 0, 1 at level 6).
+ */
 .frame.hazed::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 8;
   opacity: var(--haze);
   background:
-    radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--dk-haze-green) 28%, transparent), transparent 60%),
-    radial-gradient(ellipse at 50% 50%, transparent 45%, color-mix(in srgb, var(--dk-haze-purple) 40%, transparent) 100%);
+    linear-gradient(0deg, color-mix(in srgb, var(--dk-haze-green) 42%, transparent) 0%, transparent 38%),
+    radial-gradient(ellipse 70% 90% at 50% 45%, transparent 40%, color-mix(in srgb, var(--dk-haze-purple) 55%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--dk-haze-purple) 35%, transparent) 0%, transparent 14%, transparent 86%, color-mix(in srgb, var(--dk-haze-purple) 35%, transparent) 100%);
   transition: opacity 600ms ease;
+}
+
+/* Slow drifting fog on top of that, only from level 3 up (--fog). */
+.frame.hazed::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 9;
+  opacity: var(--fog, 0);
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--dk-haze-green) 30%, transparent), transparent 22%),
+    radial-gradient(circle at 70% 90%, color-mix(in srgb, var(--dk-haze-purple) 34%, transparent), transparent 26%),
+    radial-gradient(circle at 45% 10%, color-mix(in srgb, var(--dk-haze-purple) 22%, transparent), transparent 20%),
+    radial-gradient(circle at 90% 30%, color-mix(in srgb, var(--dk-haze-green) 18%, transparent), transparent 18%);
+  animation: fog-drift 24s ease-in-out infinite alternate;
+  transition: opacity 600ms ease;
+}
+
+@keyframes fog-drift {
+  from { transform: translate3d(-4%, 2%, 0); }
+  to { transform: translate3d(4%, -2%, 0); }
+}
+
+/* Panel edges pick up the taint as contamination climbs. */
+.frame.hazed .dk-panel {
+  border-color: color-mix(in srgb, var(--dk-haze-green) calc(var(--haze) * 55%), var(--dk-iron-3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 calc(var(--u) * 5 * var(--haze)) color-mix(in srgb, var(--dk-haze-purple) calc(var(--haze) * 45%), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame.hazed::after { animation: none; }
 }
 
 .dk-label {
