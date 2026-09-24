@@ -9,8 +9,9 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **OKTAI** | v0.1, untested on hardware | Oktai's table tracker for Drakkenheim (2014 rules): HP, hit dice, ki, superiority dice, Action Surge, Second Wind, contamination, rests, dice |
 | **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only) with an encounter summary, round counter + round time, session timer, random complications and NPCs |
 | **GAME HUD** | v0.1, untested on hardware | Motorsport-telemetry look: shift lights, huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
+| **FORGE** | v0.1, untested on hardware | Mini Forge Dad painting-session timer: session clock, per-stage splits, paint dry timer, who's painting, weekly/all-time log |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, and GAME HUD looks like race telemetry. Themes live in `shared/styles/` on top of a common `base.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, and FORGE looks like a hobby desk. Themes live in `shared/styles/` on top of a common `base.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -94,6 +95,27 @@ Big glanceable stats for mid-game, styled like a race-car dash display (its own 
 
 Settings: FPS (sensor), GPU Load, GPU Temperature, CPU Temperature, FPS Target (default 120), Warm At / Hot At (70 / 85 °C), plus the usual colors.
 
+## FORGE
+
+A painting-session timer for Mini Forge Dad, styled like a hobby desk: walnut, parchment cards, brass plates, paint-pot buttons, and a handwritten log.
+
+| Control | Tap | Hold |
+|---|---|---|
+| Stage pot (Prime, Basecoat, Wash, Layer, Highlight, Basing, Varnish) | switch to that stage (starts the clock if it isn't running) | |
+| Start / Pause | start, pause, resume | |
+| Finish | nothing | log the session and reset (about 1 s) |
+| Dry | start or restart the dry countdown | cancel it |
+| Who (top right) | Dad → Kiddo → both | |
+
+- **Stage splits:** time is tracked per stage while the clock runs. Going back to a stage adds to its total. The log card shows this session's split bars live.
+- **Log:** this week's hours (from Monday), all-time hours, and session count, plus the last 4 sessions in handwriting: date, project, time, and who painted. Sessions under a minute aren't logged. Up to 60 sessions are kept, saved on this PC.
+- **Dry timer:** counts down from the Dry Timer setting (default 5 min), then flashes "Dry!" for a minute.
+- The clock keeps running through an iCUE restart, like the STRATUM session timer.
+
+Settings: Current Project (shown on the card and saved with each session), Painter A (default "Dad"), Painter B (default "Kiddo", **set to your son's name**), Dry Timer minutes, plus the usual colors.
+
+Slot sizes: XL shows everything. L and S drop the log. M shows the session card only.
+
 ## Known limits
 
 - **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
@@ -110,13 +132,15 @@ shared/              one copy of the style, fonts, and iCUE adapter
   styles/datacore.css    DATACORE theme
   styles/drakkenheim.css OKTAI theme
   styles/motorsport.css  GAME HUD theme
-  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web (SIL OFL, licenses included)
+  styles/workshop.css    FORGE theme
+  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat (SIL OFL, licenses included)
 widgets/
   Datacore/
   EdgeTestKit/
   Oktai/
   StratumDM/
   GameHud/
+  Forge/
 tools/build.mjs
 RESEARCH.md
 ```
@@ -126,4 +150,4 @@ RESEARCH.md
 - iCUE widget rules and plugin APIs: Corsair's WidgetBuilder documentation and `icuewidget-cli` (Apache-2.0).
 - Design ideas (not code) from [Xenon](https://github.com/marcimastro98/Xenon) by Marcello Mastroeni, and from [vardek-widgets](https://github.com/vardekapp/vardek-widgets) (MIT).
 - Palette and fonts from the DATACORE app (Karieo/DnD-Website).
-- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), all SIL Open Font License 1.1.
+- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), all SIL Open Font License 1.1.
