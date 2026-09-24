@@ -85,7 +85,7 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 }
 
 .hp__cur {
-  font-size: calc(var(--u) * 24);
+  font-size: calc(var(--u) * 21);
   color: var(--text-color);
   transition: color 300ms;
 }
@@ -103,7 +103,7 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 .hp__bar {
   position: relative;
   height: calc(var(--u) * 2.2);
-  margin: calc(var(--u) * 1.8) 0 calc(var(--u) * 2);
+  margin: calc(var(--u) * 1.2) 0 calc(var(--u) * 1.5);
   background: var(--dk-iron-0);
   border: 1px solid var(--dk-iron-3);
 }
@@ -154,10 +154,33 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
   color: var(--dk-gold);
 }
 
-.hint {
-  margin-top: auto;
-  font-size: calc(var(--u) * 2.6);
+.hd { margin-bottom: 0; margin-top: auto; }
+
+.hd__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--touch-min);
+  padding: 0 calc(var(--u) * 2.5);
+  color: var(--text-color);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 80ms linear;
 }
+
+.hd__btn[hidden] { display: none; }
+.hd__btn.is-pressed { transform: scale(0.98); }
+.hd__btn .dk-label { font-size: calc(var(--u) * 3); }
+
+.hd__count {
+  font-size: calc(var(--u) * 9);
+  line-height: 1;
+  color: var(--accent-color);
+}
+
+.hd__btn.empty .hd__count { color: var(--dk-bone-dim); }
 
 /* ---- Resources ---- */
 
@@ -251,13 +274,13 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 }
 
 .dice__num {
-  font-size: calc(var(--u) * 24);
+  font-size: calc(var(--u) * 32);
   line-height: 0.85;
   color: var(--text-color);
 }
 
 .dice__detail {
-  font-size: calc(var(--u) * 5);
+  font-size: calc(var(--u) * 6);
   color: var(--dk-bone-dim);
 }
 
@@ -273,9 +296,9 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 
 .dice__history {
   display: flex;
-  gap: calc(var(--u) * 2.5);
+  gap: calc(var(--u) * 3);
   margin: calc(var(--u) * 1) 0 calc(var(--u) * 1.8);
-  font-size: calc(var(--u) * 4);
+  font-size: calc(var(--u) * 4.6);
   color: var(--dk-bone-dim);
   white-space: nowrap;
   overflow: hidden;
@@ -301,9 +324,9 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 .toast {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--u) * 5);
+  top: calc(var(--u) * 1.2);
   z-index: 20;
-  transform: translate(-50%, 20px);
+  transform: translate(-50%, -20px);
   padding: calc(var(--u) * 1.8) calc(var(--u) * 4);
   border: 1px solid var(--accent-color);
   background: var(--dk-iron-1);
@@ -328,6 +351,7 @@ header.dk-label { margin-bottom: calc(var(--u) * 1.5); }
 @media (max-aspect-ratio: 3/2) {
   :root { --u: 0.9vw; }
   .res { display: none; }
+  .hd { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

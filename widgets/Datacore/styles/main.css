@@ -130,19 +130,40 @@
   font-size: calc(var(--u) * 3);
 }
 
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: calc(var(--u) * 10);
+  margin-top: calc(var(--u) * 1.5);
+  border-bottom: 1px solid var(--dc-border);
+}
+
+.spark .bar,
+.trend .bar {
+  flex: 1;
+  height: 0;
+  background: var(--dc-text-dim);
+  opacity: 0.7;
+  transition: height 300ms ease;
+}
+
+.spark .bar:last-child { opacity: 1; }
+.spark .bar[data-state="normal"] { background: var(--state-normal); }
+.spark .bar[data-state="warm"] { background: var(--state-warm); }
+.spark .bar[data-state="hot"] { background: var(--state-hot); }
+
 /* ---- Media ---- */
 
 .track {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 0;
+  margin-top: calc(var(--u) * 2);
 }
 
 .track__title {
   font-family: var(--font-display);
-  font-size: calc(var(--u) * 13);
+  font-size: calc(var(--u) * 15);
   line-height: 1;
   letter-spacing: 0.02em;
   color: var(--dc-text-dim);
@@ -163,6 +184,34 @@
   text-overflow: ellipsis;
 }
 
+/* Decorative only: iCUE's media plugin exposes no audio levels. */
+.viz {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--u) * 0.6);
+  min-height: calc(var(--u) * 10);
+  margin: calc(var(--u) * 3) 0 calc(var(--u) * 2.5);
+}
+
+.viz i {
+  flex: 1;
+  height: 8%;
+  background: color-mix(in srgb, var(--dc-cyan) 55%, transparent);
+  transform-origin: bottom;
+}
+
+.has-track .viz i {
+  height: 100%;
+  animation: viz-bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes viz-bounce {
+  0% { transform: scaleY(0.12); }
+  60% { transform: scaleY(0.7); }
+  100% { transform: scaleY(0.35); }
+}
+
 .controls {
   display: flex;
   gap: calc(var(--u) * 2);
@@ -179,6 +228,28 @@
 .ctl--main { flex: 1.4; }
 
 /* ---- Comms ---- */
+
+.clock {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2);
+  margin-bottom: calc(var(--u) * 2);
+  white-space: nowrap;
+}
+
+.clock__time {
+  font-family: var(--font-display);
+  font-size: calc(var(--u) * 14);
+  line-height: 0.9;
+  color: var(--text-color);
+}
+
+.clock__date {
+  font-size: calc(var(--u) * 4);
+  letter-spacing: 0.12em;
+  color: var(--dc-cyan);
+}
 
 .ask {
   flex: 1;
@@ -215,10 +286,12 @@
   .frame { flex-direction: column; }
   .panel--comms { flex: 0 0 auto; }
   .temp__num { font-size: calc(var(--u) * 18); }
+  .spark, .clock { display: none; }
   .temp__unit { margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 6); }
   .ask { min-height: var(--touch-min); font-size: calc(var(--u) * 11); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .temp[data-state="hot"] .temp__value { animation: none; }
+  .has-track .viz i { animation: none; transform: scaleY(0.4); }
 }

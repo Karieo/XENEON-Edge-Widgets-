@@ -15,6 +15,9 @@ var media = null; // Media plugin once ready
 var watched = {}; // sensorId -> { el, kind: "temp" | "extra", units }
 var autoPicked = null; // { cpu, gpu } when we pick sensors ourselves
 var lastTrack = "";
+var tempNow = { cpu: null, gpu: null }; // latest { v, units } per temp slot
+var tempHistory = { cpu: [], gpu: [] }; // one { pct, state } sample per second
+var TREND = 60; // seconds of temperature history
 var timers = {};
 
 var $ = function (id) { return document.getElementById(id); };
@@ -174,6 +177,7 @@ function renderValue(id, raw) {
     el.querySelector(".temp__num").textContent = Math.round(n);
     el.querySelector(".temp__unit").textContent = normalizeUnit(entry.units);
     el.dataset.state = tempState(n, entry.units);
+    tempNow[el.id] = { v: n, units: entry.units };
   });
 }
 
@@ -185,6 +189,7 @@ function markLost(entry) {
     } else {
       el.querySelector(".temp__num").textContent = "--";
       el.dataset.state = "idle";
+      tempNow[el.id] = null;
     }
   });
 }
@@ -240,6 +245,48 @@ function autoPick() {
     autoPicked = {};
   });
 }
+
+// ---- Temperature trends ----------------------------------------------------
+
+function trendSample(t) {
+  if (!t) return null;
+  var c = /F/i.test(t.units || "") ? (t.v - 32) * 5 / 9 : t.v;
+  return {
+    pct: (c - 30) / (settings.hotAt + 10 - 30) * 100,
+    state: tempState(t.v, t.units),
+  };
+}
+
+setInterval(function () {
+  ["cpu", "gpu"].forEach(function (slot) {
+    tempHistory[slot].push(trendSample(tempNow[slot]));
+    if (tempHistory[slot].length > TREND) tempHistory[slot].shift();
+    if (!document.hidden) Edge.drawBars($(slot).querySelector(".spark"), tempHistory[slot], TREND);
+  });
+}, 1000);
+
+// ---- Clock -----------------------------------------------------------------
+
+function renderClock() {
+  var now = new Date();
+  $("clockTime").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  $("clockDate").textContent = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }).toUpperCase();
+}
+
+renderClock();
+setInterval(renderClock, 5000);
+
+// ---- Visualizer (decorative: iCUE exposes no audio levels) -----------------
+
+(function buildViz() {
+  var viz = $("viz");
+  for (var i = 0; i < 32; i++) {
+    var bar = document.createElement("i");
+    bar.style.animationDuration = (0.55 + Math.random() * 0.9).toFixed(2) + "s";
+    bar.style.animationDelay = (-Math.random()).toFixed(2) + "s";
+    viz.appendChild(bar);
+  }
+})();
 
 function setSysStatus(text) {
   $("sysStatus").textContent = text;
