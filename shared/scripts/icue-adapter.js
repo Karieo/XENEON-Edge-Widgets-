@@ -205,5 +205,27 @@
     return 1 + (buf[0] % sides);
   };
 
+  // Bar-graph trace. Keeps exactly `count` <span class="bar"> children in
+  // `container` and draws `samples` (oldest first) right-aligned.
+  // Each sample is null or { pct: 0-100, state: "normal" | "warm" | "hot" }.
+  Edge.drawBars = function (container, samples, count) {
+    var bars = container.querySelectorAll(".bar");
+    if (bars.length !== count) {
+      Array.prototype.forEach.call(bars, function (b) { b.remove(); });
+      for (var i = 0; i < count; i++) {
+        var b = document.createElement("span");
+        b.className = "bar";
+        container.appendChild(b);
+      }
+      bars = container.querySelectorAll(".bar");
+    }
+    var offset = count - samples.length;
+    for (var j = 0; j < count; j++) {
+      var s = j >= offset ? samples[j - offset] : null;
+      bars[j].style.height = s ? Math.max(3, Math.min(100, s.pct)) + "%" : "0";
+      bars[j].dataset.state = s ? s.state : "";
+    }
+  };
+
   global.Edge = Edge;
 })(window);

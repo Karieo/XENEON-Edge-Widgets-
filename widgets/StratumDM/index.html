@@ -50,6 +50,7 @@
       </header>
       <ol class="init__list" id="initList"></ol>
       <div class="init__empty dc-label" id="initEmpty">&gt; NO LINK :: SET SUPABASE URL + ANON KEY IN SETTINGS</div>
+      <div class="init__sum" id="initSum"></div>
     </section>
 
     <section class="panel panel--clock">
@@ -59,6 +60,7 @@
         <button class="btn" id="roundDown">&#8722;</button>
         <button class="btn" id="roundUp">+</button>
       </div>
+      <div class="roundtime dc-label">THIS ROUND <b id="roundTime">0:00</b></div>
       <div class="dc-label clock__label">SESSION <span class="clock__hint">hold to reset</span></div>
       <div class="timer" id="timer">0:00:00</div>
       <button class="btn" id="timerBtn">START</button>
@@ -67,6 +69,7 @@
     <section class="panel panel--gen">
       <header class="dc-label" id="genLabel">GEN://OUTPUT</header>
       <div class="gen__out" id="genOut"><span class="gen__idle">&gt; Tap for a complication or an NPC<span class="dc-cursor"></span></span></div>
+      <ol class="gen__hist" id="genHist"></ol>
       <div class="row">
         <button class="btn gen__btn" id="btnComp">COMPLICATION</button>
         <button class="btn gen__btn gen__btn--npc" id="btnNpc">NPC</button>

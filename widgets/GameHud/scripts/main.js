@@ -204,28 +204,8 @@ function tileLevel(key, v) {
 
 function renderSparks() {
   TILES.forEach(function (key) {
-    var spark = $(key).querySelector(".spark");
-    var bars = ensureBars(spark);
-    var hist = tileHistory[key];
-    var offset = WINDOW - hist.length;
-    for (var j = 0; j < WINDOW; j++) {
-      var smp = j >= offset ? hist[j - offset] : null;
-      bars[j].style.height = smp ? Math.max(3, smp.pct) + "%" : "0";
-      bars[j].dataset.state = smp ? smp.state : "";
-    }
+    Edge.drawBars($(key).querySelector(".spark"), tileHistory[key], WINDOW);
   });
-}
-
-function ensureBars(container) {
-  var bars = container.querySelectorAll(".bar");
-  if (bars.length === WINDOW) return bars;
-  Array.prototype.forEach.call(bars, function (b) { b.remove(); });
-  for (var i = 0; i < WINDOW; i++) {
-    var b = document.createElement("span");
-    b.className = "bar";
-    container.appendChild(b);
-  }
-  return container.querySelectorAll(".bar");
 }
 
 function toC(v, u) {
@@ -255,14 +235,11 @@ function renderFpsStats() {
 }
 
 function renderTrace() {
-  var bars = ensureBars($("trace"));
-  var peak = Math.max.apply(null, fpsHistory.filter(function (v) { return v !== null; }).concat([0]));
+  var vals = fpsHistory.filter(function (v) { return v !== null; });
+  var peak = Math.max.apply(null, vals.concat([0]));
   var scale = Math.max(cfg.fpsTarget * 1.25, peak * 1.05, 1);
-  var offset = WINDOW - fpsHistory.length; // newest sample sits at the right edge
-  for (var j = 0; j < WINDOW; j++) {
-    var v = j >= offset ? fpsHistory[j - offset] : null;
-    bars[j].style.height = v ? Math.max(2, v / scale * 100) + "%" : "0";
-    bars[j].dataset.state = v ? fpsState(v) : "";
-  }
+  Edge.drawBars($("trace"), fpsHistory.map(function (v) {
+    return v ? { pct: v / scale * 100, state: fpsState(v) } : null;
+  }), WINDOW);
   $("traceTarget").style.bottom = (cfg.fpsTarget / scale * 100) + "%";
 }

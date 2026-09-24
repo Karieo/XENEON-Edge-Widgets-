@@ -12,6 +12,9 @@
   <meta name="x-icue-property" content="supMax" data-label="tr('Superiority Dice')" data-type="slider" data-default="4" data-min="0" data-max="6" data-step="1" />
   <meta name="x-icue-property" content="supDie" data-label="tr('Superiority Die')" data-type="combobox" data-default="'d8'" data-values="['d6', 'd8', 'd10', 'd12']" />
   <meta name="x-icue-property" content="surgeMax" data-label="tr('Action Surge')" data-type="slider" data-default="1" data-min="0" data-max="2" data-step="1" />
+  <meta name="x-icue-property" content="hdMonk" data-label="tr('Monk Hit Dice (d8)')" data-type="slider" data-default="6" data-min="0" data-max="20" data-step="1" />
+  <meta name="x-icue-property" content="hdFighter" data-label="tr('Fighter Hit Dice (d10)')" data-type="slider" data-default="3" data-min="0" data-max="20" data-step="1" />
+  <meta name="x-icue-property" content="conMod" data-label="tr('CON Modifier')" data-type="slider" data-default="1" data-min="-3" data-max="6" data-step="1" />
   <meta name="x-icue-property" content="windMax" data-label="tr('Second Wind')" data-type="slider" data-default="1" data-min="0" data-max="2" data-step="1" />
 
   <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#ddd4c2'" />
@@ -23,7 +26,7 @@
   [
     {
       "title": "tr('OKTAI')",
-      "properties": ["maxHp", "kiMax", "supMax", "supDie", "surgeMax", "windMax"],
+      "properties": ["maxHp", "kiMax", "supMax", "supDie", "surgeMax", "windMax", "hdMonk", "hdFighter", "conMod"],
       "info": "tr('Maxes come from your sheet. Spending is saved on this PC.')"
     },
     {
@@ -60,7 +63,10 @@
         <div class="hp__tempval"><span class="dk-label">Temp</span><span id="hpTemp">0</span></div>
         <button class="btn hp__btn hp__btn--temp" id="btnTempUp">+ TEMP</button>
       </div>
-      <div class="hint dk-label">Tap 1 &#183; hold 5</div>
+      <div class="hp__row hd">
+        <button class="hd__btn dk-panel" data-hd="8"><span class="dk-label">Hit Die d8</span><span class="hd__count"></span></button>
+        <button class="hd__btn dk-panel" data-hd="10"><span class="dk-label">Hit Die d10</span><span class="hd__count"></span></button>
+      </div>
     </section>
 
     <section class="res">

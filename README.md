@@ -5,9 +5,9 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | Widget | Status | What it does |
 |---|---|---|
 | **Edge Test Kit** | Ready to test | Runs the day-1 hardware checklist from `RESEARCH.md` on the device |
-| **DATACORE** | v0.1, untested on hardware | CPU/GPU temps + fans, now playing, big ASK CLAUDE button |
-| **OKTAI** | v0.1, untested on hardware | Oktai's table tracker for Drakkenheim (2014 rules): HP, ki, superiority dice, Action Surge, Second Wind, contamination, rests, dice |
-| **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only), round counter, session timer, random complications and NPCs |
+| **DATACORE** | v0.1, untested on hardware | CPU/GPU temps with 60 s trends + fans, now playing, clock, big ASK CLAUDE button |
+| **OKTAI** | v0.1, untested on hardware | Oktai's table tracker for Drakkenheim (2014 rules): HP, hit dice, ki, superiority dice, Action Surge, Second Wind, contamination, rests, dice |
+| **STRATUM DM** | v0.1, untested on hardware | Live initiative from DATACORE (read-only) with an encounter summary, round counter + round time, session timer, random complications and NPCs |
 | **GAME HUD** | v0.1, untested on hardware | Huge FPS with a 60-second trace, GPU load, GPU temp, CPU temp. No touch controls |
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
@@ -43,7 +43,9 @@ npm run build -- Datacore
 | Scanlines | on | Pure CSS |
 | Text / Accent / Background / Transparency | DATACORE palette | Needs Custom Style on |
 
-Layout by slot size: XL shows all three panels. L and S drop the media panel. M and vertical stack system over ASK CLAUDE.
+Also on screen: a 60-second trend graph under each temperature, a clock and date above ASK CLAUDE, and a visualizer in the now-playing panel. **The visualizer is decorative.** iCUE's media plugin exposes no audio levels, so it just animates while a track is loaded.
+
+Layout by slot size: XL shows all three panels. L and S drop the media panel. M and vertical stack system over ASK CLAUDE (no trends or clock).
 
 ## OKTAI
 
@@ -53,23 +55,25 @@ Grim Drakkenheim look (iron, bone, rust) with a purple/green haze that thickens 
 |---|---|---|
 | − DMG / + HEAL | 1 HP | 5 HP |
 | − TEMP / + TEMP | 1 temp HP | 5 temp HP |
+| Hit Die d8 / d10 | spend one: rolls it + CON and heals that much (shown in the dice panel) | give one back |
 | Resource tile (Ki, Superiority, Action Surge, Second Wind) | spend one | restore one |
 | Contamination segment | set that level (tap the current top level to drop one) | |
 | SHORT REST / LONG REST | nothing | confirm (about 1 s) |
 | Dice (d20, ADV, DIS, superiority die, d6, d4) | roll | |
 
-Damage comes off temp HP first. **2014 rules:** a short rest restores ki, superiority dice, Action Surge, and Second Wind. A long rest also restores all HP and clears temp HP. Nothing touches contamination except you.
+Damage comes off temp HP first. **2014 rules:** a short rest restores ki, superiority dice, Action Surge, and Second Wind (spend hit dice with their buttons to heal). A long rest also restores all HP, clears temp HP, and returns spent hit dice up to half your total (minimum 1), d10s first. Nothing touches contamination except you.
 
-Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiority Dice 4, Superiority Die d8, Action Surge 1, Second Wind 1. State is saved per widget in iCUE's localStorage and survives restarts (pending test 4 in `RESEARCH.md`). Changing a max never loses what you've spent.
+Settings: Max HP (default 60, **set this to Oktai's real max**), Ki 6, Superiority Dice 4, Superiority Die d8, Action Surge 1, Second Wind 1, Monk Hit Dice (d8) 6, Fighter Hit Dice (d10) 3, CON Modifier (default +1, **set this to Oktai's real CON mod**). State is saved per widget in iCUE's localStorage and survives restarts (pending test 4 in `RESEARCH.md`). Changing a max never loses what you've spent.
 
 ## STRATUM DM
 
 | Panel | What it does |
 |---|---|
 | Initiative | Newest active encounter from DATACORE: initiative, name (PCs cyan, enemies rust), up to 3 conditions, HP bar. Hidden enemies are left out unless "Show Hidden Enemies" is on. Dead combatants are struck through. Tag shows LIVE / OFFLINE / NO LINK. Offline keeps the last good data on screen. |
-| Round | Tap − / +. Hold − to reset to round 1. |
+| Encounter summary | Under the list: PCs up, enemies up/down, and total enemy HP left. Counts only what's on screen, so hidden enemies never leak through. |
+| Round | Tap − / +. Hold − to reset to round 1. "This round" shows how long the current round has taken. |
 | Session timer | Tap to start/pause. Hold to reset. Keeps counting through iCUE restarts. |
-| COMPLICATION / NPC | Random pick, never the same one twice in a row. Edit the lists in `widgets/StratumDM/scripts/tables.js`. |
+| COMPLICATION / NPC | Random pick, never the same one twice in a row. The last 3 results stay listed below, so you can find that NPC name again. Edit the lists in `widgets/StratumDM/scripts/tables.js`. |
 
 **Setup:** in the widget settings, fill in **Supabase Project URL** (`https://<ref>.supabase.co`) and **Supabase Anon Key** from DATACORE's `.env` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). Anon/publishable key only, never the service key. It polls every 4 s by default (3–10 s setting) and pauses when hidden.
 

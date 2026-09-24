@@ -27,7 +27,7 @@ function loadState() {
   return {
     hp: typeof s.hp === "number" ? s.hp : null, // null = full
     temp: s.temp || 0,
-    used: Object.assign({ ki: 0, sup: 0, surge: 0, wind: 0 }, s.used),
+    used: Object.assign({ ki: 0, sup: 0, surge: 0, wind: 0, hd8: 0, hd10: 0 }, s.used),
     contam: s.contam || 0,
     rolls: Array.isArray(s.rolls) ? s.rolls.slice(0, HISTORY) : [],
   };
@@ -48,6 +48,9 @@ function onIcueDataUpdated() {
   cfg = {
     maxHp: Math.max(1, Number(Edge.prop("maxHp", 60))),
     supDie: String(Edge.prop("supDie", "d8")),
+    hd8: Math.max(0, Number(Edge.prop("hdMonk", 6))),
+    hd10: Math.max(0, Number(Edge.prop("hdFighter", 3))),
+    conMod: Number(Edge.prop("conMod", 1)),
     textColor: Edge.prop("textColor", "#ddd4c2"),
     accentColor: Edge.prop("accentColor", "#c8a45a"),
     backgroundColor: Edge.prop("backgroundColor", "#0c0d0f"),
@@ -101,6 +104,14 @@ function render() {
       pip.classList.toggle("spent", i >= max - used);
     });
     tile.classList.toggle("empty", used >= max);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".hd__btn"), function (btn) {
+    var key = "hd" + btn.dataset.hd;
+    var left = cfg[key] - Math.min(state.used[key], cfg[key]);
+    btn.hidden = cfg[key] === 0;
+    btn.querySelector(".hd__count").textContent = left + "/" + cfg[key];
+    btn.classList.toggle("empty", left <= 0);
   });
 
   renderContam();
@@ -196,9 +207,16 @@ Edge.hold($("btnLong"), function () {
   SHORT_REST.forEach(function (k) { state.used[k] = 0; });
   state.hp = null;
   state.temp = 0;
+  // 2014: regain spent hit dice up to half your total (minimum 1), d10s first.
+  var regain = Math.max(1, Math.floor((cfg.hd8 + cfg.hd10) / 2));
+  ["hd10", "hd8"].forEach(function (k) {
+    var back = Math.min(regain, state.used[k]);
+    state.used[k] -= back;
+    regain -= back;
+  });
   save();
   render();
-  toast("Long rest: everything restored. Contamination stays.");
+  toast("Long rest: HP, resources, and half your hit dice back. Contamination stays.");
 });
 
 function toast(text) {
@@ -226,6 +244,14 @@ function roll(kind) {
     var n = Edge.roll(dieSides(label));
     r = { label: label, total: n, detail: label };
   }
+  showRoll(r);
+  state.rolls.unshift({ label: r.label, total: r.total });
+  state.rolls = state.rolls.slice(0, HISTORY);
+  save();
+  renderHistory();
+}
+
+function showRoll(r) {
   var crit = (r.label === "d20" || r.label === "ADV" || r.label === "DIS") && (r.total === 20 || r.total === 1);
   $("diceNum").textContent = r.total;
   $("diceDetail").textContent = r.detail;
@@ -234,11 +260,34 @@ function roll(kind) {
   result.classList.remove("rolled");
   void result.offsetWidth; // restart the animation
   result.classList.add("rolled");
-  state.rolls.unshift({ label: r.label, total: r.total });
-  state.rolls = state.rolls.slice(0, HISTORY);
-  save();
-  renderHistory();
 }
+
+// ---- Hit dice --------------------------------------------------------------
+
+// Tap spends one: rolls it + CON (minimum 0) and heals that much.
+// Hold gives one back (for a mis-tap).
+Array.prototype.forEach.call(document.querySelectorAll(".hd__btn"), function (btn) {
+  var sides = Number(btn.dataset.hd);
+  var key = "hd" + sides;
+  Edge.press(btn, function () {
+    if (state.used[key] >= cfg[key]) return;
+    state.used[key]++;
+    var die = Edge.roll(sides);
+    var gain = Math.max(0, die + cfg.conMod);
+    var before = hpNow();
+    state.hp = Math.min(cfg.maxHp, before + gain);
+    var mod = cfg.conMod >= 0 ? "+" + cfg.conMod : String(cfg.conMod);
+    var r = { label: "HD" + sides, total: gain, detail: "d" + sides + " " + die + " " + mod };
+    showRoll(r);
+    state.rolls.unshift({ label: r.label, total: r.total });
+    state.rolls = state.rolls.slice(0, HISTORY);
+    save();
+    render();
+    toast("Hit die d" + sides + ": +" + (state.hp - before) + " HP");
+  }, function () {
+    if (state.used[key] > 0) { state.used[key]--; save(); render(); }
+  });
+});
 
 Array.prototype.forEach.call(document.querySelectorAll(".die"), function (btn) {
   Edge.press(btn, function () { roll(btn.dataset.roll); });

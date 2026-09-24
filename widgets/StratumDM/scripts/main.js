@@ -5,6 +5,9 @@ var cfg = {};
 var local = loadLocal();
 var poll = { timer: null, lastKey: "", encounter: null, inFlight: false };
 var lastPick = { comp: -1, npc: -1 };
+var genCurrent = null; // { kind, text } now on screen
+var genHistory = []; // earlier results, newest first
+var GEN_KEEP = 3;
 
 // ---- Settings ------------------------------------------------------------
 
@@ -92,6 +95,7 @@ function renderEncounter(enc, emptyText) {
   if (!enc) {
     list.innerHTML = "";
     $("encName").textContent = "";
+    $("initSum").innerHTML = "";
     if (emptyText) empty.textContent = emptyText;
     empty.hidden = false;
     return;
@@ -153,6 +157,27 @@ function renderEncounter(enc, emptyText) {
     empty.textContent = "> ENCOUNTER HAS NO VISIBLE COMBATANTS";
     empty.hidden = false;
   }
+  renderSummary(shown);
+}
+
+// One line of pacing info. Uses only what's on screen, so hidden enemies
+// never leak through the totals.
+function renderSummary(shown) {
+  var down = function (c) { return c.is_dead || (Number(c.hp_current) || 0) <= 0; };
+  var pcs = shown.filter(function (c) { return c.type === "pc"; });
+  var foes = shown.filter(function (c) { return c.type !== "pc"; });
+  var foeCur = 0, foeMax = 0;
+  foes.forEach(function (c) {
+    foeCur += Math.max(0, Number(c.hp_current) || 0);
+    foeMax += Math.max(0, Number(c.hp_max) || 0);
+  });
+  var pcsUp = pcs.filter(function (c) { return !down(c); }).length;
+  var foesDown = foes.filter(down).length;
+  var pct = foeMax ? Math.round(foeCur / foeMax * 100) : 0;
+  $("initSum").innerHTML =
+    '<span>PCS UP <b class="c-pc">' + pcsUp + "/" + pcs.length + "</b></span>" +
+    '<span>ENEMIES <b class="c-foe">' + (foes.length - foesDown) + "</b> UP \u00b7 <b>" + foesDown + "</b> DOWN</span>" +
+    '<span>ENEMY HP <b class="c-foe">' + foeCur + "/" + foeMax + "</b> (" + pct + "%)</span>";
 }
 
 // ---- Round + session timer (local, saved per widget) ----------------------
@@ -161,6 +186,7 @@ function loadLocal() {
   var s = Edge.store.load();
   return {
     round: s.round || 1,
+    roundStart: s.roundStart || Date.now(), // when the current round began
     timerMs: s.timerMs || 0, // time banked while paused
     timerStart: s.timerStart || null, // epoch ms when running
   };
@@ -186,17 +212,33 @@ function renderLocal() {
   $("timer").textContent = formatTime(elapsedMs());
   $("timerBtn").textContent = local.timerStart ? "PAUSE" : (local.timerMs ? "RESUME" : "START");
   $("frame").classList.toggle("timer-running", !!local.timerStart);
+  renderRoundTime();
+}
+
+function renderRoundTime() {
+  var sec = Math.max(0, Math.floor((Date.now() - local.roundStart) / 1000));
+  $("roundTime").textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+}
+
+function setRound(n) {
+  if (n !== local.round) local.roundStart = Date.now();
+  local.round = n;
+  saveLocal();
+  renderLocal();
 }
 
 setInterval(function () {
-  if (local.timerStart && !document.hidden) $("timer").textContent = formatTime(elapsedMs());
+  if (document.hidden) return;
+  if (local.timerStart) $("timer").textContent = formatTime(elapsedMs());
+  renderRoundTime();
 }, 1000);
 
-Edge.press($("roundUp"), function () { local.round++; saveLocal(); renderLocal(); });
+Edge.press($("roundUp"), function () { setRound(local.round + 1); });
 Edge.press($("roundDown"), function () {
-  local.round = Math.max(1, local.round - 1); saveLocal(); renderLocal();
+  setRound(Math.max(1, local.round - 1));
 }, function () {
-  local.round = 1; saveLocal(); renderLocal(); // hold − to reset to round 1
+  local.roundStart = Date.now(); // hold − to reset to round 1
+  setRound(1);
 });
 
 Edge.press($("timerBtn"), function () {
@@ -230,7 +272,15 @@ function pick(list, slot) {
   return list[i];
 }
 
-function showGen(label, html) {
+function showGen(label, html, summary) {
+  if (genCurrent) {
+    genHistory.unshift(genCurrent);
+    genHistory = genHistory.slice(0, GEN_KEEP);
+  }
+  genCurrent = { kind: label.replace("GEN://", ""), text: summary };
+  $("genHist").innerHTML = genHistory.map(function (g) {
+    return "<li><b>" + esc(g.kind) + "</b> " + esc(g.text) + "</li>";
+  }).join("");
   $("genLabel").textContent = label;
   var out = $("genOut");
   out.innerHTML = html;
@@ -246,7 +296,8 @@ function esc(s) {
 }
 
 Edge.press($("btnComp"), function () {
-  showGen("GEN://COMPLICATION", '<p class="gen__text">' + esc(pick(COMPLICATIONS, "comp")) + "</p>");
+  var text = pick(COMPLICATIONS, "comp");
+  showGen("GEN://COMPLICATION", '<p class="gen__text">' + esc(text) + "</p>", text);
 });
 
 Edge.press($("btnNpc"), function () {
@@ -256,7 +307,8 @@ Edge.press($("btnNpc"), function () {
   showGen("GEN://NPC",
     '<p class="gen__name">' + esc(name) + '</p>' +
     '<p class="gen__role">' + esc(role) + "</p>" +
-    '<p class="gen__text">' + esc(hook.charAt(0).toUpperCase() + hook.slice(1)) + ".</p>");
+    '<p class="gen__text">' + esc(hook.charAt(0).toUpperCase() + hook.slice(1)) + ".</p>",
+    name + " \u00b7 " + role);
 });
 
 // The chip limit depends on slot size, so redraw if the slot changes.

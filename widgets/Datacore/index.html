@@ -46,11 +46,13 @@
           <div class="temp__label dc-label">CPU</div>
           <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
           <div class="temp__name"></div>
+          <div class="spark"></div>
         </div>
         <div class="temp" id="gpu" data-state="idle">
           <div class="temp__label dc-label">GPU</div>
           <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
           <div class="temp__name"></div>
+          <div class="spark"></div>
         </div>
       </div>
       <ul class="extras" id="extras"></ul>
@@ -63,6 +65,7 @@
         <div class="track__title" id="trackTitle">NO SIGNAL</div>
         <div class="track__artist" id="trackArtist">&#8212;</div>
       </div>
+      <div class="viz" id="viz" aria-hidden="true"></div>
       <div class="controls">
         <button class="btn ctl" id="btnPrev" aria-label="Previous track">&#9664;&#9664;</button>
         <button class="btn ctl ctl--main" id="btnPlay" aria-label="Play or pause">&#9654;&#10074;&#10074;</button>
@@ -72,6 +75,10 @@
 
     <section class="panel panel--comms">
       <header class="dc-label">COMMS://UPLINK</header>
+      <div class="clock">
+        <span class="clock__time" id="clockTime">--:--</span>
+        <span class="clock__date" id="clockDate"></span>
+      </div>
       <button class="btn ask" id="btnClaude">
         <span class="ask__text">ASK CLAUDE</span>
       </button>
