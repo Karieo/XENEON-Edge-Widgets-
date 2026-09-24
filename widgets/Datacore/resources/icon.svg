@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DATACORE">
+  <rect width="128" height="128" rx="14" fill="#0a0a0c"/>
+  <rect x="10" y="10" width="108" height="108" rx="8" fill="none" stroke="#2a2a35" stroke-width="4"/>
+  <path d="M30 44l18 20-18 20" fill="none" stroke="#f5a623" stroke-width="9" stroke-linecap="square"/>
+  <rect x="58" y="78" width="40" height="9" fill="#00e5ff"/>
+</svg>

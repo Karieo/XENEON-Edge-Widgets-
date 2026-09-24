@@ -1,0 +1,18 @@
+{
+  "widget_name": "DATACORE",
+  "DATACORE": "DATACORE",
+  "CPU Temperature": "CPU Temperature",
+  "GPU Temperature": "GPU Temperature",
+  "Extra Sensors (fans, load)": "Extra Sensors (fans, load)",
+  "Warm At": "Warm At",
+  "Hot At": "Hot At",
+  "ASK CLAUDE Opens": "ASK CLAUDE Opens",
+  "claude.ai in browser": "claude.ai in browser",
+  "Claude desktop app": "Claude desktop app",
+  "Scanlines": "Scanlines",
+  "Widget Personalization": "Widget Personalization",
+  "Text Color": "Text Color",
+  "Accent Color": "Accent Color",
+  "Background Color": "Background Color",
+  "Background Transparency": "Background Transparency"
+}

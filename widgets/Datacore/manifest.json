@@ -1,0 +1,18 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.datacore",
+  "name": "DATACORE",
+  "description": "DATACORE terminal strip for the Xeneon Edge: CPU/GPU temps, fans, now playing, and a one-tap ASK CLAUDE button.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true,
+  "required_plugins": [
+    "widgetbuilder.sensorsdataprovider:Sensors:1.0",
+    "widgetbuilder.mediadataprovider:Media:1.0",
+    "widgetbuilder.linkprovider:Url:1.0"
+  ]
+}
