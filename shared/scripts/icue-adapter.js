@@ -13,6 +13,30 @@
 
   var Edge = {};
 
+  // iCUE can declare its globals (iCUE_initialized, plugins, uniqueId, the
+  // plugin flags and event hooks) as script-level let/const. Those are visible
+  // to bare names but NOT as window properties, so every read and write of an
+  // iCUE global goes through these two helpers instead of window[name].
+  function readGlobal(name) {
+    try {
+      return Function("return typeof " + name + ' !== "undefined" ? ' + name + " : undefined")();
+    } catch (e) {
+      return global[name];
+    }
+  }
+
+  // Bare assignment: updates iCUE's binding when it exists, else creates a
+  // window property that iCUE can pick up later (same as the docs' examples).
+  function writeGlobal(name, value) {
+    try {
+      Function("v", name + " = v;")(value);
+    } catch (e) {
+      global[name] = value;
+    }
+  }
+
+  Edge.readGlobal = readGlobal;
+
   // ---- iCUE properties ---------------------------------------------------
 
   // iCUE injects each x-icue-property as a global. Depending on the context it
@@ -22,30 +46,29 @@
       var w = global[name];
       if (w !== undefined && w !== null && w !== "") return w;
     }
-    try {
-      var v = Function("return typeof " + name + ' !== "undefined" ? ' + name + " : undefined")();
-      if (v !== undefined && v !== null && v !== "") return v;
-    } catch (e) {}
+    var v = readGlobal(name);
+    if (v !== undefined && v !== null && v !== "") return v;
     return fallback;
   };
 
   Edge.inIcue = function () {
-    return typeof global.iCUE_initialized !== "undefined";
+    return readGlobal("iCUE_initialized") !== undefined || !!readGlobal("plugins");
   };
 
   Edge.icueReady = function () {
-    return typeof global.iCUE_initialized !== "undefined" && !!global.iCUE_initialized;
+    return !!readGlobal("iCUE_initialized");
   };
 
   // ---- Plugins -----------------------------------------------------------
 
   // module: "Sensorsdataprovider" | "Mediadataprovider" | "Linkprovider"
   Edge.plugin = function (module) {
-    return global.plugins && global.plugins[module] ? global.plugins[module] : null;
+    var plugins = readGlobal("plugins");
+    return plugins && plugins[module] ? plugins[module] : null;
   };
 
   Edge.pluginReady = function (module) {
-    var flag = global["plugin" + module + "_initialized"];
+    var flag = readGlobal("plugin" + module + "_initialized");
     return !!flag && !!Edge.plugin(module);
   };
 
@@ -58,8 +81,14 @@
       fired = true;
       try { callback(Edge.plugin(module)); } catch (e) { console.error(module, e); }
     }
-    global["plugin" + module + "Events"] = { onInitialized: once };
+    writeGlobal("plugin" + module + "Events", { onInitialized: once });
     if (Edge.pluginReady(module)) once();
+    // Belt and braces: if the hook is missed, pick the plugin up once it appears.
+    var tries = 0;
+    var poll = setInterval(function () {
+      if (fired || ++tries > 30) { clearInterval(poll); return; }
+      if (Edge.plugin(module)) once();
+    }, 1000);
   };
 
   // One asyncResponse listener per plugin, shared by every request.
@@ -113,6 +142,12 @@
   // Opens in the system default browser via the Link plugin. A plain
   // window.open would load the page inside the widget instead.
   Edge.openLink = function (url) {
+    // App schemes (claude://) were confirmed on hardware through window.open,
+    // which hands them to Windows. Keep that path for anything not http(s).
+    if (!/^https?:/i.test(url)) {
+      global.open(url, "_blank", "noopener");
+      return "browser";
+    }
     var link = Edge.plugin("Linkprovider");
     if (link && typeof link.open === "function") {
       link.open(url);

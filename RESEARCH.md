@@ -21,6 +21,7 @@ Source of truth used: Corsair's **WidgetBuilder Kit** (skill file + docs snapsho
 - **iCUE parses `<head>` as strict XML** on import. Every void tag (`<meta>`, `<link>`) must self-close (`/>`), or import fails with "Missing Title Element". The CLI validator now catches this.
 - `data-type` must be one of: slider, switch, color, combobox, search-combobox, tab-buttons, textfield, media-selector, sensors-combobox, sensors-factory. Anything else → "Invalid meta parameter data type".
 - `icueEvents = {...}` must be a **bare assignment** (no `var`/`let`/`const`) or iCUE may not see it.
+- **Hardware, 2026-09-25:** iCUE's globals (`iCUE_initialized`, `plugins`, `plugin<Module>_initialized`, `plugin<Module>Events`) are **not** `window` properties. `window.plugins` came back empty and DATACORE showed "DEV MODE :: NO ICUE" even though the sensor pickers listed the Ryzen and RTX temps. Read and write them by bare name only. `icue-adapter.js` does this through `readGlobal`/`writeGlobal`. Non-web links (`claude://`, `music://`) keep going through `window.open`, the path that was proven on hardware.
 - Properties may be injected on `window` *or* only in a sandbox scope. Read them through a helper that checks both (`Edge.prop`).
 - Sensors push updates via the `sensorValueChanged(sensorId, value)` signal, so no tight polling is needed. DATACORE listens to it and resyncs every 5 s as a safety net. Media has no change signal, so it polls every 2 s and skips DOM work when nothing changed. Both pause when the page is hidden.
 - Both CPU and GPU `sensors-combobox` default to the same "default temperature sensor". DATACORE detects that and auto-picks by sensor kind (`cpu-temp`/`package`, `gpu-temp`) until you choose in settings.
@@ -42,7 +43,7 @@ Import `dist/EdgeTestKit.icuewidget`, put it on the Edge at XL size, and tap thr
 |---|---|---|---|
 | 1 | Hello-world imports and shows | (the kit itself) | ✅ **2026-09-25:** imports and shows on the Edge; iCUE connected, `uniqueId` injected |
 | 2 | Tap registers (`pointerType`?) / steals game focus? **Kill switch** | TAP | ✅ **2026-09-25:** taps register; a full-screen game **keeps focus**. Kill switch passed |
-| 3 | CPU/GPU temps + fans available; sensor IDs | SENSORS | _pending_ |
+| 3 | CPU/GPU temps + fans available; sensor IDs | SENSORS | Pickers list `AMD Ryzen 9 9900X … Temp #1` and `NVIDIA GeForce RTX 5080 Temp #1`. Widgets didn't read them until the `window` fix (see 0.2). Re-test. |
 | 4 | localStorage survives iCUE restart + reboot | STORAGE (BOOT # climbs) | _pending_ |
 | 5a | `https://claude.ai` opens in default browser | CLAUDE.AI | _pending_ |
 | 5b | `claude://` launches desktop app | CLAUDE:// | ✅ **2026-09-25:** opens the Claude desktop app. DATACORE now defaults to it |
