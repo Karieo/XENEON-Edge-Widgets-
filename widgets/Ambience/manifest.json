@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.ambience",
+  "name": "AMBIENCE",
+  "description": "Soundscape mixer for the Xeneon Edge: rain, wind, fire, stream, night, thunder, dungeon drone and brown noise, all generated live. Scenes for painting, D&D, focus and bedtime, with a fade-out timer.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}
