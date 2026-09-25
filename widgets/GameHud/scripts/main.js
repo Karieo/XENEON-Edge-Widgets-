@@ -18,6 +18,7 @@ var cfg = {};
 var sensors = null;
 var catalog = null; // Edge.sensorCatalog result
 var bound = {}; // slot -> sensorId
+var alt = {}; // temp slot -> { id, label } of the chip's other temp sensor
 var latest = {}; // sensorId -> number
 var units = {}; // sensorId -> units string
 var fpsHistory = []; // FPS samples, oldest first (null = no reading)
@@ -99,6 +100,14 @@ function bindSlots() {
     var auto = catalog ? Edge.pickSensor(catalog, slot.role) : "";
     bound[key] = untouched && auto ? auto : chosen;
   });
+  alt = {};
+  ["gpuTemp", "cpuTemp"].forEach(function (key) {
+    var sib = siblingTemp(bound[key]);
+    if (sib) alt[key] = sib;
+    var box = $(key).querySelector(".tile__alt");
+    box.hidden = !sib;
+    if (sib) box.querySelector(".tile__alt-name").textContent = sib.label;
+  });
   Object.keys(bound).forEach(function (key) {
     var id = bound[key];
     var tile = tileFor(key);
@@ -128,15 +137,31 @@ function sensorLabel(device, name) {
   return name ? dev + " \u00b7 " + name : dev;
 }
 
+// The other temperature sensor on the same device as `id` ("Temp #2" when
+// "Temp #1" is bound), or null.
+function siblingTemp(id) {
+  if (!id || !catalog) return null;
+  var me = catalog.find(function (s) { return s.id === id; });
+  if (!me || !me.device) return null;
+  var sib = catalog.find(function (s) {
+    return s.id !== id && s.type === "temperature" && s.device === me.device;
+  });
+  if (!sib) return null;
+  var tag = (sib.name.match(/#\s*\d+/) || [])[0];
+  return { id: sib.id, label: (tag || sib.name).toUpperCase().slice(0, 12) };
+}
+
 function isBound(id) {
   for (var k in bound) if (bound[k] === id) return true;
+  for (var a in alt) if (alt[a].id === id) return true;
   return false;
 }
 
 function resync() {
   if (!sensors) return;
-  Object.keys(bound).forEach(function (key) {
-    var id = bound[key];
+  var ids = Object.keys(bound).map(function (k) { return bound[k]; })
+    .concat(Object.keys(alt).map(function (k) { return alt[k].id; }));
+  ids.forEach(function (id) {
     if (!id) return;
     var u = units[id] ? Promise.resolve(units[id]) : Edge.request(sensors, "getSensorUnits", id);
     Promise.all([Edge.request(sensors, "getSensorValue", id), u]).then(function (r) {
@@ -194,6 +219,10 @@ function renderSlots() {
     var lvl = ok ? tileLevel(key, v) : null;
     tile.dataset.state = lvl ? lvl.state : "idle";
     tile.querySelector(".tbar i").style.width = lvl ? lvl.pct + "%" : "0";
+    if (alt[key]) {
+      var a = latest[alt[key].id];
+      tile.querySelector(".tile__alt-num").textContent = typeof a === "number" && !isNaN(a) ? Math.round(a) + "°" : "--";
+    }
   });
 }
 
