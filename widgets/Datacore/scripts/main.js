@@ -31,7 +31,7 @@ function readSettings() {
     extraSensors: Edge.prop("extraSensors", []),
     warmAt: Number(Edge.prop("warmAt", 70)),
     hotAt: Number(Edge.prop("hotAt", 85)),
-    claudeTarget: Edge.prop("claudeTarget", "web"),
+    claudeTarget: Edge.prop("claudeTarget", "app"), // claude:// confirmed on hardware 2026-09-25
     showScanlines: Edge.prop("showScanlines", true),
     textColor: Edge.prop("textColor", "#f0efe4"),
     accentColor: Edge.prop("accentColor", "#f5a623"),
@@ -334,7 +334,7 @@ Edge.press($("btnNext"), function () { mediaCommand("triggerNextTrack"); });
 // ---- ASK CLAUDE ----------------------------------------------------------
 
 Edge.press($("btnClaude"), function () {
-  var key = settings.claudeTarget === "app" ? "app" : "web";
+  var key = settings.claudeTarget === "web" ? "web" : "app";
   var url = CLAUDE_URLS[key];
   var how = Edge.openLink(url);
   var btn = $("btnClaude");

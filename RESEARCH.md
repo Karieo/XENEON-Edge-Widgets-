@@ -32,18 +32,20 @@ Source of truth used: Corsair's **WidgetBuilder Kit** (skill file + docs snapsho
 - **OBS control without Stream Deck:** OBS 28+ ships obs-websocket v5 (`ws://127.0.0.1:4455`). A widget can open a WebSocket to it directly, with SHA-256 challenge auth, requests, and events including `InputVolumeMeters` for real audio levels. ON AIR uses this in place of the Stream Deck plugin route from §3. **TEST on hardware:** that iCUE allows a WebSocket to localhost (it may prompt), and whether `crypto.subtle` exists in iCUE's page context (ON AIR has a verified pure-JS SHA-256 fallback either way).
 - Widgets with no touch controls should set `"interactive": false`, so taps on them can't steal game focus (GAME HUD does this).
 
-### 0.3 Day-1 hardware results (fill in on the PC)
+### 0.3 Day-1 hardware results
+
+Still to run: **3** (sensors), **4** (storage across restart + reboot), **6** (network fetch), **7** (mic), **8** (Apple Music link forms). Also worth trying: a WebSocket to `ws://127.0.0.1:4455` (ON AIR ↔ OBS).
 
 Import `dist/EdgeTestKit.icuewidget`, put it on the Edge at XL size, and tap through. The log panel shows results; screenshot it.
 
 | # | Test | Kit button | Result |
 |---|---|---|---|
-| 1 | Hello-world imports and shows | (the kit itself) | _pending_ |
-| 2 | Tap registers (`pointerType`?) / steals game focus? **Kill switch** | TAP | _pending_ |
+| 1 | Hello-world imports and shows | (the kit itself) | ✅ **2026-09-25:** imports and shows on the Edge; iCUE connected, `uniqueId` injected |
+| 2 | Tap registers (`pointerType`?) / steals game focus? **Kill switch** | TAP | ✅ **2026-09-25:** taps register; a full-screen game **keeps focus**. Kill switch passed |
 | 3 | CPU/GPU temps + fans available; sensor IDs | SENSORS | _pending_ |
 | 4 | localStorage survives iCUE restart + reboot | STORAGE (BOOT # climbs) | _pending_ |
 | 5a | `https://claude.ai` opens in default browser | CLAUDE.AI | _pending_ |
-| 5b | `claude://` launches desktop app | CLAUDE:// | _pending_ |
+| 5b | `claude://` launches desktop app | CLAUDE:// | ✅ **2026-09-25:** opens the Claude desktop app. DATACORE now defaults to it |
 | 6 | Supabase fetch: prompt? data? (401 = reachable) | SUPABASE | _pending_ |
 | 7 | Mic prompt; `getUserMedia` returns audio | MIC | _pending_ |
 | 8 | Apple Music link: which form (https, music://, musics://, itmss://) opens the Windows app? Does it play? Set your playlist link in widget settings; each tap tries the next form | APPLE MUSIC | _pending_ |
@@ -134,6 +136,7 @@ There are two ways to put custom UI on the Edge.
 
 **Decision: start with A.** Write the widget UI as plain, self-contained HTML/CSS/JS with the iCUE-specific calls isolated in one adapter file. If touch-focus stealing turns out to be annoying mid-game, the same UI can move into a local server + kiosk shell later without a rewrite.
 **Kill switch:** if tapping the Edge minimizes or unfocuses full-screen games during testing, schedule the kiosk-shell spike.
+**Result (2026-09-25, tested on hardware):** tapping the Edge during a full-screen game did NOT steal focus. Kill switch passed, so we stay with native iCUE widgets and don't need the kiosk shell.
 
 ---
 
@@ -182,7 +185,7 @@ There are two ways to put custom UI on the Edge.
 |---|---|---|---|
 | Sensors | `widgetbuilder.sensorsdataprovider:Sensors:1.0` | Temps, fans, loads from connected devices | Async with requestId. Sensor pickers via the `sensors-combobox`/`sensors-factory` controls. **TEST:** confirm Ryzen 9900X + RTX 5080 sensors show up. |
 | Media | `widgetbuilder.mediadataprovider:Media:1.0` | Song name, artist, play/pause, next, previous | **That's all.** No album art, no playlist switching, no volume. |
-| Link | `widgetbuilder.linkprovider:Url:1.0` | `open(url)` in the system default browser | A plain `window.open` opens *inside* the widget instead. **TEST:** whether a `claude://` URL launches the desktop app. |
+| Link | `widgetbuilder.linkprovider:Url:1.0` | `open(url)` in the system default browser | A plain `window.open` opens *inside* the widget instead. **CONFIRMED (2026-09-25):** `claude://` launches the Claude desktop app. |
 | Stream Deck | `widgetbuilder.streamdeck:StreamDeck:1.0` | Creates a **virtual Stream Deck** key grid (columns × rows) and sends key presses to the Stream Deck software | Needs Elgato's Stream Deck app running (it may prompt for authentication). Icons come back as data URLs. This is the path to OBS/scene control without building OBS integration ourselves. |
 | FPS | (see docs) | In-game FPS | Not explored yet. Worth a look for the system monitor. |
 | Device Action | (see docs) | Corsair device actions | Not explored yet. |
@@ -231,7 +234,7 @@ There are two ways to put custom UI on the Edge.
 | Build | Change based on research |
 |---|---|
 | System monitor v1 | Add `"interactive": true`. Use `textColor`/`accentColor`/`backgroundColor` property names. Check the FPS plugin. |
-| ASK CLAUDE button | Link plugin, system browser. Test the `claude://` scheme. Voice in v2 depends on the mic TEST. |
+| ASK CLAUDE button | Link plugin opens `claude://` (confirmed working). Voice in v2 depends on the mic TEST. |
 | OKTAI tracker | Persistence = `localStorage[uniqueId]`. No file permissions needed. |
 | STRATUM DM panel | URL permission for the Supabase domain. Poll 3–5 s. Handle denied-permission states. Quick alternative to test first: the stock iFrame/website widget pointed at DATACORE's combat page. |
 | Scene soundtrack | **Cut from the Media plugin plan.** It can't switch playlists. If still wanted later, use the Spotify Web API over a URL permission. |

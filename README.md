@@ -44,7 +44,7 @@ npm run build -- Datacore
 | GPU Temperature | iCUE default temp sensor | |
 | Extra Sensors (fans, load) | default fan | Up to 4 shown. Each entry's color is used for its underline |
 | Warm At / Hot At | 70 / 85 °C | Cyan → amber → red. Converted automatically if iCUE reports °F |
-| ASK CLAUDE Opens | claude.ai in browser | Switch to "Claude desktop app" to try `claude://` |
+| ASK CLAUDE Opens | Claude desktop app (`claude://`, confirmed on hardware) | Switch to "claude.ai in browser" as a fallback |
 | Scanlines | on | Pure CSS |
 | Text / Accent / Background / Transparency | DATACORE palette | Needs Custom Style on |
 
@@ -167,7 +167,7 @@ Slot sizes: XL shows everything. L and S show on-air + scenes. M shows the on-ai
 
 ## Known limits
 
-- **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
+- **Touch focus: tested, not a problem.** On 2026-09-25, tapping the Edge during a full-screen game did not take focus, so the widgets stay as native iCUE widgets. (All iCUE calls still live in `shared/scripts/icue-adapter.js`, in case that ever changes.)
 - **Media:** song and artist only. No play state, album art, volume, or playlist switching.
 - **Sensors:** whatever iCUE exposes. Ryzen 9900X / RTX 5080 coverage is unconfirmed until the SENSORS test runs.
 - The ASK CLAUDE button just opens a link. No API keys anywhere in this repo.
