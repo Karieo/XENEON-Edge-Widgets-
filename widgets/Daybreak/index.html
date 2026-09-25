@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('DAYBREAK')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="city" data-label="tr('City')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="tempUnits" data-label="tr('Temperature Units')" data-type="tab-buttons" data-default="'f'" data-values="[{'key':'f','value':'°F'},{'key':'c','value':'°C'}]" />
+  <meta name="x-icue-property" content="clock24" data-label="tr('24-Hour Clock')" data-type="switch" data-default="false" />
+  <meta name="x-icue-property" content="count1" data-label="tr('Countdown 1')" data-type="textfield" data-default="'Halloween | 10-31'" />
+  <meta name="x-icue-property" content="count2" data-label="tr('Countdown 2')" data-type="textfield" data-default="'Christmas | 12-25'" />
+  <meta name="x-icue-property" content="count3" data-label="tr('Countdown 3')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="count4" data-label="tr('Countdown 4')" data-type="textfield" data-default="''" />
+
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Weather')",
+      "properties": ["city", "tempUnits", "clock24"],
+      "info": "tr('Type a city, like Denver or Leeds UK. Weather by Open-Meteo.com, refreshed every 15 minutes.')"
+    },
+    {
+      "title": "tr('Countdowns')",
+      "properties": ["count1", "count2", "count3", "count4"],
+      "info": "tr('Label | date. Use 2026-10-31 for one day or 10-31 for every year.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-phase="day">
+    <div class="stars" aria-hidden="true"></div>
+
+    <section class="now">
+      <div class="time" id="time">--:--</div>
+      <div class="date" id="date"></div>
+      <svg class="arc" id="arc" viewBox="0 0 400 120" aria-hidden="true">
+        <path class="arc__path" d="M20 110 A180 100 0 0 1 380 110"></path>
+        <line class="arc__ground" x1="0" x2="400" y1="110" y2="110"></line>
+        <circle class="arc__body" id="arcBody" cx="20" cy="110" r="11"></circle>
+      </svg>
+      <div class="sun" id="sunLine"></div>
+    </section>
+
+    <section class="wx">
+      <div class="wx__now">
+        <svg class="wx__icon" id="wxIcon" viewBox="0 0 64 64" aria-hidden="true"></svg>
+        <div>
+          <div class="wx__temp" id="wxTemp">--°</div>
+          <div class="wx__desc" id="wxDesc">Set your city in settings</div>
+          <div class="wx__meta" id="wxMeta"></div>
+        </div>
+      </div>
+      <div class="hours" id="hours"></div>
+      <div class="days" id="days"></div>
+      <div class="credit" id="credit">Weather: Open-Meteo.com</div>
+    </section>
+
+    <section class="counts" id="counts"></section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

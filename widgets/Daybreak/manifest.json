@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.daybreak",
+  "name": "DAYBREAK",
+  "description": "Clock, weather, sunrise and sunset, and countdowns to the days that matter, on a sky that changes with the time of day. Weather by Open-Meteo, no account needed.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": false
+}
