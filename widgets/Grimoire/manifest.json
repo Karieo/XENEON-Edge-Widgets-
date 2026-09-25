@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.grimoire",
+  "name": "GRIMOIRE",
+  "description": "D&D 5e (2014) rules at a tap for the Xeneon Edge: conditions, exhaustion, actions, combat, DCs, travel, light, falling, and rests. Includes material from SRD 5.1 (CC-BY-4.0).",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}

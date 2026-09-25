@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('GRIMOIRE')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="startTab" data-label="tr('Open On')" data-type="combobox" data-default="'conditions'" data-values="[{'key':'conditions','value':tr('Conditions')},{'key':'actions','value':tr('Actions')},{'key':'combat','value':tr('Combat')},{'key':'checks','value':tr('Checks and Travel')},{'key':'world','value':tr('Environment')}]" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('GRIMOIRE')",
+      "properties": ["startTab"],
+      "info": "tr('2014 rules. Includes material from the System Reference Document 5.1 by Wizards of the Coast LLC, licensed CC-BY-4.0.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <nav class="ribbons" id="ribbons"></nav>
+    <section class="page index">
+      <h2 class="page__title" id="tabTitle"></h2>
+      <div class="chips" id="chips"></div>
+    </section>
+    <section class="page leaf" id="leaf">
+      <h1 class="leaf__name" id="entryName"></h1>
+      <div class="leaf__tag" id="entryTag"></div>
+      <div class="leaf__body" id="entryBody"></div>
+      <div class="leaf__credit">SRD 5.1 &#183; CC-BY-4.0 &#183; Wizards of the Coast</div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/srd.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
