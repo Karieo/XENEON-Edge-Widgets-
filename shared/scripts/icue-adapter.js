@@ -248,16 +248,31 @@
   }
 
   // Best sensor id for a role ("cpu-temp" | "gpu-temp" | "gpu-load" | "fps"), or "".
-  // Ties keep iCUE's order, so "Temp #1" beats "Temp #2".
+  // "#1" beats "#2" on the same chip; other ties keep iCUE's order.
   Edge.pickSensor = function (catalog, role) {
     var rate = ROLES[role];
     var best = null;
     var bestScore = 0;
     (catalog || []).forEach(function (s) {
       var score = rate(s);
+      if (score > 0 && /#\s*1\b/.test(s.name)) score += 1;
       if (score > bestScore) { best = s; bestScore = score; }
     });
     return best ? best.id : "";
+  };
+
+  // The other temperature sensor on the same device as `id` ("Temp #2" when
+  // "Temp #1" is bound): { id, label } or null.
+  Edge.siblingSensor = function (catalog, id) {
+    if (!id || !catalog) return null;
+    var me = catalog.find(function (s) { return s.id === id; });
+    if (!me || !me.device) return null;
+    var sib = catalog.find(function (s) {
+      return s.id !== id && s.type === me.type && s.device === me.device;
+    });
+    if (!sib) return null;
+    var tag = (sib.name.match(/#\s*\d+/) || [])[0];
+    return { id: sib.id, label: (tag || sib.name).toUpperCase().slice(0, 12) };
   };
 
   // ---- Misc --------------------------------------------------------------

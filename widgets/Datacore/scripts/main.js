@@ -14,6 +14,7 @@ var sensors = null; // Sensors plugin once ready
 var media = null; // Media plugin once ready
 var watched = {}; // sensorId -> { el, kind: "temp" | "extra", units }
 var autoPicked = null; // { cpu, gpu } when we pick sensors ourselves
+var catalog = null; // Edge.sensorCatalog result, for auto-pick and second temps
 var lastTrack = "";
 var tempNow = { cpu: null, gpu: null }; // latest { v, units } per temp slot
 var tempHistory = { cpu: [], gpu: [] }; // one { pct, state } sample per second
@@ -154,6 +155,15 @@ function bindTemp(slot, sensorId) {
   Edge.request(sensors, "getSensorName", sensorId).then(function (name) {
     el.querySelector(".temp__name").textContent = shortName(name);
   }).catch(function () {});
+
+  // Show the chip's other temp (e.g. Temp #2) beside the main number.
+  var box = el.querySelector(".temp__alt");
+  var sib = Edge.siblingSensor(catalog, sensorId);
+  box.hidden = !sib || !!watched[sib.id];
+  if (box.hidden) return;
+  box.querySelector(".temp__alt-name").textContent = sib.label;
+  box.querySelector(".temp__alt-num").textContent = "--";
+  watched[sib.id] = { el: box, kind: "alt", units: "" };
 }
 
 function refreshSensor(id) {
@@ -178,6 +188,10 @@ function renderValue(id, raw) {
     entry.el.querySelector(".extra__value").textContent = formatExtra(n, entry.units);
     return;
   }
+  if (entry.kind === "alt") {
+    entry.el.querySelector(".temp__alt-num").textContent = Math.round(n) + "\u00b0";
+    return;
+  }
 
   [entry.el, entry.also].forEach(function (el) {
     if (!el) return;
@@ -193,6 +207,8 @@ function markLost(entry) {
     if (!el) return;
     if (entry.kind === "extra") {
       el.querySelector(".extra__value").textContent = "LOST";
+    } else if (entry.kind === "alt") {
+      el.querySelector(".temp__alt-num").textContent = "--";
     } else {
       el.querySelector(".temp__num").textContent = "--";
       el.dataset.state = "idle";
@@ -235,6 +251,7 @@ function shortName(name) {
 function autoPick() {
   autoPicked = {};
   return Edge.sensorCatalog(sensors).then(function (all) {
+    catalog = all;
     autoPicked = { cpu: Edge.pickSensor(all, "cpu-temp"), gpu: Edge.pickSensor(all, "gpu-temp") };
   }).catch(function () {
     autoPicked = {};

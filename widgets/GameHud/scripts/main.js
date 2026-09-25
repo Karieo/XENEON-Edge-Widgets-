@@ -102,7 +102,7 @@ function bindSlots() {
   });
   alt = {};
   ["gpuTemp", "cpuTemp"].forEach(function (key) {
-    var sib = siblingTemp(bound[key]);
+    var sib = Edge.siblingSensor(catalog, bound[key]);
     if (sib) alt[key] = sib;
     var box = $(key).querySelector(".tile__alt");
     box.hidden = !sib;
@@ -135,20 +135,6 @@ function sensorLabel(device, name) {
     .trim();
   if (!dev || name.indexOf(dev) >= 0) return name;
   return name ? dev + " \u00b7 " + name : dev;
-}
-
-// The other temperature sensor on the same device as `id` ("Temp #2" when
-// "Temp #1" is bound), or null.
-function siblingTemp(id) {
-  if (!id || !catalog) return null;
-  var me = catalog.find(function (s) { return s.id === id; });
-  if (!me || !me.device) return null;
-  var sib = catalog.find(function (s) {
-    return s.id !== id && s.type === "temperature" && s.device === me.device;
-  });
-  if (!sib) return null;
-  var tag = (sib.name.match(/#\s*\d+/) || [])[0];
-  return { id: sib.id, label: (tag || sib.name).toUpperCase().slice(0, 12) };
 }
 
 function isBound(id) {
