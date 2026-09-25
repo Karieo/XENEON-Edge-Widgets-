@@ -1,0 +1,430 @@
+/* JUKEBOX — a turntable in a dim listening room. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("../shared/fonts/fraunces-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("../shared/fonts/fraunces-latin-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../shared/fonts/inter-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-display: block;
+}
+
+:root {
+  --text-color: #f6f0e6;
+  --accent-color: #e8475f;
+  --bg-color: #141016;
+  --soft: rgba(246, 240, 230, 0.62);
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-ui: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+body { font-family: var(--font-ui); font-weight: 500; }
+
+.frame {
+  display: grid;
+  grid-template-columns: auto 1.25fr 1fr;
+  gap: calc(var(--u) * 4.5);
+  align-items: center;
+  padding: calc(var(--u) * 4) calc(var(--u) * 5);
+  background: color-mix(in srgb, var(--bg-color) calc(var(--widget-opacity) * 100%), transparent);
+  isolation: isolate;
+}
+
+/* Blurred album art fills the room; a warm vignette sits on top. */
+.backdrop {
+  position: absolute;
+  inset: -60px;
+  z-index: -2;
+  background: radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--accent-color) 35%, #141016), #141016 70%);
+  background-size: cover;
+  background-position: center;
+  filter: blur(50px) saturate(1.3) brightness(0.55);
+  opacity: var(--widget-opacity);
+  transition: background-image 800ms;
+}
+
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* ---- Turntable ---- */
+
+.deck {
+  position: relative;
+  height: calc(var(--u) * 88);
+  aspect-ratio: 1.12;
+}
+
+.record {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--u) * 88);
+  height: calc(var(--u) * 88);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, #0c0c0d 0 2px, #151517 2px 4px),
+    #0c0c0d;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), inset 0 0 0 calc(var(--u) * 1.4) #070707;
+  cursor: pointer;
+  animation: spin 1.8s linear infinite;
+  animation-play-state: paused;
+}
+
+[data-state="playing"] .record { animation-play-state: running; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Light catching the grooves (doesn't spin with the record). */
+.record__grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 20deg, transparent 0 8%, rgba(255, 255, 255, 0.11) 12%, transparent 17% 52%, rgba(255, 255, 255, 0.08) 58%, transparent 63%);
+  animation: spin 1.8s linear infinite reverse;
+  animation-play-state: inherit;
+}
+
+.record__label {
+  position: absolute;
+  inset: 32%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-color);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 calc(var(--u) * 0.6) rgba(0, 0, 0, 0.5);
+  font-family: var(--font-serif);
+  font-size: calc(var(--u) * 6);
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+}
+
+.record__label.has-art span { display: none; }
+
+.record__hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--u) * 2.4);
+  height: calc(var(--u) * 2.4);
+  margin: calc(var(--u) * -1.2) 0 0 calc(var(--u) * -1.2);
+  border-radius: 50%;
+  background: #d8d2c4;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Tonearm: pivots at its base, swings onto the record while playing. */
+.arm {
+  position: absolute;
+  right: 0;
+  top: calc(var(--u) * 2);
+  width: calc(var(--u) * 14);
+  height: calc(var(--u) * 62);
+  transform-origin: 50% calc(var(--u) * 6);
+  transform: rotate(-4deg);
+  transition: transform 900ms cubic-bezier(0.5, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+[data-state="playing"] .arm { transform: rotate(22deg); }
+.arm.lift { animation: lift 700ms ease; }
+
+@keyframes lift { 40% { filter: drop-shadow(0 12px 8px rgba(0, 0, 0, 0.6)); } }
+
+.arm__base {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(var(--u) * 12);
+  height: calc(var(--u) * 12);
+  margin-left: calc(var(--u) * -6);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f4f0e8, #9d978b);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+.arm__rod {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--u) * 6);
+  width: calc(var(--u) * 1.6);
+  height: calc(var(--u) * 50);
+  margin-left: calc(var(--u) * -0.8);
+  border-radius: 99px;
+  background: linear-gradient(90deg, #8d877b, #efe9dd, #8d877b);
+  box-shadow: 4px 8px 10px rgba(0, 0, 0, 0.45);
+}
+
+.arm__head {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: calc(var(--u) * 5);
+  height: calc(var(--u) * 8);
+  margin-left: calc(var(--u) * -2.2);
+  border-radius: calc(var(--u) * 1);
+  background: linear-gradient(180deg, #2b2b2e, #111);
+  box-shadow: 0 0 0 2px #8d877b;
+}
+
+/* ---- Info and controls ---- */
+
+.info { display: flex; flex-direction: column; min-width: 0; }
+
+.info__kicker {
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  filter: brightness(1.25);
+}
+
+.info__title {
+  max-height: 2.1em;
+  margin: calc(var(--u) * 1.4) 0 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: calc(var(--u) * 11 * var(--fit, 1));
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  overflow: hidden;
+}
+
+.info__artist {
+  margin-top: calc(var(--u) * 1.4);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: calc(var(--u) * 5.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info__album {
+  margin-top: calc(var(--u) * 0.8);
+  min-height: 1.3em;
+  font-size: calc(var(--u) * 3);
+  color: var(--soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 3);
+  margin-top: calc(var(--u) * 4);
+}
+
+.ctl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 2px solid rgba(246, 240, 230, 0.25);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-color);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 90ms, background 90ms;
+}
+
+.ctl svg { width: 42%; height: 42%; fill: currentColor; stroke: currentColor; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+
+.ctl--main {
+  width: calc(var(--touch-min) * 1.3);
+  height: calc(var(--touch-min) * 1.3);
+  border: 0;
+  background: var(--accent-color);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent-color) 45%, transparent);
+  color: #fff;
+}
+
+.ctl .i-pause { display: none; }
+[data-state="playing"] .ctl .i-pause { display: inline; }
+[data-state="playing"] .ctl .i-play { display: none; }
+
+.ctl.is-pressed { transform: scale(0.94); }
+
+/* ---- Playlists and recently played ---- */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.8);
+  min-width: 0;
+  height: 100%;
+}
+
+.playlists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--u) * 1.4);
+}
+
+.playlists[data-count="0"] { display: none; }
+
+.plist {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.4);
+  min-height: calc(var(--u) * 11);
+  padding: 0 calc(var(--u) * 2.2);
+  border: 1px solid rgba(246, 240, 230, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-color);
+  font: inherit;
+  font-size: calc(var(--u) * 3.2);
+  cursor: pointer;
+  touch-action: manipulation;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.plist span { overflow: hidden; text-overflow: ellipsis; }
+.plist svg { flex: none; width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); fill: none; stroke: var(--accent-color); stroke-width: 2; stroke-linecap: round; }
+.plist.is-pressed { background: rgba(255, 255, 255, 0.18); }
+
+.side__head {
+  margin-top: calc(var(--u) * 0.6);
+  font-size: calc(var(--u) * 2.6);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+/* Album wall: art tiles with the title on a scrim. */
+.recent {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: calc(var(--u) * 1.4);
+  min-height: 0;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  min-height: 0;
+  padding: calc(var(--u) * 1.2);
+  border: 0;
+  border-radius: calc(var(--u) * 1.2);
+  background-color: #2a2230;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.8));
+}
+
+.tile--blank { background: linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 45%, #2a2230), #1d1822); }
+
+.tile__t, .tile__a {
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile__t { font-size: calc(var(--u) * 2.6); }
+.tile__a { font-size: calc(var(--u) * 2.1); opacity: 0.75; }
+.tile.is-pressed { transform: scale(0.97); }
+
+.recent__empty {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  color: var(--soft);
+  font-size: calc(var(--u) * 3);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--u) * 3);
+  transform: translate(-50%, 20px);
+  padding: calc(var(--u) * 1.4) calc(var(--u) * 4);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: calc(var(--u) * 3.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms, transform 200ms;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large: record + now playing + controls. */
+@media (max-aspect-ratio: 3/1) {
+  .frame { grid-template-columns: auto 1fr; }
+  .side { display: none; }
+}
+
+/* Small: no record, big text and controls. */
+@media (max-height: 420px) {
+  .frame { grid-template-columns: 1fr; padding: calc(var(--u) * 5) calc(var(--u) * 7); }
+  .deck { display: none; }
+  .info { padding-right: calc(var(--touch-min) * 3.9); }
+  .info__kicker { font-size: calc(var(--u) * 5); }
+  .info__title { font-size: calc(var(--u) * 17 * var(--fit, 1)); }
+  .info__artist { font-size: calc(var(--u) * 8); }
+  .info__album { font-size: calc(var(--u) * 5); }
+  .controls { position: absolute; right: calc(var(--u) * 6); top: 50%; transform: translateY(-50%); margin: 0; }
+}
+
+/* Medium: smaller record beside the info; no side panel. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.85vw; }
+  .frame { grid-template-columns: auto 1fr; gap: calc(var(--u) * 3); padding: calc(var(--u) * 4); }
+  .deck { height: calc(var(--u) * 44); }
+  .record { width: calc(var(--u) * 44); height: calc(var(--u) * 44); }
+  .arm { height: calc(var(--u) * 31); width: calc(var(--u) * 7); transform-origin: 50% calc(var(--u) * 3); }
+  .arm__base { width: calc(var(--u) * 6); height: calc(var(--u) * 6); margin-left: calc(var(--u) * -3); }
+  .arm__rod { top: calc(var(--u) * 3); height: calc(var(--u) * 25); }
+  .arm__head { width: calc(var(--u) * 3); height: calc(var(--u) * 5); margin-left: calc(var(--u) * -1.3); }
+  .record__label { font-size: calc(var(--u) * 4); }
+  .controls { gap: calc(var(--u) * 2); }
+}
