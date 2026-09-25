@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('SKETCH')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="boardColor" data-label="tr('Board Color')" data-type="color" data-default="'#1f3a2e'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('SKETCH')",
+      "properties": ["boardColor"],
+      "info": "tr('Draw with a finger. Hold the trash button to wipe the page. Three pages, saved on this PC.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <div class="board" id="board">
+      <canvas id="canvas"></canvas>
+      <div class="hint" id="hint">Draw here</div>
+    </div>
+    <aside class="tray" id="tray">
+      <div class="chalks" id="chalks"></div>
+      <div class="tools">
+        <button class="tool" id="sizeBtn" aria-label="Line size"><i class="dot"></i></button>
+        <button class="tool" id="eraseBtn" aria-label="Eraser"><svg viewBox="0 0 24 24"><path d="M4 16l8-8 6 6-6 6H8z M12 20h8"/></svg></button>
+        <button class="tool" id="undoBtn" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 0 1 0 10h-3"/></svg></button>
+        <button class="tool tool--danger" id="clearBtn" aria-label="Wipe page"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>
+      </div>
+      <div class="pages" id="pages"></div>
+    </aside>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
