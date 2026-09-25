@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('LAUNCHPAD')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="tile1" data-label="tr('Tile 1')" data-type="textfield" data-default="'Steam | steam://open/games'" />
+  <meta name="x-icue-property" content="tile2" data-label="tr('Tile 2')" data-type="textfield" data-default="'Discord | discord://'" />
+  <meta name="x-icue-property" content="tile3" data-label="tr('Tile 3')" data-type="textfield" data-default="'Claude | claude://'" />
+  <meta name="x-icue-property" content="tile4" data-label="tr('Tile 4')" data-type="textfield" data-default="'YouTube | https://www.youtube.com'" />
+  <meta name="x-icue-property" content="tile5" data-label="tr('Tile 5')" data-type="textfield" data-default="'Apple Music | https://music.apple.com'" />
+  <meta name="x-icue-property" content="tile6" data-label="tr('Tile 6')" data-type="textfield" data-default="'DnD Beyond | https://www.dndbeyond.com'" />
+  <meta name="x-icue-property" content="tile7" data-label="tr('Tile 7')" data-type="textfield" data-default="'Drive | https://drive.google.com'" />
+  <meta name="x-icue-property" content="tile8" data-label="tr('Tile 8')" data-type="textfield" data-default="'Settings | ms-settings:'" />
+  <meta name="x-icue-property" content="tile9" data-label="tr('Tile 9')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="tile10" data-label="tr('Tile 10')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="showLabels" data-label="tr('Show Labels')" data-type="switch" data-default="true" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#ffffff'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0c0d10'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Tiles')",
+      "properties": ["tile1", "tile2", "tile3", "tile4", "tile5", "tile6", "tile7", "tile8", "tile9", "tile10", "showLabels"],
+      "info": "tr('One tile per line: Label | link. App links like steam:// or discord:// work too. Leave a tile blank to hide it.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <div class="grid" id="grid"></div>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
