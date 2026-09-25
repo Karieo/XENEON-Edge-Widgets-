@@ -43,7 +43,7 @@ Import `dist/EdgeTestKit.icuewidget`, put it on the Edge at XL size, and tap thr
 |---|---|---|---|
 | 1 | Hello-world imports and shows | (the kit itself) | ✅ **2026-09-25:** imports and shows on the Edge; iCUE connected, `uniqueId` injected |
 | 2 | Tap registers (`pointerType`?) / steals game focus? **Kill switch** | TAP | ✅ **2026-09-25:** taps register; a full-screen game **keeps focus**. Kill switch passed |
-| 3 | CPU/GPU temps + fans available; sensor IDs | SENSORS | Pickers list `AMD Ryzen 9 9900X … Temp #1` and `NVIDIA GeForce RTX 5080 Temp #1`. Widgets didn't read them until the `window` fix (see 0.2). Re-test. |
+| 3 | CPU/GPU temps + fans available; sensor IDs | SENSORS | ✅ 2026-09-25 after the `window` fix (0.2). Ryzen 9 9900X (Temp #1/#2, Load), RTX 5080 (Temp #1/#2, Fan #1/#2, Load, Memory Load), built-in Radeon iGPU, TEAMGROUP RAM temps. **FPS:** one iCUE sensor, no per-screen or per-app choice. With no game it reads whatever is drawing (jumped 7–176). With a game in focus it settles. |
 | 4 | localStorage survives iCUE restart + reboot | STORAGE (BOOT # climbs) | _pending_ |
 | 5a | `https://claude.ai` opens in default browser | CLAUDE.AI | _pending_ |
 | 5b | `claude://` launches desktop app | CLAUDE:// | ✅ **2026-09-25:** opens the Claude desktop app. DATACORE now defaults to it |
