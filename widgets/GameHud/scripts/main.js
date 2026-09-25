@@ -103,13 +103,29 @@ function bindSlots() {
     var id = bound[key];
     var tile = tileFor(key);
     if (!id) { if (tile) tile.querySelector(".tile__name").textContent = "NOT SET"; return; }
-    Edge.request(sensors, "getSensorName", id).then(function (name) {
-      var label = String(name || "").toUpperCase().slice(0, 30);
+    Promise.all([
+      Edge.request(sensors, "getSensorName", id).catch(function () { return ""; }),
+      Edge.request(sensors, "getSensorDeviceName", id).catch(function () { return ""; }),
+    ]).then(function (r) {
+      var label = sensorLabel(String(r[1] || ""), String(r[0] || "")).toUpperCase().slice(0, 34);
       if (tile) tile.querySelector(".tile__name").textContent = label;
       else $("fpsName").textContent = label ? ":: " + label : "";
     }).catch(function () {});
   });
   resync();
+}
+
+// "NVIDIA GeForce RTX 5080" + "Temp #1" -> "RTX 5080 · Temp #1", so each tile
+// shows which chip it reads (the Ryzen's built-in Radeon is a GPU too).
+function sensorLabel(device, name) {
+  var dev = device
+    .replace(/\((tm|r)\)/gi, "")
+    .replace(/^(amd|nvidia|intel)\s+/i, "")
+    .replace(/^geforce\s+/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!dev || name.indexOf(dev) >= 0) return name;
+  return name ? dev + " \u00b7 " + name : dev;
 }
 
 function isBound(id) {
