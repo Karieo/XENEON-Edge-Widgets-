@@ -78,14 +78,21 @@ Edge.onPlugin("Sensorsdataprovider", function (plugin) {
 });
 
 function temperatureIds() {
+  // A picker left on iCUE's default (or empty) is auto-picked by device, so
+  // the RTX wins over the Ryzen's built-in Radeon. A real choice always wins.
+  var def = defaultTempId();
+  function untouched(v) { return !v || v === def; }
   var cpu = settings.cpuSensor;
   var gpu = settings.gpuSensor;
-  // Both pickers default to "the default temperature sensor", so until the
-  // user picks, they're identical. In that case, find CPU/GPU by sensor kind.
-  if ((!cpu || cpu === gpu) && autoPicked) {
-    return { cpu: autoPicked.cpu || cpu, gpu: autoPicked.gpu || gpu, auto: true };
-  }
-  return { cpu: cpu, gpu: gpu, auto: false };
+  var ap = autoPicked || {};
+  var ids = { cpu: cpu, gpu: gpu, auto: false };
+  if (untouched(cpu) && ap.cpu) { ids.cpu = ap.cpu; ids.auto = true; }
+  if (untouched(gpu) && ap.gpu) { ids.gpu = ap.gpu; ids.auto = true; }
+  return ids;
+}
+
+function defaultTempId() {
+  try { return sensors.getDefaultSensorIdBlock("temperature"); } catch (e) { return ""; }
 }
 
 function rebuildSensors() {
@@ -94,7 +101,7 @@ function rebuildSensors() {
     return;
   }
 
-  if ((!settings.cpuSensor || settings.cpuSensor === settings.gpuSensor) && !autoPicked) {
+  if (!autoPicked) {
     autoPick().then(rebuildSensors);
     return;
   }
@@ -224,23 +231,11 @@ function shortName(name) {
   return String(name || "").replace(/\s+/g, " ").trim().toUpperCase().slice(0, 28);
 }
 
-// Finds CPU and GPU temperature sensors by kind when the user hasn't picked.
+// Finds the CPU and GPU temperature sensors for pickers left on the default.
 function autoPick() {
   autoPicked = {};
-  return Edge.request(sensors, "getAllSensorIds").then(function (ids) {
-    ids = Array.isArray(ids) ? ids : [];
-    return Promise.all(ids.map(function (id) {
-      return Promise.all([
-        Edge.request(sensors, "getSensorType", id).catch(function () { return ""; }),
-        Edge.request(sensors, "getSensorKind", id).catch(function () { return ""; }),
-      ]).then(function (tk) { return { id: id, type: tk[0], kind: tk[1] }; });
-    }));
-  }).then(function (all) {
-    var temps = all.filter(function (s) { return s.type === "temperature"; });
-    var cpu = temps.find(function (s) { return s.kind === "cpu-temp"; }) ||
-      temps.find(function (s) { return s.kind === "package"; });
-    var gpu = temps.find(function (s) { return s.kind === "gpu-temp"; });
-    autoPicked = { cpu: cpu && cpu.id, gpu: gpu && gpu.id };
+  return Edge.sensorCatalog(sensors).then(function (all) {
+    autoPicked = { cpu: Edge.pickSensor(all, "cpu-temp"), gpu: Edge.pickSensor(all, "gpu-temp") };
   }).catch(function () {
     autoPicked = {};
   });

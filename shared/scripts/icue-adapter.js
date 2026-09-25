@@ -193,6 +193,73 @@
     },
   };
 
+  // ---- Sensor auto-pick ----------------------------------------------------
+
+  // Every sensor with the fields auto-pick needs: [{ id, type, kind, name, device }].
+  Edge.sensorCatalog = function (plugin) {
+    function ask(method, id) {
+      return Edge.request(plugin, method, id).catch(function () { return ""; });
+    }
+    return Edge.request(plugin, "getAllSensorIds").then(function (ids) {
+      ids = Array.isArray(ids) ? ids : [];
+      return Promise.all(ids.map(function (id) {
+        return Promise.all([ask("getSensorType", id), ask("getSensorKind", id), ask("getSensorName", id), ask("getSensorDeviceName", id)])
+          .then(function (r) {
+            return { id: id, type: String(r[0] || ""), kind: String(r[1] || ""), name: String(r[2] || ""), device: String(r[3] || "") };
+          });
+      }));
+    });
+  };
+
+  // A Ryzen 9000 has a small Radeon iGPU next to the real card, so GPU picks
+  // rank by device name: discrete first, integrated only as a last resort.
+  var DGPU = /nvidia|geforce|\brtx\b|\bgtx\b|radeon\s+rx|\barc\s+[ab]\d/i;
+  var IGPU = /radeon\(tm\)\s+graphics|radeon\s+graphics|intel.*(uhd|iris|hd graphics)|integrated/i;
+  var CPU = /ryzen|threadripper|core\(tm\)|intel.*core|\bcpu\b|processor|package/i;
+  var SIDE_LOAD = /memory|video|engine|decode|encode|bus|copy/i;
+
+  function label(s) { return s.device + " " + s.name; }
+
+  var ROLES = {
+    "cpu-temp": function (s) {
+      if (s.type !== "temperature" || DGPU.test(label(s)) || IGPU.test(label(s))) return -1;
+      var score = 0;
+      if (s.kind === "cpu-temp" || s.kind === "package") score += 10;
+      if (CPU.test(label(s))) score += 5;
+      return score || -1;
+    },
+    "gpu-temp": function (s) {
+      if (s.type !== "temperature") return -1;
+      return gpuScore(s, /^gpu/.test(s.kind));
+    },
+    "gpu-load": function (s) {
+      if (s.type !== "load") return -1;
+      var score = gpuScore(s, s.kind === "gpu-load");
+      return score > 0 && SIDE_LOAD.test(s.name) ? score - 15 : score;
+    },
+    fps: function (s) { return s.type === "fps" ? 1 : -1; },
+  };
+
+  function gpuScore(s, kindMatch) {
+    var dgpu = DGPU.test(label(s));
+    var igpu = !dgpu && IGPU.test(label(s));
+    if (!kindMatch && !dgpu && !igpu) return -1;
+    return 30 + (dgpu ? 20 : 0) - (igpu ? 20 : 0) + (kindMatch ? 5 : 0);
+  }
+
+  // Best sensor id for a role ("cpu-temp" | "gpu-temp" | "gpu-load" | "fps"), or "".
+  // Ties keep iCUE's order, so "Temp #1" beats "Temp #2".
+  Edge.pickSensor = function (catalog, role) {
+    var rate = ROLES[role];
+    var best = null;
+    var bestScore = 0;
+    (catalog || []).forEach(function (s) {
+      var score = rate(s);
+      if (score > bestScore) { best = s; bestScore = score; }
+    });
+    return best ? best.id : "";
+  };
+
   // ---- Misc --------------------------------------------------------------
 
   // Holds a press for `ms` before firing `onLong`; a quick tap fires `onTap`.

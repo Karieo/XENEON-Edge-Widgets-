@@ -4,21 +4,19 @@ var WINDOW = 60; // seconds of FPS fpsHistory
 var RESYNC_MS = 2000; // safety net in case a sensorValueChanged signal is missed
 var IDLE_AFTER = 3; // seconds without FPS before showing "no game"
 
-// Each slot finds its sensor by type/kind when left on the iCUE default.
+// Each slot finds its sensor by role when left on the iCUE default
+// (see Edge.pickSensor: the RTX wins over the Ryzen's built-in Radeon).
 var SLOTS = {
-  fps: { prop: "fpsSensor", type: "fps", match: function (s) { return s.type === "fps"; } },
-  gpuLoad: { prop: "gpuLoadSensor", type: "load", match: function (s) { return s.kind === "gpu-load"; } },
-  gpuTemp: { prop: "gpuTempSensor", type: "temperature", match: function (s) { return s.kind === "gpu-temp"; } },
-  cpuTemp: {
-    prop: "cpuTempSensor", type: "temperature",
-    match: function (s) { return s.type === "temperature" && (s.kind === "cpu-temp" || s.kind === "package"); },
-  },
+  fps: { prop: "fpsSensor", type: "fps", role: "fps" },
+  gpuLoad: { prop: "gpuLoadSensor", type: "load", role: "gpu-load" },
+  gpuTemp: { prop: "gpuTempSensor", type: "temperature", role: "gpu-temp" },
+  cpuTemp: { prop: "cpuTempSensor", type: "temperature", role: "cpu-temp" },
 };
 
 var $ = function (id) { return document.getElementById(id); };
 var cfg = {};
 var sensors = null;
-var catalog = null; // [{ id, type, kind }] from getAllSensorIds
+var catalog = null; // Edge.sensorCatalog result
 var bound = {}; // slot -> sensorId
 var latest = {}; // sensorId -> number
 var units = {}; // sensorId -> units string
@@ -77,15 +75,7 @@ Edge.onPlugin("Sensorsdataprovider", function (plugin) {
 
 function loadCatalog() {
   if (!sensors) return;
-  Edge.request(sensors, "getAllSensorIds").then(function (ids) {
-    ids = Array.isArray(ids) ? ids : [];
-    return Promise.all(ids.map(function (id) {
-      return Promise.all([
-        Edge.request(sensors, "getSensorType", id).catch(function () { return ""; }),
-        Edge.request(sensors, "getSensorKind", id).catch(function () { return ""; }),
-      ]).then(function (tk) { return { id: id, type: tk[0], kind: tk[1] }; });
-    }));
-  }).then(function (list) {
+  Edge.sensorCatalog(sensors).then(function (list) {
     catalog = list;
     bindSlots();
   }).catch(function () {
@@ -106,8 +96,8 @@ function bindSlots() {
     var chosen = Edge.prop(slot.prop, "");
     // Only override a sensor the user never changed from iCUE's default.
     var untouched = !chosen || chosen === defaultIdFor(slot.type);
-    var auto = catalog && catalog.find(slot.match);
-    bound[key] = untouched && auto ? auto.id : chosen;
+    var auto = catalog ? Edge.pickSensor(catalog, slot.role) : "";
+    bound[key] = untouched && auto ? auto : chosen;
   });
   Object.keys(bound).forEach(function (key) {
     var id = bound[key];
