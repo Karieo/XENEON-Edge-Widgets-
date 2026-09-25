@@ -4,7 +4,7 @@
 //   npm run build              -> every widget in widgets/
 //   npm run build -- Datacore  -> just one
 
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +31,16 @@ for (const name of names) {
     console.error(`Skipping ${name}: no manifest.json`);
     continue;
   }
+  // An element id equal to a setting name becomes a global that shadows the
+  // setting (see RESEARCH.md 0.2), so refuse to package that.
+  const html = readFileSync(path.join(dir, "index.html"), "utf8");
+  const props = [...html.matchAll(/x-icue-property" content="([^"]+)"/g)].map((m) => m[1]);
+  const clash = props.filter((p) => html.includes(`id="${p}"`));
+  if (clash.length) {
+    console.error(`${name}: element id matches a setting name: ${clash.join(", ")}. Rename the element.`);
+    process.exit(1);
+  }
+
   const target = path.join(dir, "shared");
   rmSync(target, { recursive: true, force: true });
   cpSync(path.join(root, "shared"), target, { recursive: true });
