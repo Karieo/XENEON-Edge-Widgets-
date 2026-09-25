@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('PAINT RACK')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="custom1" data-label="tr('My Recipe 1')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="custom2" data-label="tr('My Recipe 2')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="custom3" data-label="tr('My Recipe 3')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Recipes')",
+      "properties": ["custom1", "custom2", "custom3"],
+      "info": "tr('Name: paint, paint, paint. Citadel paint names get a swatch automatically. Tap a step when it is done; hold RESET to start over.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <section class="list" id="list"></section>
+    <section class="palette">
+      <header class="palette__head">
+        <div>
+          <div class="palette__kicker" id="kicker"></div>
+          <h1 class="palette__name" id="recipeName"></h1>
+        </div>
+        <button class="reset" id="resetBtn">Reset</button>
+      </header>
+      <ol class="steps" id="steps"></ol>
+      <div class="palette__note">Swatches are approximate.</div>
+    </section>
+    <section class="next" id="nextCard">
+      <div class="next__label">Up next</div>
+      <div class="next__blob" id="nextBlob"></div>
+      <div class="next__paint" id="nextPaint"></div>
+      <div class="next__how" id="nextHow"></div>
+      <div class="next__progress"><i id="progressFill"></i></div>
+      <div class="next__count" id="progressText"></div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/paints.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
