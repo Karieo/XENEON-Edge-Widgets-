@@ -47,6 +47,8 @@
       if (w !== undefined && w !== null && w !== "") return w;
     }
     var v = readGlobal(name);
+    // An element whose id matches the setting shows up as a global too.
+    if (v && typeof v === "object" && v.nodeType) return fallback;
     if (v !== undefined && v !== null && v !== "") return v;
     return fallback;
   };

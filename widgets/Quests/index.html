@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('QUESTS')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="heroName" data-label="tr('Hero Name')" data-type="textfield" data-default="'Kiddo'" />
+  <meta name="x-icue-property" content="quest1" data-label="tr('Quest 1')" data-type="textfield" data-default="'Make your bed | 10'" />
+  <meta name="x-icue-property" content="quest2" data-label="tr('Quest 2')" data-type="textfield" data-default="'Brush teeth (morning) | 5'" />
+  <meta name="x-icue-property" content="quest3" data-label="tr('Quest 3')" data-type="textfield" data-default="'Homework | 20'" />
+  <meta name="x-icue-property" content="quest4" data-label="tr('Quest 4')" data-type="textfield" data-default="'Read for 20 minutes | 15'" />
+  <meta name="x-icue-property" content="quest5" data-label="tr('Quest 5')" data-type="textfield" data-default="'Tidy your room | 15'" />
+  <meta name="x-icue-property" content="quest6" data-label="tr('Quest 6')" data-type="textfield" data-default="'Help with dinner | 10'" />
+  <meta name="x-icue-property" content="quest7" data-label="tr('Quest 7')" data-type="textfield" data-default="'Brush teeth (night) | 5'" />
+  <meta name="x-icue-property" content="quest8" data-label="tr('Quest 8')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="reward" data-label="tr('Reward')" data-type="textfield" data-default="'Pick the movie | 300'" />
+
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Quests')",
+      "properties": ["heroName", "quest1", "quest2", "quest3", "quest4", "quest5", "quest6", "quest7", "quest8", "reward"],
+      "info": "tr('One quest per line: Quest | XP. Quests reset at midnight. Reward: Prize | XP cost. Hold the chest to claim.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <section class="px-box hero">
+      <div class="hero__top">
+        <svg class="sprite" id="sprite" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <div class="hero__id">
+          <div class="hero__name" id="heroLabel">Kiddo</div>
+          <div class="hero__lv">LV <span id="level">1</span></div>
+          <div class="streak" id="streak"></div>
+        </div>
+      </div>
+      <div class="xp">
+        <div class="xp__label"><span>XP</span><span id="xpText">0 / 100</span></div>
+        <div class="xp__bar" id="xpBar"></div>
+      </div>
+      <div class="week" id="week"></div>
+    </section>
+
+    <section class="px-box board">
+      <div class="board__head"><span>Today</span><span id="todayXp">0 XP</span></div>
+      <div class="quests" id="quests"></div>
+    </section>
+
+    <section class="px-box chest" id="chestBox">
+      <div class="chest__title">Reward</div>
+      <svg class="chest__art" id="chestArt" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"></svg>
+      <div class="chest__name" id="rewardName"></div>
+      <div class="chest__bar"><i id="rewardFill"></i></div>
+      <div class="chest__cost" id="rewardCost"></div>
+    </section>
+
+    <div class="pop" id="pop"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

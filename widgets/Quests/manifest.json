@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.quests",
+  "name": "QUESTS",
+  "description": "Pixel-RPG chore board for the Xeneon Edge: daily quests worth XP, hero levels, streaks, a week view, and a reward chest to save up for.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}
