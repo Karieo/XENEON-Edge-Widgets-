@@ -1,0 +1,326 @@
+/* AMBIENCE — 1970s hi-fi faceplate. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "Josefin Sans";
+  src: url("../shared/fonts/josefin-sans-latin-300-normal.woff2") format("woff2");
+  font-weight: 300;
+  font-display: block;
+}
+@font-face {
+  font-family: "Josefin Sans";
+  src: url("../shared/fonts/josefin-sans-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --walnut: #2a1a10;
+  --walnut-2: #3a2416;
+  --face: #e9dcc0;
+  --face-2: #d9c9a6;
+  --ink: #2b2118;
+  --ink-soft: #7a6a55;
+  --brass: #b8862f;
+  --brass-hi: #e6bd62;
+  --amber: #ffb347;
+  --green: #2f7a55;
+
+  --text-color: var(--ink);
+  --accent-color: var(--brass);
+  --bg-color: var(--walnut);
+  --font-hifi: "Josefin Sans", "Futura", "Century Gothic", sans-serif;
+}
+
+body { font-family: var(--font-hifi); font-weight: 700; }
+
+.frame {
+  display: grid;
+  grid-template-columns: 0.9fr 2.2fr 1fr;
+  gap: calc(var(--u) * 2.4);
+  padding: calc(var(--u) * 2.6);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 210, 150, 0.03) 0 3px, transparent 3px 31px),
+    repeating-linear-gradient(88deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 17px),
+    color-mix(in srgb, var(--walnut) calc(var(--widget-opacity) * 100%), transparent);
+}
+
+/* Brushed cream faceplate with screws. */
+.plate {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: calc(var(--u) * 2.4) calc(var(--u) * 2.8);
+  border-radius: calc(var(--u) * 1.4);
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.018) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--face), var(--face-2));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), inset 0 -3px 0 rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.plate::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--u) * 1.2);
+  pointer-events: none;
+  background:
+    radial-gradient(circle, #9a8a70 0 3px, transparent 3.5px) left top / 12px 12px no-repeat,
+    radial-gradient(circle, #9a8a70 0 3px, transparent 3.5px) right top / 12px 12px no-repeat,
+    radial-gradient(circle, #9a8a70 0 3px, transparent 3.5px) left bottom / 12px 12px no-repeat,
+    radial-gradient(circle, #9a8a70 0 3px, transparent 3.5px) right bottom / 12px 12px no-repeat;
+}
+
+.plate__label {
+  font-size: calc(var(--u) * 2.6);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ---- Scenes ---- */
+
+.scenes { display: flex; flex-direction: column; gap: calc(var(--u) * 1.6); }
+
+.scene-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: calc(var(--u) * 1.4);
+  min-height: 0;
+}
+
+.scene {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 0;
+  padding: 0 calc(var(--u) * 2);
+  border: 2px solid #b9a784;
+  border-radius: calc(var(--u) * 1);
+  background: linear-gradient(180deg, #f3e9d3, #dccca9);
+  box-shadow: 0 3px 0 #a8966f;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.scene.is-pressed { transform: translateY(2px); box-shadow: 0 1px 0 #a8966f; }
+
+.scene.on {
+  border-color: var(--brass);
+  background: linear-gradient(180deg, #3a2a1a, #2a1d12);
+  box-shadow: 0 3px 0 #120b06, inset 0 0 calc(var(--u) * 3) rgba(255, 179, 71, 0.3);
+  color: var(--amber);
+}
+
+.scene__name { font-size: calc(var(--u) * 3.4); }
+.scene__hint { margin-top: calc(var(--u) * 0.4); font-weight: 300; font-size: calc(var(--u) * 2.4); opacity: 0.7; }
+
+/* ---- Mixer ---- */
+
+.mixer { display: flex; flex-direction: column; }
+
+.channels {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: calc(var(--u) * 1);
+  align-items: center;
+}
+
+.channel, .knob-wrap { position: relative; isolation: isolate; }
+
+.channel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--u) * 1.4);
+}
+
+/* Pilot lamp glows with the level. */
+.lamp {
+  width: calc(var(--u) * 3.2);
+  height: calc(var(--u) * 3.2);
+  border-radius: 50%;
+  background: #6d5a3e;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: background 200ms, box-shadow 200ms;
+}
+
+.channel.on .lamp {
+  background: radial-gradient(circle at 40% 35%, #fff2c9, var(--amber) 55%, #d96f1a);
+  box-shadow: 0 0 calc(var(--u) * (1 + var(--v) / 20)) rgba(255, 170, 60, calc(0.3 + var(--v) / 160));
+}
+
+.channel.muted .lamp { background: #b3261e; box-shadow: none; }
+
+/* Brass knob: the pointer turns through 270 degrees. */
+.knob {
+  position: relative;
+  width: calc(var(--u) * 21);
+  height: calc(var(--u) * 21);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.18) 59%, transparent 62%),
+    repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.10) 0 4deg, rgba(0, 0, 0, 0.06) 4deg 8deg),
+    radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass) 55%, #7d5716);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.45), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+/* Tick ring behind the knob. */
+.knob::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--u) * -2.2);
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(from 225deg, var(--ink-soft) 0 calc(var(--v, 0) * 2.7deg), rgba(0, 0, 0, 0.08) calc(var(--v, 0) * 2.7deg) 270deg, transparent 270deg);
+  -webkit-mask: radial-gradient(circle, transparent 66%, #000 67%, #000 70%, transparent 71%);
+  mask: radial-gradient(circle, transparent 66%, #000 67%, #000 70%, transparent 71%);
+}
+
+.channel.on .knob::before { background: conic-gradient(from 225deg, var(--amber) 0 calc(var(--v, 0) * 2.7deg), rgba(0, 0, 0, 0.08) calc(var(--v, 0) * 2.7deg) 270deg, transparent 270deg); }
+
+.knob i {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: calc(var(--u) * 1);
+  height: 36%;
+  margin-left: calc(var(--u) * -0.5);
+  border-radius: 99px;
+  background: #2b2118;
+  transform-origin: 50% 117%;
+  transform: rotate(calc(-135deg + var(--v, 0) * 2.7deg));
+}
+
+.knob.is-pressed { filter: brightness(1.1); }
+
+.knob__value {
+  margin-top: calc(var(--u) * 1.6);
+  font-size: calc(var(--u) * 3.4);
+  color: var(--ink);
+  min-height: 1em;
+}
+
+.channel.muted .knob__value { color: #b3261e; }
+
+.knob__label {
+  font-size: calc(var(--u) * 2.6);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ---- Master ---- */
+
+.master { display: flex; flex-direction: column; gap: calc(var(--u) * 1.8); }
+
+.scope {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border-radius: calc(var(--u) * 1.2);
+  background: #06140c;
+  box-shadow: inset 0 0 calc(var(--u) * 3) rgba(0, 0, 0, 0.9), 0 0 0 3px #3a2c1c;
+}
+
+.master__row { display: flex; align-items: center; justify-content: space-between; gap: calc(var(--u) * 2); }
+
+.transport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 1.6);
+  min-height: var(--touch-min);
+  border: 2px solid #5a4630;
+  border-radius: calc(var(--u) * 1);
+  background: linear-gradient(180deg, #3a2a1a, #22170d);
+  color: var(--amber);
+  font: inherit;
+  font-size: calc(var(--u) * 4.4);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.transport__icon {
+  width: 0;
+  height: 0;
+  border-left: calc(var(--u) * 3.4) solid currentColor;
+  border-top: calc(var(--u) * 2) solid transparent;
+  border-bottom: calc(var(--u) * 2) solid transparent;
+}
+
+[data-playing="yes"] .transport__icon {
+  width: calc(var(--u) * 3.4);
+  height: calc(var(--u) * 4);
+  border: 0;
+  background: linear-gradient(90deg, currentColor 0 35%, transparent 35% 65%, currentColor 65%);
+}
+
+.knob-wrap { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 1); }
+.knob--master { width: calc(var(--u) * 15); height: calc(var(--u) * 15); }
+.knob--master::before { background: conic-gradient(from 225deg, var(--brass) 0 calc(var(--v, 0) * 2.7deg), rgba(0, 0, 0, 0.08) calc(var(--v, 0) * 2.7deg) 270deg, transparent 270deg); }
+
+.sleep {
+  min-height: calc(var(--u) * 10);
+  border: 2px dashed #b9a784;
+  border-radius: calc(var(--u) * 1);
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sleep b { margin-left: 0.6em; color: var(--ink); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large: scenes in one column, knobs in two rows. */
+@media (max-aspect-ratio: 3/1) {
+  .frame { grid-template-columns: 1fr 2.3fr 1.2fr; }
+  .channels { grid-template-columns: repeat(4, 1fr); row-gap: calc(var(--u) * 3); }
+  .knob { width: calc(var(--u) * 13); height: calc(var(--u) * 13); }
+  .scene-grid { grid-template-columns: 1fr; }
+  .scene__hint { display: none; }
+}
+
+/* Small: scenes and play only. */
+@media (max-height: 420px) {
+  .frame { grid-template-columns: 2fr 1fr; }
+  .mixer { display: none; }
+  .scene-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .scene__name { font-size: calc(var(--u) * 5); }
+  .knob-wrap, .sleep { display: none; }
+  .transport { font-size: calc(var(--u) * 7); align-self: stretch; }
+  .master__row { flex: 1; align-items: stretch; }
+  .scope { display: none; }
+}
+
+/* Medium: scenes on top, mixer, then play and sleep. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.8vw; }
+  .frame { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+  .master { flex-direction: row; padding: calc(var(--u) * 1.4) calc(var(--u) * 2.4); }
+  .scope, .knob-wrap { display: none; }
+  .master__row { flex: 1.4; }
+  .sleep { flex: 1; min-height: var(--touch-min); }
+  .scene-grid { grid-template-columns: repeat(3, 1fr); }
+  .scene { min-height: calc(var(--u) * 12); }
+  .channels { grid-template-columns: repeat(8, 1fr); }
+  .knob { width: calc(var(--u) * 8.5); height: calc(var(--u) * 8.5); }
+  .knob__label { font-size: calc(var(--u) * 1.9); letter-spacing: 0.04em; }
+  .lamp { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+}

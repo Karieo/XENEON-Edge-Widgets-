@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.wargame",
+  "name": "WARGAME",
+  "description": "Two-player Warhammer 40,000 (10th edition) tracker for the Xeneon Edge: battle round, turn and phase, command points, primary and secondary victory points, and Battle Ready bonus.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}

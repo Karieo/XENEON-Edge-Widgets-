@@ -1,0 +1,154 @@
+/* LAUNCHPAD — flat, saturated tiles. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../shared/fonts/space-grotesk-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --text-color: #ffffff;
+  --bg-color: #0c0d10;
+  --accent-color: #ffffff;
+  --font-lp: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+}
+
+body { font-family: var(--font-lp); font-weight: 700; }
+
+.frame { padding: calc(var(--u) * 2.4); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  grid-auto-rows: 1fr;
+  gap: calc(var(--u) * 2.4);
+  height: 100%;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: calc(var(--u) * 3.4);
+  border: 0;
+  border-radius: calc(var(--u) * 2.4);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 45%),
+    var(--tile);
+  color: var(--text-color);
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 90ms ease, filter 90ms ease;
+}
+
+/* A big faint copy of the icon as a watermark. */
+.tile__icon {
+  position: absolute;
+  top: calc(var(--u) * 3.4);
+  left: calc(var(--u) * 3.4);
+  width: calc(var(--u) * 16);
+  height: calc(var(--u) * 16);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tile__label {
+  max-width: 100%;
+  font-size: calc(var(--u) * 6.4);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile__scheme {
+  max-width: 100%;
+  margin-top: calc(var(--u) * 1);
+  font-size: calc(var(--u) * 2.6);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile.is-pressed { transform: scale(0.96); filter: brightness(1.15); }
+
+.tile.launched::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: launch-flash 450ms ease-out forwards;
+}
+
+@keyframes launch-flash {
+  from { opacity: 0.55; }
+  to { opacity: 0; }
+}
+
+[data-labels="off"] .tile__label,
+[data-labels="off"] .tile__scheme { display: none; }
+[data-labels="off"] .tile { justify-content: center; align-items: center; }
+[data-labels="off"] .tile__icon { position: static; }
+
+.empty {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  opacity: 0.6;
+  font-size: calc(var(--u) * 5);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--u) * 4);
+  transform: translate(-50%, 20px);
+  padding: calc(var(--u) * 1.6) calc(var(--u) * 4);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: calc(var(--u) * 3.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms, transform 200ms;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large: max 4 columns, two rows. */
+@media (max-aspect-ratio: 3/1) {
+  .grid { grid-template-columns: repeat(var(--cols-l, 4), 1fr); }
+  .tile:nth-child(n + 9) { display: none; }
+}
+
+/* Medium: 2 x 3. */
+@media (max-aspect-ratio: 3/2) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .tile:nth-child(n + 7) { display: none; }
+}
+
+/* Small (840x344, same aspect as Large): one row of 4 big icons. */
+@media (max-height: 420px) {
+  .grid { grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr; }
+  .tile:nth-child(n + 5) { display: none; }
+  .tile { min-height: 0; }
+  .tile__icon { width: calc(var(--u) * 26); height: calc(var(--u) * 26); }
+  .tile__label { font-size: calc(var(--u) * 10); }
+  .tile__scheme { display: none; }
+}

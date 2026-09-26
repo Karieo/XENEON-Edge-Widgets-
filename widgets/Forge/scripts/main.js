@@ -195,7 +195,7 @@ function render() {
   var running = !!st.runStart;
   var total = sessionMs();
   $("frame").dataset.run = running ? "on" : total ? "paused" : "idle";
-  $("project").textContent = cfg.project;
+  $("projectLabel").textContent = cfg.project;
   $("who").textContent = whoLabel(st.who);
   $("clock").textContent = fmtClock(total);
   $("runBtn").textContent = running ? "Pause" : total ? "Resume" : "Start";

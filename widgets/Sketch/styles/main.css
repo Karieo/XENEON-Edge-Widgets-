@@ -1,0 +1,175 @@
+/* SKETCH — a classroom chalkboard. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "Caveat";
+  src: url("../shared/fonts/caveat-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --board: #1f3a2e;
+  --wood: #8a5a33;
+  --wood-dark: #5e3a1e;
+  --text-color: #f1eee4;
+  --accent-color: #f1eee4;
+  --bg-color: var(--wood-dark);
+  --font-chalk: "Caveat", "Segoe Print", cursive;
+}
+
+body { font-family: var(--font-chalk); font-weight: 700; }
+
+.frame {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 2.4);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 220, 170, 0.05) 0 2px, transparent 2px 19px),
+    linear-gradient(180deg, var(--wood), var(--wood-dark));
+  opacity: var(--widget-opacity);
+}
+
+.board {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  border-radius: calc(var(--u) * 1);
+  background:
+    radial-gradient(ellipse at 22% 30%, rgba(255, 255, 255, 0.06), transparent 40%),
+    radial-gradient(ellipse at 70% 75%, rgba(255, 255, 255, 0.05), transparent 45%),
+    radial-gradient(ellipse at 85% 15%, rgba(255, 255, 255, 0.04), transparent 30%),
+    var(--board);
+  box-shadow: inset 0 0 calc(var(--u) * 5) rgba(0, 0, 0, 0.55), 0 0 0 calc(var(--u) * 0.8) #3b2412;
+  overflow: hidden;
+}
+
+canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(241, 238, 228, 0.25);
+  font-size: calc(var(--u) * 10);
+  pointer-events: none;
+}
+
+.hint[hidden] { display: none; }
+
+/* ---- Chalk tray ---- */
+
+.tray {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2);
+  width: calc(var(--u) * 36);
+  padding: calc(var(--u) * 2);
+  border-radius: calc(var(--u) * 1);
+  background: linear-gradient(90deg, #6d4526, #8a5a33 40%, #6d4526);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.chalks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--u) * 1.4);
+}
+
+/* A stick of chalk. */
+.chalk {
+  height: calc(var(--u) * 10);
+  border: 0;
+  border-radius: calc(var(--u) * 1.6);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 40%, rgba(0, 0, 0, 0.15)),
+    var(--chalk);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 120ms;
+}
+
+.chalk.on { transform: translateY(calc(var(--u) * -0.8)) scale(1.04); box-shadow: 0 0 0 calc(var(--u) * 0.5) #fff, 0 6px 10px rgba(0, 0, 0, 0.4); }
+
+.tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--u) * 1.4);
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  border: 2px solid rgba(241, 238, 228, 0.35);
+  border-radius: calc(var(--u) * 1.2);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text-color);
+  cursor: pointer;
+  touch-action: manipulation;
+  --accent-color: #f1eee4;
+}
+
+.tool svg { width: 48%; height: 48%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tool.on { background: rgba(241, 238, 228, 0.9); color: #3b2412; }
+.tool.is-pressed { background: rgba(241, 238, 228, 0.3); }
+.tool--danger { color: #ffb3a8; border-color: rgba(255, 179, 168, 0.5); }
+
+.dot {
+  width: calc(var(--u) * 2);
+  height: calc(var(--u) * 2);
+  border-radius: 50%;
+  background: var(--chalk, #fff);
+  transition: width 120ms, height 120ms;
+}
+
+[data-size="0"] .dot { width: calc(var(--u) * 1.4); height: calc(var(--u) * 1.4); }
+[data-size="2"] .dot { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }
+
+.pages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--u) * 1);
+}
+
+.page {
+  position: relative;
+  min-height: calc(var(--u) * 9);
+  border: 0;
+  border-radius: calc(var(--u) * 1);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(241, 238, 228, 0.7);
+  font: inherit;
+  font-size: calc(var(--u) * 5);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.page.on { background: var(--board); color: #fff; box-shadow: 0 0 0 2px rgba(241, 238, 228, 0.6); }
+.page.used::after { content: ""; position: absolute; right: 18%; top: 22%; width: 6px; height: 6px; border-radius: 50%; background: #ffd166; }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Medium and Small: tray becomes a strip along the bottom. */
+@media (max-aspect-ratio: 3/2), (max-height: 420px) {
+  .frame { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .tray { flex-direction: row; align-items: center; width: auto; padding: calc(var(--u) * 1.2); }
+  .chalks { grid-template-columns: repeat(6, 1fr); flex: 2; }
+  .chalk { height: calc(var(--u) * 8); }
+  .tools { grid-template-columns: repeat(4, 1fr); flex: 1.6; }
+  .tool { min-height: calc(var(--u) * 9); }
+  .pages { flex: 1; }
+  .page { min-height: calc(var(--u) * 9); }
+}
+
+@media (max-aspect-ratio: 3/2) { :root { --u: 0.9vw; } }

@@ -14,6 +14,7 @@ var sensors = null; // Sensors plugin once ready
 var media = null; // Media plugin once ready
 var watched = {}; // sensorId -> { el, kind: "temp" | "extra", units }
 var autoPicked = null; // { cpu, gpu } when we pick sensors ourselves
+var catalog = null; // Edge.sensorCatalog result, for auto-pick and second temps
 var lastTrack = "";
 var tempNow = { cpu: null, gpu: null }; // latest { v, units } per temp slot
 var tempHistory = { cpu: [], gpu: [] }; // one { pct, state } sample per second
@@ -31,7 +32,7 @@ function readSettings() {
     extraSensors: Edge.prop("extraSensors", []),
     warmAt: Number(Edge.prop("warmAt", 70)),
     hotAt: Number(Edge.prop("hotAt", 85)),
-    claudeTarget: Edge.prop("claudeTarget", "web"),
+    claudeTarget: Edge.prop("claudeTarget", "app"), // claude:// confirmed on hardware 2026-09-25
     showScanlines: Edge.prop("showScanlines", true),
     textColor: Edge.prop("textColor", "#f0efe4"),
     accentColor: Edge.prop("accentColor", "#f5a623"),
@@ -78,14 +79,21 @@ Edge.onPlugin("Sensorsdataprovider", function (plugin) {
 });
 
 function temperatureIds() {
+  // A picker left on iCUE's default (or empty) is auto-picked by device, so
+  // the RTX wins over the Ryzen's built-in Radeon. A real choice always wins.
+  var def = defaultTempId();
+  function untouched(v) { return !v || v === def; }
   var cpu = settings.cpuSensor;
   var gpu = settings.gpuSensor;
-  // Both pickers default to "the default temperature sensor", so until the
-  // user picks, they're identical. In that case, find CPU/GPU by sensor kind.
-  if ((!cpu || cpu === gpu) && autoPicked) {
-    return { cpu: autoPicked.cpu || cpu, gpu: autoPicked.gpu || gpu, auto: true };
-  }
-  return { cpu: cpu, gpu: gpu, auto: false };
+  var ap = autoPicked || {};
+  var ids = { cpu: cpu, gpu: gpu, auto: false };
+  if (untouched(cpu) && ap.cpu) { ids.cpu = ap.cpu; ids.auto = true; }
+  if (untouched(gpu) && ap.gpu) { ids.gpu = ap.gpu; ids.auto = true; }
+  return ids;
+}
+
+function defaultTempId() {
+  try { return sensors.getDefaultSensorIdBlock("temperature"); } catch (e) { return ""; }
 }
 
 function rebuildSensors() {
@@ -94,7 +102,7 @@ function rebuildSensors() {
     return;
   }
 
-  if ((!settings.cpuSensor || settings.cpuSensor === settings.gpuSensor) && !autoPicked) {
+  if (!autoPicked) {
     autoPick().then(rebuildSensors);
     return;
   }
@@ -147,6 +155,15 @@ function bindTemp(slot, sensorId) {
   Edge.request(sensors, "getSensorName", sensorId).then(function (name) {
     el.querySelector(".temp__name").textContent = shortName(name);
   }).catch(function () {});
+
+  // Show the chip's other temp (e.g. Temp #2) beside the main number.
+  var box = el.querySelector(".temp__alt");
+  var sib = Edge.siblingSensor(catalog, sensorId);
+  box.hidden = !sib || !!watched[sib.id];
+  if (box.hidden) return;
+  box.querySelector(".temp__alt-name").textContent = sib.label;
+  box.querySelector(".temp__alt-num").textContent = "--";
+  watched[sib.id] = { el: box, kind: "alt", units: "" };
 }
 
 function refreshSensor(id) {
@@ -171,6 +188,10 @@ function renderValue(id, raw) {
     entry.el.querySelector(".extra__value").textContent = formatExtra(n, entry.units);
     return;
   }
+  if (entry.kind === "alt") {
+    entry.el.querySelector(".temp__alt-num").textContent = Math.round(n) + "\u00b0";
+    return;
+  }
 
   [entry.el, entry.also].forEach(function (el) {
     if (!el) return;
@@ -186,6 +207,8 @@ function markLost(entry) {
     if (!el) return;
     if (entry.kind === "extra") {
       el.querySelector(".extra__value").textContent = "LOST";
+    } else if (entry.kind === "alt") {
+      el.querySelector(".temp__alt-num").textContent = "--";
     } else {
       el.querySelector(".temp__num").textContent = "--";
       el.dataset.state = "idle";
@@ -224,23 +247,12 @@ function shortName(name) {
   return String(name || "").replace(/\s+/g, " ").trim().toUpperCase().slice(0, 28);
 }
 
-// Finds CPU and GPU temperature sensors by kind when the user hasn't picked.
+// Finds the CPU and GPU temperature sensors for pickers left on the default.
 function autoPick() {
   autoPicked = {};
-  return Edge.request(sensors, "getAllSensorIds").then(function (ids) {
-    ids = Array.isArray(ids) ? ids : [];
-    return Promise.all(ids.map(function (id) {
-      return Promise.all([
-        Edge.request(sensors, "getSensorType", id).catch(function () { return ""; }),
-        Edge.request(sensors, "getSensorKind", id).catch(function () { return ""; }),
-      ]).then(function (tk) { return { id: id, type: tk[0], kind: tk[1] }; });
-    }));
-  }).then(function (all) {
-    var temps = all.filter(function (s) { return s.type === "temperature"; });
-    var cpu = temps.find(function (s) { return s.kind === "cpu-temp"; }) ||
-      temps.find(function (s) { return s.kind === "package"; });
-    var gpu = temps.find(function (s) { return s.kind === "gpu-temp"; });
-    autoPicked = { cpu: cpu && cpu.id, gpu: gpu && gpu.id };
+  return Edge.sensorCatalog(sensors).then(function (all) {
+    catalog = all;
+    autoPicked = { cpu: Edge.pickSensor(all, "cpu-temp"), gpu: Edge.pickSensor(all, "gpu-temp") };
   }).catch(function () {
     autoPicked = {};
   });
@@ -334,7 +346,7 @@ Edge.press($("btnNext"), function () { mediaCommand("triggerNextTrack"); });
 // ---- ASK CLAUDE ----------------------------------------------------------
 
 Edge.press($("btnClaude"), function () {
-  var key = settings.claudeTarget === "app" ? "app" : "web";
+  var key = settings.claudeTarget === "web" ? "web" : "app";
   var url = CLAUDE_URLS[key];
   var how = Edge.openLink(url);
   var btn = $("btnClaude");

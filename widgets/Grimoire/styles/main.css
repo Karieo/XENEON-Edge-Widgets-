@@ -1,0 +1,267 @@
+/* GRIMOIRE — an open rulebook. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "IM Fell English";
+  src: url("../shared/fonts/im-fell-english-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "IM Fell English";
+  src: url("../shared/fonts/im-fell-english-latin-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Cinzel";
+  src: url("../shared/fonts/cinzel-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --leather: #3b2415;
+  --leather-2: #4d3020;
+  --paper: #efe2c2;
+  --paper-2: #e3d1a8;
+  --ink: #2b1d12;
+  --ink-soft: #6a5438;
+  --rubric: #8e2a1c;
+  --gilt: #c89b3c;
+
+  --text-color: var(--ink);
+  --accent-color: var(--rubric);
+  --bg-color: var(--leather);
+  --font-book: "IM Fell English", Georgia, serif;
+  --font-cap: "Cinzel", Georgia, serif;
+}
+
+body { font-family: var(--font-book); }
+
+.frame {
+  display: grid;
+  grid-template-columns: auto 1.25fr 1.5fr;
+  gap: 0;
+  padding: calc(var(--u) * 2.6) calc(var(--u) * 3);
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 220, 170, 0.06), transparent 70%),
+    repeating-linear-gradient(35deg, rgba(0, 0, 0, 0.05) 0 3px, transparent 3px 9px),
+    color-mix(in srgb, var(--leather) calc(var(--widget-opacity) * 100%), transparent);
+}
+
+/* ---- Ribbons (tabs) ---- */
+
+.ribbons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--u) * 1.4);
+  padding-right: calc(var(--u) * 1.4);
+  z-index: 1;
+}
+
+.ribbon {
+  position: relative;
+  min-height: calc(var(--u) * 11);
+  min-width: calc(var(--u) * 30);
+  padding: 0 calc(var(--u) * 4) 0 calc(var(--u) * 2.6);
+  border: 0;
+  background: linear-gradient(90deg, #5a1a12, #7a261b);
+  color: #f2dcae;
+  font-family: var(--font-cap);
+  font-weight: 700;
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.06em;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--u) * 2.6) 50%, 100% 100%, 0 100%);
+  transition: transform 150ms ease, background 150ms;
+}
+
+.ribbon.on {
+  background: linear-gradient(90deg, #9c3322, #b8412c);
+  color: #fff4d6;
+  transform: translateX(calc(var(--u) * 1.4));
+}
+
+.ribbon.is-pressed { filter: brightness(1.15); }
+
+/* ---- Pages ---- */
+
+.page {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: calc(var(--u) * 3.4) calc(var(--u) * 4);
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(120, 80, 30, 0.22) 100%),
+    linear-gradient(180deg, var(--paper), var(--paper-2));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* The spine between the two pages. */
+.index { border-radius: 6px 0 0 6px; box-shadow: inset -24px 0 30px -18px rgba(70, 40, 10, 0.45), 0 8px 24px rgba(0, 0, 0, 0.45); }
+.leaf { border-radius: 0 6px 6px 0; box-shadow: inset 24px 0 30px -18px rgba(70, 40, 10, 0.45), 0 8px 24px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; }
+
+.page__title {
+  margin: 0 0 calc(var(--u) * 2.4);
+  font-family: var(--font-cap);
+  font-size: calc(var(--u) * 4);
+  color: var(--rubric);
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid color-mix(in srgb, var(--gilt) 60%, transparent);
+  padding-bottom: calc(var(--u) * 1);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: calc(var(--u) * 1.4);
+}
+
+/* Many entries (conditions): tighter chips so they all fit. */
+.chips[data-dense] .chip { min-height: calc(var(--u) * 13); padding: 0 calc(var(--u) * 2.4); }
+
+.chip {
+  min-height: var(--touch-min);
+  padding: 0 calc(var(--u) * 3.4);
+  border: 1.5px solid color-mix(in srgb, var(--ink-soft) 55%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 250, 235, 0.55);
+  color: var(--ink);
+  font-family: var(--font-book);
+  font-size: calc(var(--u) * 4.4);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.chip.on {
+  border-color: var(--rubric);
+  background: var(--rubric);
+  color: #fbeed0;
+}
+
+.chip.is-pressed { transform: scale(0.97); }
+
+/* ---- Entry ---- */
+
+.leaf__name {
+  margin: 0;
+  font-family: var(--font-book);
+  font-weight: 400;
+  font-size: calc(var(--u) * 8);
+  line-height: 1;
+  color: var(--rubric);
+}
+
+/* Illuminated first letter. */
+.leaf__name::first-letter {
+  font-family: var(--font-cap);
+  color: var(--gilt);
+  text-shadow: 1px 1px 0 var(--rubric);
+}
+
+.leaf__tag {
+  margin-top: calc(var(--u) * 0.8);
+  font-style: italic;
+  font-size: calc(var(--u) * 3);
+  color: var(--ink-soft);
+}
+
+.leaf__body {
+  flex: 1;
+  min-height: 0;
+  margin-top: calc(var(--u) * 2);
+  font-size: calc(var(--u) * 5.2 * var(--fit, 1));
+  line-height: 1.32;
+  overflow: hidden;
+}
+
+.leaf__body ul { margin: 0; padding: 0; list-style: none; }
+
+.leaf__body li {
+  position: relative;
+  padding-left: 1.2em;
+  margin-bottom: 0.45em;
+}
+
+.leaf__body li::before {
+  content: "\2767";
+  position: absolute;
+  left: 0;
+  color: var(--rubric);
+  font-size: 0.8em;
+  top: 0.12em;
+}
+
+.leaf__body table {
+  width: 100%;
+  margin-bottom: 0.6em;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.leaf__body th {
+  font-family: var(--font-cap);
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  text-align: left;
+  color: var(--rubric);
+  border-bottom: 1.5px solid var(--gilt);
+  padding: 0.15em 0.6em 0.25em 0;
+}
+
+.leaf__body td {
+  padding: 0.22em 0.6em 0.22em 0;
+  border-bottom: 1px dotted color-mix(in srgb, var(--ink-soft) 50%, transparent);
+}
+
+.leaf__credit {
+  font-style: italic;
+  font-size: calc(var(--u) * 2);
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.leaf.turn { animation: page-turn 260ms ease-out; }
+
+@keyframes page-turn {
+  from { opacity: 0.35; transform: perspective(1200px) rotateY(-8deg); transform-origin: left; }
+}
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large: ribbons across the top. */
+@media (max-aspect-ratio: 3/1) {
+  .frame { grid-template-columns: 1fr 1.3fr; grid-template-rows: auto 1fr; row-gap: calc(var(--u) * 1.6); }
+  .ribbons { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; padding: 0; }
+  .ribbon { min-width: 0; flex: 1; min-height: calc(var(--u) * 9); clip-path: none; border-radius: 6px 6px 0 0; text-align: center; padding: 0 calc(var(--u) * 1.4); }
+  .ribbon.on { transform: translateY(calc(var(--u) * 0.6)); }
+  .page__title { display: none; }
+  .chips[data-dense] .chip { min-height: calc(var(--u) * 10.5); font-size: calc(var(--u) * 3.8); }
+}
+
+/* Small: just the entry, chips hidden. */
+@media (max-height: 420px) {
+  .frame { grid-template-columns: 1fr 1.6fr; }
+  .ribbons { display: none; }
+  .chips { gap: calc(var(--u) * 1.8); }
+  .chip { font-size: calc(var(--u) * 4.4); min-height: calc(var(--u) * 13); }
+  .page__title { display: block; }
+}
+
+/* Medium: ribbons on top, chips beside the entry. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.8vw; }
+  .frame { grid-template-columns: 0.75fr 1.25fr; grid-template-rows: auto 1fr; }
+  .ribbon { font-size: calc(var(--u) * 2.4); }
+  .index { padding: calc(var(--u) * 2.4); }
+  .chips { gap: calc(var(--u) * 1); }
+  .chip, .chips[data-dense] .chip { min-height: calc(var(--u) * 7.5); padding: 0 calc(var(--u) * 1.8); font-size: calc(var(--u) * 3); }
+  .leaf { padding: calc(var(--u) * 2.6) calc(var(--u) * 3); }
+  .leaf__name { font-size: calc(var(--u) * 6); }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('AMBIENCE')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="startVolume" data-label="tr('Start Volume')" data-type="slider" data-default="60" data-min="5" data-max="100" data-step="5" data-unit-label="'%'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('AMBIENCE')",
+      "properties": ["startVolume"],
+      "info": "tr('Tap a scene or a knob to start. Drag a knob up or down to set its level, tap it to mute. All sounds are generated live, no files or internet.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-playing="no">
+    <section class="plate scenes">
+      <div class="plate__label">Scenes</div>
+      <div class="scene-grid" id="scenes"></div>
+    </section>
+
+    <section class="plate mixer">
+      <div class="plate__label">Mixer</div>
+      <div class="channels" id="channels"></div>
+    </section>
+
+    <section class="plate master">
+      <canvas class="scope" id="scope" width="600" height="220"></canvas>
+      <div class="master__row">
+        <button class="transport" id="playBtn"><span class="transport__icon"></span><span id="playLabel">Play</span></button>
+        <div class="knob-wrap">
+          <div class="knob knob--master" id="masterKnob"><i></i></div>
+          <span class="knob__label">Volume</span>
+        </div>
+      </div>
+      <button class="sleep" id="sleepBtn">Sleep timer <b id="sleepText">Off</b></button>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/sound.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

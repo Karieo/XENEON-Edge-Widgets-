@@ -12,8 +12,17 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **FORGE** | v0.1, untested on hardware | Mini Forge Dad painting-session timer: session clock, per-stage splits, paint dry timer, who's painting, weekly/all-time log |
 | **CREATOR** | v0.1, untested on hardware | YouTube channel stats: subscribers, views, 14-day views chart, latest upload, recent uploads. Light or dark |
 | **ON AIR** | v0.1, untested on hardware | OBS control: record/stream with timers (hold to stop), scene buttons, mic/desktop mute with live meters, chapter marks, replay clips, recording health |
+| **LAUNCHPAD** | v0.1, untested on hardware | Big colored tiles that open apps and sites: Steam, Discord, Claude, YouTube, anything with a link |
+| **DAYBREAK** | v0.1, untested on hardware | Clock, weather (Open-Meteo, no key), sun/moon arc, 12-hour and 5-day forecast, countdowns, on a sky that follows the sun |
+| **WARGAME** | v0.1, untested on hardware | Two-player Warhammer 40K (10th edition) tracker: round, turn, phase, CP, primary/secondary VP, Battle Ready |
+| **QUESTS** | v0.1, untested on hardware | Pixel-RPG chore board: daily quests worth XP, levels, streaks, a reward chest |
+| **GRIMOIRE** | v0.1, untested on hardware | D&D 5e (2014) rules at a tap: conditions, exhaustion, actions, combat, DCs, travel, light, rests (SRD 5.1) |
+| **AMBIENCE** | v0.1, untested on hardware | Soundscape mixer, all generated live: rain, wind, fire, stream, night, thunder, dungeon drone, brown noise. Scenes and a sleep timer |
+| **JUKEBOX** | v0.1, untested on hardware | Now playing on a spinning record with album art, big controls, recently played wall, playlist buttons |
+| **PAINT RACK** | v0.1, untested on hardware | Paint recipes with swatches and step tick-off: Ultramarines, Blood Angels, Ork skin, metals, bone, flesh, bases, plus your own |
+| **SKETCH** | v0.1, untested on hardware | Finger-drawing chalkboard: chalk colors, eraser, undo, three saved pages |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), and ON AIR looks like a broadcast console. Themes live in `shared/styles/` on top of a common `base.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, and SKETCH is a chalkboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -44,7 +53,7 @@ npm run build -- Datacore
 | GPU Temperature | iCUE default temp sensor | |
 | Extra Sensors (fans, load) | default fan | Up to 4 shown. Each entry's color is used for its underline |
 | Warm At / Hot At | 70 / 85 °C | Cyan → amber → red. Converted automatically if iCUE reports °F |
-| ASK CLAUDE Opens | claude.ai in browser | Switch to "Claude desktop app" to try `claude://` |
+| ASK CLAUDE Opens | Claude desktop app (`claude://`, confirmed on hardware) | Switch to "claude.ai in browser" as a fallback |
 | Scanlines | on | Pure CSS |
 | Text / Accent / Background / Transparency | DATACORE palette | Needs Custom Style on |
 
@@ -167,10 +176,62 @@ Slot sizes: XL shows everything. L and S show on-air + scenes. M shows the on-ai
 
 ## Known limits
 
-- **Touch focus:** on the stock iCUE dashboard, tapping the Edge may move the cursor and take focus from a full-screen game. That's the kill-switch test in `RESEARCH.md`. If it's bad, the UI can move to a local kiosk window; all iCUE calls live in `shared/scripts/icue-adapter.js` for that reason.
-- **Media:** song and artist only. No play state, album art, volume, or playlist switching.
-- **Sensors:** whatever iCUE exposes. Ryzen 9900X / RTX 5080 coverage is unconfirmed until the SENSORS test runs.
+- **Touch focus: tested, not a problem.** On 2026-09-25, tapping the Edge during a full-screen game did not take focus, so the widgets stay as native iCUE widgets. (All iCUE calls still live in `shared/scripts/icue-adapter.js`, in case that ever changes.)
+- **Media:** song and artist only. No play state, album art, volume, or playlist switching. (JUKEBOX looks up art on the iTunes Search API and guesses play state.)
+- **Sensors:** confirmed on hardware 2026-09-25: Ryzen 9900X (Temp #1/#2, Load), RTX 5080 (Temp #1/#2, fans, Load, Memory Load), the 9900X's built-in Radeon, and RAM temps. Auto-pick prefers the RTX over the built-in Radeon.
+- **Network widgets** (DAYBREAK weather, JUKEBOX art, CREATOR, STRATUM DM) need the Edge's network test (test 6) to pass. They show a clear message when offline.
+- **Sound** (AMBIENCE) is untested inside iCUE. It starts on the first tap.
 - The ASK CLAUDE button just opens a link. No API keys anywhere in this repo.
+
+## LAUNCHPAD
+
+Ten tile settings, each `Label | link`. App links work (`steam://open/games`, `discord://`, `claude://`, `ms-settings:`), and so do plain sites (`youtube.com`). Blank tiles are hidden. Icons are picked from the label and link (game, chat, music, dice, folder, brush...). App links open through Windows (the path confirmed with `claude://`); web links open in your browser through iCUE's Link plugin.
+
+## DAYBREAK
+
+Type a city in settings (`Denver`, `Leeds UK`). Weather comes from [Open-Meteo](https://open-meteo.com) (free, no account, CC-BY 4.0, credited on screen) and refreshes every 15 minutes; the last forecast is kept if the network drops.
+
+- The sky changes with the real sunrise and sunset: night, dawn, day, dusk.
+- The arc shows the sun by day and the moon (with its phase) by night.
+- Hourly: 12 beads, height = temperature, blue fill = chance of rain.
+- 5 days: range bars on one shared scale.
+- Countdowns: `Label | 2026-10-31` for one date, `Label | 10-31` for every year.
+
+## WARGAME
+
+| Control | Tap | Hold |
+|---|---|---|
+| Primary / Secondary / Command | +1 (VP capped at 50 / 40) | −1 |
+| Battle Ready +10 | toggle | |
+| Player name (before the first move) | that player goes first | |
+| Next phase | Command → Movement → Shooting → Charge → Fight → other player → next round | step back one phase |
+| New game | | reset (about 1 s) |
+
+Both players gain 1 CP at the start of every Command phase, automatically and never twice for the same phase. The game ends after round 5 with a winner banner, and it's saved, so an iCUE restart mid-game loses nothing.
+
+## QUESTS
+
+Up to 8 quests (`Make your bed | 10`) and a reward (`Pick the movie | 300`). Tap a quest to complete it (tap again to undo). Quests reset at midnight. Levels come at 100, 300, 600, 1000 XP... A streak grows on days when every quest gets done. Hold the chest to claim the reward once there's enough XP; claiming spends XP toward the reward without lowering the level.
+
+## GRIMOIRE
+
+Tap a ribbon (Conditions, Actions, Combat, Checks and Travel, Environment), then an entry. Long entries shrink to fit rather than scroll. It reopens where you left off. 2014 rules, condensed from SRD 5.1.
+
+## AMBIENCE
+
+Tap a scene (Rainy Study, Campfire, Storm, Dungeon, Forest Night, Focus) or any knob to start. Drag a knob up or down to set it; tap it to mute. Sleep timer: Off → 15 → 30 → 60 minutes, fading out over the last 20 seconds. Every sound is synthesized with Web Audio (noise, filters, oscillators). There are no audio files and nothing to license.
+
+## JUKEBOX
+
+Shows whatever iCUE's Media plugin reports. Album art and album name come from the iTunes Search API (no key; turn it off in settings). Tap the record or the big button to play/pause. The recently played wall opens a song in Apple Music. Four playlist buttons: `Name | link`, using a link from Apple Music → Share → Copy Link. The Media plugin doesn't report play state, so the paused/playing look is a best guess.
+
+## PAINT RACK
+
+Pick a recipe, tap each step as you finish it, and the Up Next card shows the next paint big. Add your own in settings: `Night Lords: Kantor Blue, Nuln Oil, Altdorf Guard Blue`. Citadel paint names get a swatch and step name automatically. Hold Reset to start a recipe over. Swatches are approximate.
+
+## SKETCH
+
+Draw with a finger. Chalk sticks pick the color, the dot button changes line size, then eraser, undo, and trash (hold to wipe). Three pages, all saved.
 
 ## Layout
 
@@ -184,7 +245,7 @@ shared/              one copy of the style, fonts, and iCUE adapter
   styles/workshop.css    FORGE theme
   styles/studio.css      CREATOR theme (light + dark)
   styles/broadcast.css   ON AIR theme
-  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat, Inter, Oswald, JetBrains Mono (SIL OFL, licenses included)
+  fonts/             Bebas Neue, Share Tech Mono, VT323, Cinzel, Barlow Condensed, Titillium Web, Zilla Slab, Caveat, Inter, Oswald, JetBrains Mono, Space Grotesk, Outfit, Saira Stencil One, Press Start 2P, IM Fell English, Josefin Sans, Fraunces (SIL OFL, licenses included)
 widgets/
   Datacore/
   EdgeTestKit/
@@ -194,6 +255,15 @@ widgets/
   Forge/
   Creator/
   OnAir/
+  Launchpad/
+  Daybreak/
+  Wargame/
+  Quests/
+  Grimoire/
+  Ambience/
+  Jukebox/
+  PaintRack/
+  Sketch/
 tools/build.mjs
 RESEARCH.md
 ```
@@ -203,4 +273,8 @@ RESEARCH.md
 - iCUE widget rules and plugin APIs: Corsair's WidgetBuilder documentation and `icuewidget-cli` (Apache-2.0).
 - Design ideas (not code) from [Xenon](https://github.com/marcimastro98/Xenon) by Marcello Mastroeni, and from [vardek-widgets](https://github.com/vardekapp/vardek-widgets) (MIT).
 - Palette and fonts from the DATACORE app (Karieo/DnD-Website).
-- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), Oswald (Vernon Adams), JetBrains Mono (JetBrains), all SIL Open Font License 1.1.
+- Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), Oswald (Vernon Adams), JetBrains Mono (JetBrains), Space Grotesk (Florian Karsten), Outfit (Rodrigo Fuenzalida), Saira Stencil One (Omnibus-Type), Press Start 2P (CodeMan38), IM Fell English (Igino Marini), Josefin Sans (Santiago Orozco), Fraunces (Undercase Type), all SIL Open Font License 1.1.
+- Weather data by [Open-Meteo.com](https://open-meteo.com) (CC-BY 4.0).
+- Album art and album names from Apple's iTunes Search API.
+- GRIMOIRE: This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
+- Warhammer 40,000 and Citadel paint names are trademarks of Games Workshop. PAINT RACK swatches are eyeballed approximations for personal reference. WARGAME only tracks numbers; no rules text is included.

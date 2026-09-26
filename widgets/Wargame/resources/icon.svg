@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="WARGAME">
+  <rect width="128" height="128" rx="14" fill="#15171a"/>
+  <path d="M64 14 L104 30 V62 C104 88 86 104 64 114 C42 104 24 88 24 62 V30 Z" fill="#8c1c13" stroke="#c9a24a" stroke-width="5"/>
+  <path d="M46 52 L64 40 L82 52 M46 70 L64 58 L82 70 M46 88 L64 76 L82 88" fill="none" stroke="#e8d7a8" stroke-width="6" stroke-linejoin="round"/>
+</svg>

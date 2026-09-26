@@ -172,6 +172,27 @@ svg[data-state="hot"] { --line: var(--state-hot); }
   color: var(--state-color);
 }
 
+/* Second sensor on the same chip (Ryzen and RTX both report Temp #1 and #2). */
+.tile__alt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  padding-left: calc(var(--u) * 2);
+  border-left: 2px solid #2a2e35;
+}
+
+.tile__alt[hidden] { display: none; }
+
+.tile__alt-name { font-size: calc(var(--u) * 2.6); }
+
+.tile__alt-num {
+  font-size: calc(var(--u) * 12);
+  line-height: 1;
+  color: var(--ms-white);
+  opacity: 0.8;
+}
+
 .tile[data-state="hot"] .tile__num { color: var(--ms-red); animation: hot-flash 0.9s steps(1) infinite; }
 
 @keyframes hot-flash {

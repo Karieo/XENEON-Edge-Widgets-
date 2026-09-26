@@ -13,6 +13,30 @@
 
   var Edge = {};
 
+  // iCUE can declare its globals (iCUE_initialized, plugins, uniqueId, the
+  // plugin flags and event hooks) as script-level let/const. Those are visible
+  // to bare names but NOT as window properties, so every read and write of an
+  // iCUE global goes through these two helpers instead of window[name].
+  function readGlobal(name) {
+    try {
+      return Function("return typeof " + name + ' !== "undefined" ? ' + name + " : undefined")();
+    } catch (e) {
+      return global[name];
+    }
+  }
+
+  // Bare assignment: updates iCUE's binding when it exists, else creates a
+  // window property that iCUE can pick up later (same as the docs' examples).
+  function writeGlobal(name, value) {
+    try {
+      Function("v", name + " = v;")(value);
+    } catch (e) {
+      global[name] = value;
+    }
+  }
+
+  Edge.readGlobal = readGlobal;
+
   // ---- iCUE properties ---------------------------------------------------
 
   // iCUE injects each x-icue-property as a global. Depending on the context it
@@ -22,30 +46,31 @@
       var w = global[name];
       if (w !== undefined && w !== null && w !== "") return w;
     }
-    try {
-      var v = Function("return typeof " + name + ' !== "undefined" ? ' + name + " : undefined")();
-      if (v !== undefined && v !== null && v !== "") return v;
-    } catch (e) {}
+    var v = readGlobal(name);
+    // An element whose id matches the setting shows up as a global too.
+    if (v && typeof v === "object" && v.nodeType) return fallback;
+    if (v !== undefined && v !== null && v !== "") return v;
     return fallback;
   };
 
   Edge.inIcue = function () {
-    return typeof global.iCUE_initialized !== "undefined";
+    return readGlobal("iCUE_initialized") !== undefined || !!readGlobal("plugins");
   };
 
   Edge.icueReady = function () {
-    return typeof global.iCUE_initialized !== "undefined" && !!global.iCUE_initialized;
+    return !!readGlobal("iCUE_initialized");
   };
 
   // ---- Plugins -----------------------------------------------------------
 
   // module: "Sensorsdataprovider" | "Mediadataprovider" | "Linkprovider"
   Edge.plugin = function (module) {
-    return global.plugins && global.plugins[module] ? global.plugins[module] : null;
+    var plugins = readGlobal("plugins");
+    return plugins && plugins[module] ? plugins[module] : null;
   };
 
   Edge.pluginReady = function (module) {
-    var flag = global["plugin" + module + "_initialized"];
+    var flag = readGlobal("plugin" + module + "_initialized");
     return !!flag && !!Edge.plugin(module);
   };
 
@@ -58,8 +83,14 @@
       fired = true;
       try { callback(Edge.plugin(module)); } catch (e) { console.error(module, e); }
     }
-    global["plugin" + module + "Events"] = { onInitialized: once };
+    writeGlobal("plugin" + module + "Events", { onInitialized: once });
     if (Edge.pluginReady(module)) once();
+    // Belt and braces: if the hook is missed, pick the plugin up once it appears.
+    var tries = 0;
+    var poll = setInterval(function () {
+      if (fired || ++tries > 30) { clearInterval(poll); return; }
+      if (Edge.plugin(module)) once();
+    }, 1000);
   };
 
   // One asyncResponse listener per plugin, shared by every request.
@@ -113,6 +144,12 @@
   // Opens in the system default browser via the Link plugin. A plain
   // window.open would load the page inside the widget instead.
   Edge.openLink = function (url) {
+    // App schemes (claude://) were confirmed on hardware through window.open,
+    // which hands them to Windows. Keep that path for anything not http(s).
+    if (!/^https?:/i.test(url)) {
+      global.open(url, "_blank", "noopener");
+      return "browser";
+    }
     var link = Edge.plugin("Linkprovider");
     if (link && typeof link.open === "function") {
       link.open(url);
@@ -156,6 +193,88 @@
         if (event.key === storeKey()) callback(Edge.store.load());
       });
     },
+  };
+
+  // ---- Sensor auto-pick ----------------------------------------------------
+
+  // Every sensor with the fields auto-pick needs: [{ id, type, kind, name, device }].
+  Edge.sensorCatalog = function (plugin) {
+    function ask(method, id) {
+      return Edge.request(plugin, method, id).catch(function () { return ""; });
+    }
+    return Edge.request(plugin, "getAllSensorIds").then(function (ids) {
+      ids = Array.isArray(ids) ? ids : [];
+      return Promise.all(ids.map(function (id) {
+        return Promise.all([ask("getSensorType", id), ask("getSensorKind", id), ask("getSensorName", id), ask("getSensorDeviceName", id)])
+          .then(function (r) {
+            return { id: id, type: String(r[0] || ""), kind: String(r[1] || ""), name: String(r[2] || ""), device: String(r[3] || "") };
+          });
+      }));
+    });
+  };
+
+  // A Ryzen 9000 has a small Radeon iGPU next to the real card, so GPU picks
+  // rank by device name: discrete first, integrated only as a last resort.
+  var DGPU = /nvidia|geforce|\brtx\b|\bgtx\b|radeon\s+rx|\barc\s+[ab]\d/i;
+  var IGPU = /radeon\(tm\)\s+graphics|radeon\s+graphics|intel.*(uhd|iris|hd graphics)|integrated/i;
+  var CPU = /ryzen|threadripper|core\(tm\)|intel.*core|\bcpu\b|processor|package/i;
+  var SIDE_LOAD = /memory|video|engine|decode|encode|bus|copy/i;
+
+  function label(s) { return s.device + " " + s.name; }
+
+  var ROLES = {
+    "cpu-temp": function (s) {
+      if (s.type !== "temperature" || DGPU.test(label(s)) || IGPU.test(label(s))) return -1;
+      var score = 0;
+      if (s.kind === "cpu-temp" || s.kind === "package") score += 10;
+      if (CPU.test(label(s))) score += 5;
+      return score || -1;
+    },
+    "gpu-temp": function (s) {
+      if (s.type !== "temperature") return -1;
+      return gpuScore(s, /^gpu/.test(s.kind));
+    },
+    "gpu-load": function (s) {
+      if (s.type !== "load") return -1;
+      var score = gpuScore(s, s.kind === "gpu-load");
+      return score > 0 && SIDE_LOAD.test(s.name) ? score - 15 : score;
+    },
+    fps: function (s) { return s.type === "fps" ? 1 : -1; },
+  };
+
+  function gpuScore(s, kindMatch) {
+    var dgpu = DGPU.test(label(s));
+    var igpu = !dgpu && IGPU.test(label(s));
+    if (!kindMatch && !dgpu && !igpu) return -1;
+    return 30 + (dgpu ? 20 : 0) - (igpu ? 20 : 0) + (kindMatch ? 5 : 0);
+  }
+
+  // Best sensor id for a role ("cpu-temp" | "gpu-temp" | "gpu-load" | "fps"), or "".
+  // "#1" beats "#2" on the same chip; other ties keep iCUE's order.
+  Edge.pickSensor = function (catalog, role) {
+    var rate = ROLES[role];
+    var best = null;
+    var bestScore = 0;
+    (catalog || []).forEach(function (s) {
+      var score = rate(s);
+      if (score > 0 && /#\s*1\b/.test(s.name)) score += 1;
+      if (score > bestScore) { best = s; bestScore = score; }
+    });
+    return best ? best.id : "";
+  };
+
+  // The other temperature sensor on the same device as `id` ("Temp #2" when
+  // "Temp #1" is bound): { id, label } or null.
+  Edge.siblingSensor = function (catalog, id) {
+    if (!id || !catalog) return null;
+    var me = catalog.find(function (s) { return s.id === id; });
+    if (!me || !me.device) return null;
+    var sib = catalog.find(function (s) {
+      return s.id !== id && s.type === me.type && s.device === me.device;
+    });
+    if (!sib) return null;
+    var tag = (sib.name.match(/#\s*\d+/) || [])[0];
+    return { id: sib.id, label: (tag || sib.name).toUpperCase().slice(0, 12) };
   };
 
   // ---- Misc --------------------------------------------------------------

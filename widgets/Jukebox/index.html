@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('JUKEBOX')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="playlist1" data-label="tr('Playlist 1')" data-type="textfield" data-default="'Painting | https://music.apple.com/us/browse'" />
+  <meta name="x-icue-property" content="playlist2" data-label="tr('Playlist 2')" data-type="textfield" data-default="'D&amp;D Night | https://music.apple.com/us/search?term=dungeons%20and%20dragons%20ambience'" />
+  <meta name="x-icue-property" content="playlist3" data-label="tr('Playlist 3')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="playlist4" data-label="tr('Playlist 4')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="lookupArt" data-label="tr('Look Up Album Art')" data-type="switch" data-default="true" />
+
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#e8475f'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Playlists')",
+      "properties": ["playlist1", "playlist2", "playlist3", "playlist4", "lookupArt"],
+      "info": "tr('Name | link, like a playlist link copied from Apple Music (Share, Copy Link). Album art comes from the iTunes Search API.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["accentColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-state="idle">
+    <div class="backdrop" id="backdrop"></div>
+
+    <section class="deck">
+      <div class="record" id="record">
+        <div class="record__grooves"></div>
+        <div class="record__label" id="label"><span id="labelText">JUKEBOX</span></div>
+        <div class="record__hole"></div>
+      </div>
+      <div class="arm" id="arm"><i class="arm__base"></i><i class="arm__rod"></i><i class="arm__head"></i></div>
+    </section>
+
+    <section class="info">
+      <div class="info__kicker" id="kicker">Now playing</div>
+      <h1 class="info__title" id="title">Nothing playing</h1>
+      <div class="info__artist" id="artist">Start music on your PC</div>
+      <div class="info__album" id="album"></div>
+      <div class="controls">
+        <button class="ctl" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5v14M19 5L9 12l10 7z"/></svg></button>
+        <button class="ctl ctl--main" id="playBtn" aria-label="Play or pause"><svg viewBox="0 0 24 24"><path class="i-play" d="M8 5l12 7-12 7z"/><path class="i-pause" d="M7 5h4v14H7zM14 5h4v14h-4z"/></svg></button>
+        <button class="ctl" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg></button>
+      </div>
+    </section>
+
+    <section class="side">
+      <div class="playlists" id="playlists"></div>
+      <div class="side__head">Recently played</div>
+      <div class="recent" id="recent"></div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

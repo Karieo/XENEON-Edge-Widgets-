@@ -72,6 +72,26 @@
   opacity: 0.8;
 }
 
+/* Second sensor on the same chip (Ryzen and RTX both report Temp #1 and #2). */
+.temp__alt {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  margin-left: calc(var(--u) * 3);
+  padding-left: calc(var(--u) * 2);
+  border-left: 1px solid color-mix(in srgb, var(--state-color) 40%, transparent);
+  color: var(--dc-text-dim);
+}
+
+.temp__alt[hidden] { display: none; }
+
+.temp__alt-name { font-size: calc(var(--u) * 2.8); }
+
+.temp__alt-num {
+  font-size: calc(var(--u) * 11);
+  font-weight: 700;
+}
+
 .temp[data-state="hot"] .temp__value {
   animation: hot-pulse 1.2s ease-in-out infinite;
 }
@@ -288,6 +308,7 @@
   .temp__num { font-size: calc(var(--u) * 18); }
   .spark, .clock { display: none; }
   .temp__unit { margin-top: calc(var(--u) * 1.5); font-size: calc(var(--u) * 6); }
+  .temp__alt-num { font-size: calc(var(--u) * 7); }
   .ask { min-height: var(--touch-min); font-size: calc(var(--u) * 11); }
 }
 

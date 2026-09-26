@@ -4,22 +4,21 @@ var WINDOW = 60; // seconds of FPS fpsHistory
 var RESYNC_MS = 2000; // safety net in case a sensorValueChanged signal is missed
 var IDLE_AFTER = 3; // seconds without FPS before showing "no game"
 
-// Each slot finds its sensor by type/kind when left on the iCUE default.
+// Each slot finds its sensor by role when left on the iCUE default
+// (see Edge.pickSensor: the RTX wins over the Ryzen's built-in Radeon).
 var SLOTS = {
-  fps: { prop: "fpsSensor", type: "fps", match: function (s) { return s.type === "fps"; } },
-  gpuLoad: { prop: "gpuLoadSensor", type: "load", match: function (s) { return s.kind === "gpu-load"; } },
-  gpuTemp: { prop: "gpuTempSensor", type: "temperature", match: function (s) { return s.kind === "gpu-temp"; } },
-  cpuTemp: {
-    prop: "cpuTempSensor", type: "temperature",
-    match: function (s) { return s.type === "temperature" && (s.kind === "cpu-temp" || s.kind === "package"); },
-  },
+  fps: { prop: "fpsSensor", type: "fps", role: "fps" },
+  gpuLoad: { prop: "gpuLoadSensor", type: "load", role: "gpu-load" },
+  gpuTemp: { prop: "gpuTempSensor", type: "temperature", role: "gpu-temp" },
+  cpuTemp: { prop: "cpuTempSensor", type: "temperature", role: "cpu-temp" },
 };
 
 var $ = function (id) { return document.getElementById(id); };
 var cfg = {};
 var sensors = null;
-var catalog = null; // [{ id, type, kind }] from getAllSensorIds
+var catalog = null; // Edge.sensorCatalog result
 var bound = {}; // slot -> sensorId
+var alt = {}; // temp slot -> { id, label } of the chip's other temp sensor
 var latest = {}; // sensorId -> number
 var units = {}; // sensorId -> units string
 var fpsHistory = []; // FPS samples, oldest first (null = no reading)
@@ -77,15 +76,7 @@ Edge.onPlugin("Sensorsdataprovider", function (plugin) {
 
 function loadCatalog() {
   if (!sensors) return;
-  Edge.request(sensors, "getAllSensorIds").then(function (ids) {
-    ids = Array.isArray(ids) ? ids : [];
-    return Promise.all(ids.map(function (id) {
-      return Promise.all([
-        Edge.request(sensors, "getSensorType", id).catch(function () { return ""; }),
-        Edge.request(sensors, "getSensorKind", id).catch(function () { return ""; }),
-      ]).then(function (tk) { return { id: id, type: tk[0], kind: tk[1] }; });
-    }));
-  }).then(function (list) {
+  Edge.sensorCatalog(sensors).then(function (list) {
     catalog = list;
     bindSlots();
   }).catch(function () {
@@ -106,15 +97,26 @@ function bindSlots() {
     var chosen = Edge.prop(slot.prop, "");
     // Only override a sensor the user never changed from iCUE's default.
     var untouched = !chosen || chosen === defaultIdFor(slot.type);
-    var auto = catalog && catalog.find(slot.match);
-    bound[key] = untouched && auto ? auto.id : chosen;
+    var auto = catalog ? Edge.pickSensor(catalog, slot.role) : "";
+    bound[key] = untouched && auto ? auto : chosen;
+  });
+  alt = {};
+  ["gpuTemp", "cpuTemp"].forEach(function (key) {
+    var sib = Edge.siblingSensor(catalog, bound[key]);
+    if (sib) alt[key] = sib;
+    var box = $(key).querySelector(".tile__alt");
+    box.hidden = !sib;
+    if (sib) box.querySelector(".tile__alt-name").textContent = sib.label;
   });
   Object.keys(bound).forEach(function (key) {
     var id = bound[key];
     var tile = tileFor(key);
     if (!id) { if (tile) tile.querySelector(".tile__name").textContent = "NOT SET"; return; }
-    Edge.request(sensors, "getSensorName", id).then(function (name) {
-      var label = String(name || "").toUpperCase().slice(0, 30);
+    Promise.all([
+      Edge.request(sensors, "getSensorName", id).catch(function () { return ""; }),
+      Edge.request(sensors, "getSensorDeviceName", id).catch(function () { return ""; }),
+    ]).then(function (r) {
+      var label = sensorLabel(String(r[1] || ""), String(r[0] || "")).toUpperCase().slice(0, 34);
       if (tile) tile.querySelector(".tile__name").textContent = label;
       else $("fpsName").textContent = label ? ":: " + label : "";
     }).catch(function () {});
@@ -122,15 +124,30 @@ function bindSlots() {
   resync();
 }
 
+// "NVIDIA GeForce RTX 5080" + "Temp #1" -> "RTX 5080 · Temp #1", so each tile
+// shows which chip it reads (the Ryzen's built-in Radeon is a GPU too).
+function sensorLabel(device, name) {
+  var dev = device
+    .replace(/\((tm|r)\)/gi, "")
+    .replace(/^(amd|nvidia|intel)\s+/i, "")
+    .replace(/^geforce\s+/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!dev || name.indexOf(dev) >= 0) return name;
+  return name ? dev + " \u00b7 " + name : dev;
+}
+
 function isBound(id) {
   for (var k in bound) if (bound[k] === id) return true;
+  for (var a in alt) if (alt[a].id === id) return true;
   return false;
 }
 
 function resync() {
   if (!sensors) return;
-  Object.keys(bound).forEach(function (key) {
-    var id = bound[key];
+  var ids = Object.keys(bound).map(function (k) { return bound[k]; })
+    .concat(Object.keys(alt).map(function (k) { return alt[k].id; }));
+  ids.forEach(function (id) {
     if (!id) return;
     var u = units[id] ? Promise.resolve(units[id]) : Edge.request(sensors, "getSensorUnits", id);
     Promise.all([Edge.request(sensors, "getSensorValue", id), u]).then(function (r) {
@@ -188,6 +205,10 @@ function renderSlots() {
     var lvl = ok ? tileLevel(key, v) : null;
     tile.dataset.state = lvl ? lvl.state : "idle";
     tile.querySelector(".tbar i").style.width = lvl ? lvl.pct + "%" : "0";
+    if (alt[key]) {
+      var a = latest[alt[key].id];
+      tile.querySelector(".tile__alt-num").textContent = typeof a === "number" && !isNaN(a) ? Math.round(a) + "°" : "--";
+    }
   });
 }
 

@@ -1,0 +1,13 @@
+{
+  "widget_name": "QUESTS",
+  "QUESTS": "QUESTS",
+  "Mini Forge Dad": "Mini Forge Dad",
+  "Hero Name": "Hero Name",
+  "Quest 1": "Quest 1", "Quest 2": "Quest 2", "Quest 3": "Quest 3", "Quest 4": "Quest 4",
+  "Quest 5": "Quest 5", "Quest 6": "Quest 6", "Quest 7": "Quest 7", "Quest 8": "Quest 8",
+  "Reward": "Reward",
+  "Quests": "Quests",
+  "One quest per line: Quest | XP. Quests reset at midnight. Reward: Prize | XP cost. Hold the chest to claim.": "One quest per line: Quest | XP. Quests reset at midnight. Reward: Prize | XP cost. Hold the chest to claim.",
+  "Widget Personalization": "Widget Personalization",
+  "Background Transparency": "Background Transparency"
+}

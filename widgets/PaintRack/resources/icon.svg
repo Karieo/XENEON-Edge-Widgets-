@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="PAINT RACK">
+  <rect width="128" height="128" rx="14" fill="#c9d3d8"/>
+  <path d="M30 40c10-12 30-10 34 2s-10 22-22 20-20-12-12-22z" fill="#0f3d7c"/>
+  <path d="M72 30c12-6 28 2 26 16s-18 16-26 10-10-20 0-26z" fill="#9a1115"/>
+  <path d="M64 80c10-10 30-6 32 6s-12 20-24 18-18-14-8-24z" fill="#317e57"/>
+  <path d="M26 82c8-8 22-6 24 4s-8 16-18 14-14-10-6-18z" fill="#c39e57"/>
+</svg>

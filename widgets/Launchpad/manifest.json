@@ -1,0 +1,14 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.launchpad",
+  "name": "LAUNCHPAD",
+  "description": "Big touch tiles that open your apps and sites from the Xeneon Edge: Steam, Discord, Claude, YouTube, anything with a link.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true,
+  "required_plugins": ["widgetbuilder.linkprovider:Url:1.0"]
+}

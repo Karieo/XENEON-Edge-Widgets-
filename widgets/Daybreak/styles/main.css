@@ -1,0 +1,398 @@
+/* DAYBREAK — a sky that follows the sun. Primary target: Edge XL (2536x696). */
+
+@font-face {
+  font-family: "Outfit";
+  src: url("../shared/fonts/outfit-latin-200-normal.woff2") format("woff2");
+  font-weight: 200;
+  font-display: block;
+}
+@font-face {
+  font-family: "Outfit";
+  src: url("../shared/fonts/outfit-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-display: block;
+}
+
+:root {
+  --text-color: #ffffff;
+  --accent-color: #ffffff;
+  --bg-color: #0b1030;
+  --glass: rgba(255, 255, 255, 0.12);
+  --glass-line: rgba(255, 255, 255, 0.22);
+  --soft: rgba(255, 255, 255, 0.72);
+  --font-sky: "Outfit", "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sky);
+  font-weight: 600;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* ---- Sky ---- */
+
+.frame {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr 1fr;
+  gap: calc(var(--u) * 3);
+  padding: calc(var(--u) * 4) calc(var(--u) * 4.5);
+  background: none;
+  isolation: isolate;
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: var(--widget-opacity);
+  background: var(--sky);
+  transition: background 2s ease;
+}
+
+.frame[data-phase="night"] { --sky: linear-gradient(180deg, #070b24 0%, #121a45 60%, #22295a 100%); }
+.frame[data-phase="dawn"] { --sky: linear-gradient(180deg, #27397f 0%, #7a5aa6 38%, #f0896a 72%, #ffd08a 100%); }
+.frame[data-phase="day"] { --sky: linear-gradient(180deg, #2f7fd8 0%, #5aa7ea 55%, #a5d4f5 100%); }
+.frame[data-phase="dusk"] { --sky: linear-gradient(180deg, #2c2464 0%, #7b3a86 40%, #d9587a 72%, #f7a55d 100%); }
+
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 2s ease;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8% 20%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 18% 62%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 31% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 44% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 57% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 70%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 79% 28%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 58%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 95% 10%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 4% 86%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 50% 88%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 72% 48%, #fff 50%, transparent 51%);
+}
+
+[data-phase="night"] .stars { opacity: 0.8; }
+[data-phase="dawn"] .stars, [data-phase="dusk"] .stars { opacity: 0.25; }
+
+section { min-width: 0; min-height: 0; }
+
+/* ---- Now: time, date, sun arc ---- */
+
+.now {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.time {
+  font-weight: 200;
+  font-size: calc(var(--u) * 30);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.time small {
+  margin-left: calc(var(--u) * 1.5);
+  font-size: 0.26em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.date {
+  margin-top: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 4.6);
+  color: var(--soft);
+}
+
+.arc {
+  width: 100%;
+  max-width: calc(var(--u) * 70);
+  margin-top: calc(var(--u) * 4);
+  overflow: visible;
+}
+
+.arc__path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+  stroke-width: 2.5;
+  stroke-dasharray: 3 9;
+  stroke-linecap: round;
+}
+
+.arc__ground { stroke: rgba(255, 255, 255, 0.55); stroke-width: 2; }
+
+.arc__body {
+  fill: #ffe38a;
+  filter: drop-shadow(0 0 10px rgba(255, 214, 110, 0.9));
+  transition: cx 1s, cy 1s;
+}
+
+.arc__body.moon { fill: #eef1ff; filter: drop-shadow(0 0 8px rgba(220, 228, 255, 0.8)); }
+
+.sun {
+  margin-top: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 3);
+  color: var(--soft);
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Weather ---- */
+
+.wx {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  column-gap: calc(var(--u) * 4);
+  padding: calc(var(--u) * 3) calc(var(--u) * 3.5);
+  border: 1px solid var(--glass-line);
+  border-radius: calc(var(--u) * 3);
+  background: var(--glass);
+  backdrop-filter: blur(6px);
+}
+
+.wx__now {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 3);
+}
+
+.wx__icon {
+  width: calc(var(--u) * 17);
+  height: calc(var(--u) * 17);
+  flex: none;
+  overflow: visible;
+}
+
+.wx__temp {
+  font-weight: 200;
+  font-size: calc(var(--u) * 16);
+  line-height: 0.95;
+}
+
+.wx__desc {
+  font-size: calc(var(--u) * 4.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wx__meta {
+  margin-top: calc(var(--u) * 0.8);
+  font-size: calc(var(--u) * 3);
+  color: var(--soft);
+  white-space: pre;
+}
+
+/* Hourly: beads on stems, height follows temperature. */
+.hours {
+  display: flex;
+  gap: calc(var(--u) * 0.6);
+  min-height: 0;
+  margin-top: calc(var(--u) * 2.5);
+}
+
+.hour {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.hour__temp { font-size: calc(var(--u) * 2.8); }
+
+.hour__track {
+  position: relative;
+  flex: 1;
+  width: calc(var(--u) * 3);
+  margin: calc(var(--u) * 0.8) 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.hour__rain {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--rain);
+  background: linear-gradient(0deg, rgba(108, 195, 255, 0.85), rgba(108, 195, 255, 0.25));
+}
+
+.hour__stem {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  height: calc(12% + var(--pos) * 76%);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.hour__bead {
+  position: absolute;
+  left: 50%;
+  bottom: calc(12% + var(--pos) * 76%);
+  width: calc(var(--u) * 2.6);
+  height: calc(var(--u) * 2.6);
+  margin: 0 0 calc(var(--u) * -1.3) calc(var(--u) * -1.3);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.hour__icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); overflow: visible; }
+
+.hour__label { font-size: calc(var(--u) * 2.5); color: var(--soft); }
+
+/* Five days: range pills on one shared scale. */
+.days {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  margin-top: calc(var(--u) * 2.5);
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 5.2em calc(var(--u) * 5) 2.4em 1fr 2.4em;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+  font-size: calc(var(--u) * 3);
+}
+
+.day__icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); overflow: visible; }
+.day__lo { text-align: right; color: var(--soft); }
+
+.day__bar {
+  position: relative;
+  height: calc(var(--u) * 1.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.day__bar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--from);
+  right: calc(100% - var(--to));
+  min-width: calc(var(--u) * 1.4);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8fd3ff, #ffd36b 60%, #ff9a5a);
+}
+
+.credit {
+  grid-column: 1 / -1;
+  margin-top: calc(var(--u) * 1.5);
+  font-size: calc(var(--u) * 2.2);
+  color: rgba(255, 255, 255, 0.55);
+  text-align: right;
+}
+
+/* ---- Countdowns ---- */
+
+.counts {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: calc(var(--u) * 2);
+}
+
+.count {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: end;
+  column-gap: calc(var(--u) * 2.4);
+  padding: calc(var(--u) * 1.6) calc(var(--u) * 3);
+  border: 1px solid var(--glass-line);
+  border-radius: calc(var(--u) * 2.4);
+  background: var(--glass);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.count__num {
+  grid-row: 1 / 3;
+  align-self: center;
+  font-weight: 200;
+  font-size: calc(var(--u) * 11);
+  line-height: 1;
+}
+
+.count__unit {
+  display: none;
+}
+
+.count__label {
+  align-self: end;
+  font-size: calc(var(--u) * 4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count__date {
+  align-self: start;
+  font-size: calc(var(--u) * 2.8);
+  color: var(--soft);
+}
+
+.count--today { background: rgba(255, 215, 110, 0.3); border-color: rgba(255, 215, 110, 0.7); }
+.count--today .count__num { font-size: calc(var(--u) * 7); font-weight: 600; }
+
+.count--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--soft);
+  font-size: calc(var(--u) * 3.4);
+}
+
+/* Few countdowns: bigger cards. */
+.counts[data-count="1"] .count__num,
+.counts[data-count="2"] .count__num { font-size: calc(var(--u) * 17); }
+
+/* ---- Other slot sizes: hide, don't shrink ---- */
+
+/* Large and Small: time + weather, no countdowns. */
+@media (max-aspect-ratio: 3/1) {
+  .frame { grid-template-columns: 1fr 1.6fr; }
+  .counts { display: none; }
+}
+
+/* Small (840x344): time + current weather only. */
+@media (max-height: 420px) {
+  .frame { grid-template-columns: 1fr 1fr; padding: calc(var(--u) * 5); }
+  .arc, .sun, .hours, .days, .credit { display: none; }
+  .wx { display: flex; align-items: center; background: none; border: 0; padding: 0; backdrop-filter: none; }
+  .time { font-size: calc(var(--u) * 34); }
+  .date { font-size: calc(var(--u) * 7); }
+  .wx__icon { width: calc(var(--u) * 26); height: calc(var(--u) * 26); }
+  .wx__temp { font-size: calc(var(--u) * 26); }
+  .wx__desc { font-size: calc(var(--u) * 6); white-space: normal; }
+  .wx__meta { display: none; }
+}
+
+/* Medium: stack time over weather; hourly beads only. */
+@media (max-aspect-ratio: 3/2) {
+  :root { --u: 0.85vw; }
+  .frame { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .arc, .days { display: none; }
+  .wx { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+  .hours { min-height: calc(var(--u) * 26); }
+  .wx__icon { width: calc(var(--u) * 12); height: calc(var(--u) * 12); }
+  .wx__temp { font-size: calc(var(--u) * 12); }
+  .date { font-size: calc(var(--u) * 4); margin-top: calc(var(--u) * 0.5); }
+  .time { font-size: calc(var(--u) * 17); }
+}

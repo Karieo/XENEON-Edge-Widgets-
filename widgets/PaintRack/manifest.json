@@ -1,0 +1,13 @@
+{
+  "author": "Karieo",
+  "id": "com.karieo.paintrack",
+  "name": "PAINT RACK",
+  "description": "Mini Forge Dad paint recipes for the Xeneon Edge: base, shade, layer and edge steps with color swatches, tick-off progress per recipe, and your own recipes from settings.",
+  "version": "0.1.0",
+  "preview_icon": "resources/icon.svg",
+  "min_app_version": "5.47",
+  "min_framework_version": "1.0.0",
+  "os": [{ "platform": "windows" }],
+  "supported_devices": [{ "type": "dashboard_lcd" }],
+  "interactive": true
+}

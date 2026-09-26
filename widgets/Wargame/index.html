@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('WARGAME')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="p1Name" data-label="tr('Player 1')" data-type="textfield" data-default="'Dad'" />
+  <meta name="x-icue-property" content="p1Army" data-label="tr('Player 1 Army')" data-type="textfield" data-default="'Space Marines'" />
+  <meta name="x-icue-property" content="p1Color" data-label="tr('Player 1 Color')" data-type="color" data-default="'#2f6fd6'" />
+  <meta name="x-icue-property" content="p2Name" data-label="tr('Player 2')" data-type="textfield" data-default="'Kiddo'" />
+  <meta name="x-icue-property" content="p2Army" data-label="tr('Player 2 Army')" data-type="textfield" data-default="'Orks'" />
+  <meta name="x-icue-property" content="p2Color" data-label="tr('Player 2 Color')" data-type="color" data-default="'#3f9a3a'" />
+  <meta name="x-icue-property" content="startCp" data-label="tr('Starting CP')" data-type="slider" data-default="0" data-min="0" data-max="12" data-step="1" />
+
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('WARGAME')",
+      "properties": ["p1Name", "p1Army", "p1Color", "p2Name", "p2Army", "p2Color", "startCp"],
+      "info": "tr('Tap a number to add, hold to take one away. Hold NEW GAME to reset. The game is saved on this PC.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-active="1">
+    <section class="side" id="side1" data-p="1">
+      <header class="side__head">
+        <div>
+          <div class="side__name" data-f="name"></div>
+          <div class="side__army" data-f="army"></div>
+        </div>
+        <div class="side__total"><span data-f="total">0</span><small>VP</small></div>
+      </header>
+      <div class="rows">
+        <button class="stat" data-k="primary"><span class="stat__label">Primary</span><span class="stat__val" data-f="primary">0</span><span class="stat__max">/ 50</span></button>
+        <button class="stat" data-k="secondary"><span class="stat__label">Secondary</span><span class="stat__val" data-f="secondary">0</span><span class="stat__max">/ 40</span></button>
+        <button class="stat stat--cp" data-k="cp"><span class="stat__label">Command</span><span class="stat__val" data-f="cp">0</span><span class="stat__max">CP</span></button>
+      </div>
+      <button class="ready" data-k="ready">Battle Ready <b>+10</b></button>
+    </section>
+
+    <section class="center">
+      <div class="round">
+        <span class="round__label">Battle round</span>
+        <div class="round__pips" id="pips"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="turn" id="turn"></div>
+      <ol class="phases" id="phases">
+        <li>Command</li><li>Movement</li><li>Shooting</li><li>Charge</li><li>Fight</li>
+      </ol>
+      <div class="controls">
+        <button class="btn next" id="nextBtn">Next phase</button>
+        <button class="btn newgame" id="newBtn">New game</button>
+      </div>
+      <div class="banner" id="banner"></div>
+    </section>
+
+    <section class="side" id="side2" data-p="2">
+      <header class="side__head">
+        <div>
+          <div class="side__name" data-f="name"></div>
+          <div class="side__army" data-f="army"></div>
+        </div>
+        <div class="side__total"><span data-f="total">0</span><small>VP</small></div>
+      </header>
+      <div class="rows">
+        <button class="stat" data-k="primary"><span class="stat__label">Primary</span><span class="stat__val" data-f="primary">0</span><span class="stat__max">/ 50</span></button>
+        <button class="stat" data-k="secondary"><span class="stat__label">Secondary</span><span class="stat__val" data-f="secondary">0</span><span class="stat__max">/ 40</span></button>
+        <button class="stat stat--cp" data-k="cp"><span class="stat__label">Command</span><span class="stat__val" data-f="cp">0</span><span class="stat__max">CP</span></button>
+      </div>
+      <button class="ready" data-k="ready">Battle Ready <b>+10</b></button>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

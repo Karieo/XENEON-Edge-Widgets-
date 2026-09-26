@@ -12,7 +12,7 @@
   <meta name="x-icue-property" content="extraSensors" data-label="tr('Extra Sensors (fans, load)')" data-type="sensors-factory" data-default="plugins.Sensorsdataprovider.getDefaultSensorIdBlock('fan')" />
   <meta name="x-icue-property" content="warmAt" data-label="tr('Warm At')" data-type="slider" data-default="70" data-min="40" data-max="100" data-step="1" data-unit-label="'°C'" />
   <meta name="x-icue-property" content="hotAt" data-label="tr('Hot At')" data-type="slider" data-default="85" data-min="50" data-max="110" data-step="1" data-unit-label="'°C'" />
-  <meta name="x-icue-property" content="claudeTarget" data-label="tr('ASK CLAUDE Opens')" data-type="combobox" data-default="'web'" data-values="[{'key':'web','value':tr('claude.ai in browser')},{'key':'app','value':tr('Claude desktop app')}]" />
+  <meta name="x-icue-property" content="claudeTarget" data-label="tr('ASK CLAUDE Opens')" data-type="combobox" data-default="'app'" data-values="[{'key':'app','value':tr('Claude desktop app')},{'key':'web','value':tr('claude.ai in browser')}]" />
   <meta name="x-icue-property" content="showScanlines" data-label="tr('Scanlines')" data-type="switch" data-default="true" />
 
   <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#f0efe4'" />
@@ -44,13 +44,13 @@
       <div class="temps">
         <div class="temp" id="cpu" data-state="idle">
           <div class="temp__label dc-label">CPU</div>
-          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
+          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span><span class="temp__alt" hidden><span class="temp__alt-name dc-label"></span><span class="temp__alt-num">--</span></span></div>
           <div class="temp__name"></div>
           <div class="spark"></div>
         </div>
         <div class="temp" id="gpu" data-state="idle">
           <div class="temp__label dc-label">GPU</div>
-          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span></div>
+          <div class="temp__value"><span class="temp__num">--</span><span class="temp__unit"></span><span class="temp__alt" hidden><span class="temp__alt-name dc-label"></span><span class="temp__alt-num">--</span></span></div>
           <div class="temp__name"></div>
           <div class="spark"></div>
         </div>
