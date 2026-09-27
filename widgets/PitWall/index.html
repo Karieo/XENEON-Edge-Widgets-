@@ -7,6 +7,7 @@
   <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
   <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
 
+  <meta name="x-icue-property" content="dataSource" data-label="tr('Data Source')" data-type="combobox" data-default="'apis'" data-values="[{'key':'apis','value':tr('F1 APIs, same as the dashboard')},{'key':'feed','value':tr('Dashboard feed URL')}]" />
   <meta name="x-icue-property" content="dashboardUrl" data-label="tr('Dashboard URL')" data-type="textfield" data-default="''" />
   <meta name="x-icue-property" content="myDriver" data-label="tr('My Driver')" data-type="textfield" data-default="''" />
   <meta name="x-icue-property" content="clock24" data-label="tr('24-Hour Clock')" data-type="switch" data-default="false" />
@@ -16,8 +17,8 @@
   [
     {
       "title": "tr('PIT WALL')",
-      "properties": ["dashboardUrl", "myDriver", "clock24"],
-      "info": "tr('Paste your F1 dashboard address (it must serve /api/edge with CORS allowed). Leave blank to see sample data. My Driver is a three-letter code like HAM to highlight.')"
+      "properties": ["dataSource", "dashboardUrl", "myDriver", "clock24"],
+      "info": "tr('F1 APIs reads OpenF1 and Jolpica directly, like the F1 dashboard does. Dashboard feed URL is only for a dashboard that serves /api/edge. My Driver is a three-letter code like HAM to highlight.')"
     },
     {
       "title": "tr('Widget Personalization')",
@@ -34,7 +35,7 @@
     <header class="bar">
       <div class="bar__brand">PIT WALL</div>
       <div class="views" id="views">
-        <button class="view" data-view="live">Live</button>
+        <button class="view" data-view="live" id="liveTab">Live</button>
         <button class="view" data-view="weekend">Weekend</button>
       </div>
       <div class="bar__src" id="src"></div>
@@ -78,6 +79,7 @@
 
   <script src="shared/scripts/icue-adapter.js"></script>
   <script src="scripts/sample.js"></script>
+  <script src="scripts/source.js"></script>
   <script src="scripts/main.js"></script>
   <script>
     icueEvents = {

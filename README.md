@@ -236,12 +236,19 @@ Draw with a finger. Chalk sticks pick the color, the dot button changes line siz
 
 ## PIT WALL
 
-Reads one JSON feed from your F1 dashboard: set **Dashboard URL** (e.g. `https://f1.example.com` or `http://192.168.1.20:3000`) and the widget fetches `<url>/api/edge`. The feed format is in [`docs/f1-edge-feed.md`](docs/f1-edge-feed.md); the dashboard must send `Access-Control-Allow-Origin: *` on that route. With no URL, it shows built-in sample data.
+F1 on the Edge, from the same data as the F1 dashboard (Karieo/F1-Dashboard). Two sources (setting **Data Source**):
 
-- During a session the live timing tower takes over automatically (tap **Weekend** to peek at standings); it goes back to the weekend view when the session ends.
-- Polls every 60 s, every 15 s within 30 minutes of a session, every 3 s while live.
-- **My Driver** (`HAM`, `NOR`...) highlights that driver in the tower and standings.
-- If the dashboard is unreachable it keeps showing the last feed and says why.
+- **F1 APIs, same as the dashboard** (default): reads OpenF1 and Jolpica directly, with the dashboard's own helpers (`scripts/source.js`). No setup.
+- **Dashboard feed URL**: for a dashboard that serves `<url>/api/edge` (format in [`docs/f1-edge-feed.md`](docs/f1-edge-feed.md), with `Access-Control-Allow-Origin: *`).
+
+What it shows:
+
+- **Weekend** view: next race, countdown to the next session, session times in local time, driver and constructor standings (tap to switch).
+- **Results** tower: for 6 hours after a session, the final classification with gaps, tyres and pit counts.
+- **Live** tower: with a feed that provides live data (the widget itself never logs in; see below).
+- **My Driver** (`HAM`, `NOR`...) highlights that driver.
+
+**OpenF1 access:** per [openf1.org/auth.html](https://openf1.org/auth.html), data from 30 minutes before a session to 30 minutes after it needs a paid sponsor account, and free use is limited to 3 requests/s and 30/min. PIT WALL stores no login, so during that window it shows "live timing needs an OpenF1 account" and the weekend view, and it stops polling OpenF1's timing endpoints. Outside the window it uses about 2 OpenF1 requests a minute. (The F1 dashboard's own poll plan assumes 30 requests per 10 s, which is above the free limit.)
 
 ## Layout
 
