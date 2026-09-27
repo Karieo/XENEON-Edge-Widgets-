@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('PIT WALL')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="dashboardUrl" data-label="tr('Dashboard URL')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="myDriver" data-label="tr('My Driver')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="clock24" data-label="tr('24-Hour Clock')" data-type="switch" data-default="false" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('PIT WALL')",
+      "properties": ["dashboardUrl", "myDriver", "clock24"],
+      "info": "tr('Paste your F1 dashboard address (it must serve /api/edge with CORS allowed). Leave blank to see sample data. My Driver is a three-letter code like HAM to highlight.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame" data-view="weekend" data-status="none">
+    <header class="bar">
+      <div class="bar__brand">PIT WALL</div>
+      <div class="views" id="views">
+        <button class="view" data-view="live">Live</button>
+        <button class="view" data-view="weekend">Weekend</button>
+      </div>
+      <div class="bar__src" id="src"></div>
+    </header>
+
+    <!-- Live timing -->
+    <section class="live" id="live">
+      <div class="session">
+        <div class="session__name" id="sessName"></div>
+        <div class="session__lap" id="sessLap"></div>
+        <div class="session__track"><i id="lapFill"></i></div>
+        <div class="flag" id="flag"></div>
+        <div class="session__fl" id="fastest"></div>
+      </div>
+      <div class="tower" id="tower"></div>
+    </section>
+
+    <!-- Race weekend + standings -->
+    <section class="weekend" id="weekend">
+      <div class="race">
+        <div class="race__round" id="round"></div>
+        <div class="race__name" id="raceName"></div>
+        <div class="race__where" id="raceWhere"></div>
+        <div class="count">
+          <div class="count__label" id="countLabel"></div>
+          <div class="count__clock" id="countClock"></div>
+        </div>
+        <ol class="sessions" id="sessions"></ol>
+      </div>
+      <div class="table">
+        <div class="table__tabs">
+          <button class="ttab" data-tab="drivers">Drivers</button>
+          <button class="ttab" data-tab="constructors">Constructors</button>
+        </div>
+        <ol class="rows" id="rows"></ol>
+      </div>
+    </section>
+
+    <div class="empty" id="empty"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/sample.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
