@@ -16,7 +16,7 @@
     {
       "title": "tr('GRIDIRON')",
       "properties": ["favoriteTeam", "redZone"],
-      "info": "tr('Scores come from the public ESPN scoreboard. Favorite Team is an abbreviation like HOU or DAL (optional): its game is pinned first. Tap the standings to cycle divisions.')"
+      "info": "tr('Scores come from the public ESPN scoreboard. Tap a game for its Gamecast, swipe the games to page. Favorite Team is an abbreviation like HOU or DAL (optional): its game is pinned first. Tap the standings to cycle divisions.')"
     },
     {
       "title": "tr('Widget Personalization')",
@@ -47,6 +47,21 @@
         <ol class="stand" id="stand"></ol>
       </button>
     </aside>
+    <section class="cast" id="cast">
+      <div class="cast__bar">
+        <button class="cast__btn" id="castBack">&#8249; All games</button>
+        <button class="cast__btn cast__btn--espn" id="castEspn">ESPN Gamecast &#8250;</button>
+      </div>
+      <div class="cast__score" id="castScore"></div>
+      <div class="cast__field" id="castField"></div>
+      <div class="cast__tabs" id="castTabs">
+        <button class="cast__tab" data-tab="drive">Drive</button>
+        <button class="cast__tab" data-tab="scoring">Scoring</button>
+        <button class="cast__tab" data-tab="leaders">Leaders</button>
+        <button class="cast__tab" data-tab="stats">Stats</button>
+      </div>
+      <div class="cast__body" id="castBody"></div>
+    </section>
     <div class="toast" id="toast"></div>
   </main>
 

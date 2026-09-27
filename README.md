@@ -22,7 +22,7 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **PAINT RACK** | v0.1, untested on hardware | Paint recipes with swatches and step tick-off: Ultramarines, Blood Angels, Ork skin, metals, bone, flesh, bases, plus your own |
 | **SKETCH** | v0.1, untested on hardware | Finger-drawing chalkboard: chalk colors, eraser, undo, three saved pages |
 | **PIT WALL** | v0.1, untested on hardware | F1 from your F1 dashboard: live timing tower (gaps, tyres, pits, flags), next-race countdown with local session times, driver and constructor standings |
-| **GRIDIRON** | v0.1, untested on hardware | NFL Sunday: every game on the slate with live scores, down and distance, possession, red-zone alerts, scoring plays, division standings |
+| **GRIDIRON** | v0.1, untested on hardware | NFL Sunday: every game on the slate with live scores, down and distance, possession, red-zone alerts, scoring plays, division standings, and a Gamecast for any game you tap |
 
 Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, SKETCH is a chalkboard, and GRIDIRON is a stadium scoreboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
 
@@ -255,11 +255,12 @@ What it shows:
 
 NFL Sunday on the Edge. Scores come from ESPN's public scoreboard and standings (`site.api.espn.com`, no key, unofficial and undocumented, so fields are read defensively).
 
-- **Games**: every game this week. Order: your Favorite Team, then live games (red zone first), upcoming by kickoff, then finals. XL fits 16, L 12, M 4, S 2; the rest rotate every 12 s, and a tap on the games flips the page.
+- **Games**: every game this week. Order: your Favorite Team, then live games (red zone first), upcoming by kickoff, then finals. XL fits 16, L 12, M 4, S 2; the rest rotate every 12 s. Swipe the games (or tap the page dots) to flip.
 - **Tiles**: team color, record, score, possession ball, quarter and clock, down and distance, kickoff time and network.
 - **Scoring plays**: while games are live, the side panel lists the last 8 scores and a banner pops up for each touchdown or field goal. Worked out from score changes between polls, so a touchdown and its extra point can show as one +7.
 - **Red Zone Alerts** (setting, on by default): red-zone games flash, move to the top and get a banner.
 - **Standings**: when nothing is live the side panel shows division standings. Tap to cycle all 8 divisions; the last one is remembered. On live days, tap the scoring plays to peek at standings for 20 s.
+- **Gamecast**: tap any game. Line score by quarter, timeouts, a field showing the ball, direction and first-down line, the last play and win probability. Tabs for the current drive, scoring plays, player leaders and team stats. Before kickoff it shows venue, weather and the betting line; after, attendance. **ESPN Gamecast** opens the full page in your browser (uses iCUE's Link plugin). Live games refresh every 15 s while open.
 - **Favorite Team** (optional, e.g. `HOU`): pins that game first and opens standings on its division.
 - **Polling**: every 20 s with games live, 60 s within 30 min of a kickoff, 5 min on a game day, 15 min otherwise. Standings every 6 h. If ESPN is down it keeps the last scores and says how old they are.
 

@@ -1,6 +1,7 @@
 /* GRIDIRON — NFL Sunday on the Edge. Scores from ESPN's public scoreboard
-   (scripts/espn.js). Games that don't fit rotate in pages; the side panel
-   shows scoring plays while games are live and division standings otherwise. */
+   (scripts/espn.js). Games that don't fit rotate in pages (swipe to flip);
+   the side panel shows scoring plays while games are live and division
+   standings otherwise. Tap a game for its Gamecast. */
 
 var POLL_LIVE = 20000;
 var POLL_NEAR = 60000; // a kickoff within 30 min
@@ -11,6 +12,8 @@ var STAND_MS = 6 * 3600000;
 var PAGE_MS = 12000;
 var PEEK_MS = 20000; // standings stay up this long after a tap on live days
 var TOAST_MS = 6000;
+var CAST_LIVE = 15000;
+var SWIPE_PX = 60;
 var FEED_MAX = 8;
 var DIV_ORDER = ["AFC East", "AFC North", "AFC South", "AFC West", "NFC East", "NFC North", "NFC South", "NFC West"];
 var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -43,12 +46,22 @@ function onIcueDataUpdated() {
       page: 0,
       peekUntil: 0,
       prev: null, // { gameId: { h, a, rz } } from the last poll
+      open: null, // game id shown in the Gamecast view
+      tab: "drive",
+      cast: null, // Espn.summary() for the open game
+      castErr: "",
     };
     if (s.board) { board = s.board; boardAt = s.at || 0; }
     if (s.table) { table = s.table; tableAt = s.tableAt || 0; }
     Edge.press($("standPanel"), nextDivision);
     Edge.press($("feedPanel"), peekStandings);
-    Edge.press($("games"), nextPage);
+    wireGames();
+    Edge.press($("pages"), function () { flip(1); });
+    Edge.press($("castBack"), closeGame);
+    Edge.press($("castEspn"), openEspn);
+    Array.prototype.forEach.call(document.querySelectorAll(".cast__tab"), function (b) {
+      Edge.press(b, function () { ui.tab = b.dataset.tab; renderCast(); });
+    });
     setInterval(turnPage, PAGE_MS);
     setInterval(renderSource, 30000);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) poll(); });
@@ -89,6 +102,9 @@ function poll() {
     .then(function () {
       persist();
       render();
+      // Refetch the open game's details when it changes state (e.g. kicks off).
+      var og = ui.open && findGame(ui.open);
+      if (og && !castTimer && og.state !== ui.castState) fetchCast();
       pollTimer = setTimeout(poll, nextDelay());
     });
 }
@@ -193,6 +209,7 @@ function render() {
   renderGames();
   renderSide();
   renderSource();
+  renderCast();
 }
 
 function renderHeader() {
@@ -245,16 +262,36 @@ function renderGames() {
   }
 }
 
-function nextPage() {
+// Tap a game to open its Gamecast; swipe (either way, any direction) to page.
+function wireGames() {
+  var el = $("games");
+  var x0 = null, y0 = 0;
+  el.addEventListener("pointerdown", function (e) { x0 = e.clientX; y0 = e.clientY; });
+  el.addEventListener("pointercancel", function () { x0 = null; });
+  el.addEventListener("pointerup", function (e) {
+    if (x0 == null) return;
+    var dx = e.clientX - x0, dy = e.clientY - y0;
+    x0 = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) > SWIPE_PX) {
+      flip((Math.abs(dx) > Math.abs(dy) ? dx : dy) < 0 ? 1 : -1);
+      return;
+    }
+    var t = e.target && e.target.closest ? e.target.closest(".game") : null;
+    if (t) openGame(t.dataset.id);
+  });
+}
+
+function flip(dir) {
   var pages = Number($("games").dataset.pages) || 1;
   if (pages < 2) return;
-  ui.page = (ui.page + 1) % pages;
+  ui.page = (ui.page + dir + pages) % pages;
   ui.pagedAt = Date.now();
   renderGames();
 }
 
 function turnPage() {
-  // Hold the page for a while after a tap so it doesn't jump out from under you.
+  if (ui.open) return;
+  // Hold the page for a while after a swipe so it doesn't jump out from under you.
   if (ui.pagedAt && Date.now() - ui.pagedAt < PAGE_MS * 2) return;
   var pages = Number($("games").dataset.pages) || 1;
   if (pages < 2) return;
@@ -266,6 +303,7 @@ function tile(g) {
   var t = document.createElement("div");
   var fav = cfg.fav && (g.home.abbr === cfg.fav || g.away.abbr === cfg.fav);
   t.className = "game " + g.state + (fav ? " fav" : "") + (g.state === "in" && g.redZone ? " rz" : "");
+  t.dataset.id = g.id;
   t.innerHTML =
     '<div class="game__row away"></div><div class="game__row home"></div>' +
     '<div class="game__foot"><span class="game__status"></span><span class="game__sit"></span></div>';
@@ -405,4 +443,303 @@ function renderSource() {
 function ago(t) {
   var s = Math.round((Date.now() - t) / 1000);
   return s < 10 ? "just now" : s < 60 ? s + "s ago" : s < 3600 ? Math.round(s / 60) + " min ago" : Math.round(s / 3600) + " h ago";
+}
+
+// ---- Gamecast ---------------------------------------------------------------------
+
+var castTimer = null;
+
+function findGame(id) {
+  return board ? board.games.find(function (g) { return g.id === id; }) || null : null;
+}
+
+function openGame(id) {
+  var g = findGame(id);
+  if (!g) return;
+  ui.open = id;
+  ui.cast = null;
+  ui.castErr = "";
+  ui.tab = g.state === "in" ? "drive" : g.state === "post" ? "scoring" : "leaders";
+  renderCast();
+  fetchCast();
+}
+
+function closeGame() {
+  ui.open = null;
+  clearTimeout(castTimer);
+  castTimer = null;
+  render();
+}
+
+function openEspn() {
+  var g = ui.open && findGame(ui.open);
+  if (!g) return;
+  var how = Edge.openLink(g.link);
+  if (how === "unavailable") showToast({ cls: "score", text: "Link plugin unavailable", sub: "Open espn.com on the PC" });
+}
+
+function fetchCast() {
+  clearTimeout(castTimer);
+  castTimer = null;
+  var id = ui.open;
+  if (!id) return;
+  Espn.summary(id)
+    .then(function (c) {
+      if (ui.open !== id) return;
+      ui.cast = c;
+      ui.castErr = "";
+    }, function () {
+      if (ui.open === id) ui.castErr = "Gamecast details are not available right now";
+    })
+    .then(function () {
+      if (ui.open !== id) return;
+      renderCast();
+      var g = findGame(id);
+      ui.castState = g ? g.state : null;
+      if (g && g.state === "in") castTimer = setTimeout(fetchCast, CAST_LIVE);
+    });
+}
+
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function chip(color) {
+  var i = el("i", "chip");
+  i.style.setProperty("--team", color || "#888");
+  return i;
+}
+
+function renderCast() {
+  var frame = $("frame");
+  var g = ui.open && findGame(ui.open);
+  if (!g) {
+    if (ui.open) closeGame(); // dropped off the scoreboard
+    frame.dataset.mode = "board";
+    return;
+  }
+  frame.dataset.mode = "cast";
+  castScore(g);
+  castField(g);
+  castTabs(g);
+  castBody(g);
+}
+
+// Line score: team rows with quarters and total.
+function castScore(g) {
+  var box = $("castScore");
+  box.innerHTML = "";
+  var head = el("div", "cs__head");
+  head.appendChild(el("span", "cs__status", statusText(g)));
+  head.appendChild(el("span", "cs__net", g.network || ""));
+  box.appendChild(head);
+  var n = Math.max(4, g.home.lines.length, g.away.lines.length);
+  var tbl = el("table", "cs");
+  var hr = el("tr");
+  hr.appendChild(el("th", "cs__st", statusText(g))); // shown on S, where the head row is dropped
+  if (g.state !== "pre") for (var q = 1; q <= n; q++) hr.appendChild(el("th", "", q <= 4 ? String(q) : n > 5 ? q - 4 + "OT" : "OT"));
+  hr.appendChild(el("th", "cs__tot", g.state === "pre" ? "" : "T"));
+  tbl.appendChild(hr);
+  [["away", g.away], ["home", g.home]].forEach(function (x) {
+    var s = x[1];
+    var tr = el("tr", g.state === "post" && !s.winner && (g.home.winner || g.away.winner) ? "lost" : "");
+    var td = el("td", "cs__team");
+    td.appendChild(chip(s.color));
+    td.appendChild(el("b", "", s.abbr));
+    td.appendChild(el("span", "cs__rec", s.record || ""));
+    if (g.state === "in" && g.possession === x[0]) td.appendChild(el("span", "cs__ball"));
+    if (g.state === "in" && g.timeouts && g.timeouts[x[0]] != null) {
+      var tos = el("span", "tos");
+      for (var i = 0; i < 3; i++) tos.appendChild(el("i", i < g.timeouts[x[0]] ? "" : "used"));
+      td.appendChild(tos);
+    }
+    tr.appendChild(td);
+    if (g.state !== "pre") for (var q = 0; q < n; q++) tr.appendChild(el("td", "", s.lines[q] != null ? String(s.lines[q]) : q < g.period ? "0" : ""));
+    tr.appendChild(el("td", "cs__tot", g.state === "pre" || s.score == null ? "" : String(s.score)));
+    tbl.appendChild(tr);
+  });
+  box.appendChild(tbl);
+}
+
+// Ball position in yards from the away goal line (away end zone drawn on the left).
+function fieldX(g) {
+  var spot = String(g.spot || "").trim();
+  if (/(^|\s)50$/.test(spot)) return 50;
+  var m = /^([A-Z]{2,4})\s+(\d{1,2})$/.exec(spot);
+  if (!m) return null;
+  var n = Number(m[2]);
+  if (m[1] === g.home.abbr) return 100 - n;
+  if (m[1] === g.away.abbr) return n;
+  return null;
+}
+
+function castField(g) {
+  var box = $("castField");
+  box.innerHTML = "";
+  var x = g.state === "in" ? fieldX(g) : null;
+  if (x != null && g.possession) {
+    var right = g.possession === "away"; // away attacks the home end zone on the right
+    var goal = /goal/i.test(g.downText || g.down);
+    var ltg = goal ? (right ? 100 : 0) : g.distance != null ? x + (right ? g.distance : -g.distance) : null;
+    var f = el("div", "fld" + (g.redZone && cfg.redZone ? " rz" : ""));
+    var ezA = el("div", "fld__ez", g.away.abbr); ezA.style.setProperty("--team", g.away.color);
+    var ezH = el("div", "fld__ez", g.home.abbr); ezH.style.setProperty("--team", g.home.color);
+    var grid = el("div", "fld__grid");
+    [10, 20, 30, 40, 50, 60, 70, 80, 90].forEach(function (y) {
+      var m = el("span", "fld__yd", String(y <= 50 ? y : 100 - y));
+      m.style.left = y + "%";
+      grid.appendChild(m);
+    });
+    if (ltg != null && ltg >= 0 && ltg <= 100) {
+      var l = el("i", "fld__ltg");
+      l.style.left = ltg + "%";
+      grid.appendChild(l);
+    }
+    var ball = el("i", "fld__ball " + (right ? "to-right" : "to-left"));
+    ball.style.left = x + "%";
+    ball.style.setProperty("--team", (right ? g.away : g.home).color);
+    grid.appendChild(ball);
+    f.appendChild(ezA); f.appendChild(grid); f.appendChild(ezH);
+    box.appendChild(f);
+  }
+  var lines = [];
+  if (g.state === "in") {
+    var who = g.possession === "home" ? g.home : g.possession === "away" ? g.away : null;
+    if (g.downText || g.down) lines.push(["fld__dd", (who ? who.abbr + " · " : "") + (g.downText || [g.down, g.spot].filter(Boolean).join(" at "))]);
+    if (g.lastPlay) lines.push(["fld__last", g.lastPlay]);
+  } else {
+    var info = ui.cast ? ui.cast.info : {};
+    if (g.state === "pre") lines.push(["fld__dd", "Kickoff " + kickoff(g.start) + (g.network ? " · " + g.network : "")]);
+    else lines.push(["fld__dd", statusText(g) + " · " + g.away.abbr + " " + (g.away.score || 0) + ", " + g.home.abbr + " " + (g.home.score || 0)]);
+    var venue = g.venue || info.venue;
+    if (venue) lines.push(["fld__info", venue]);
+    if (g.state === "pre" && (g.weather || info.weather)) lines.push(["fld__info", "Weather " + (g.weather || info.weather)]);
+    if (g.state === "pre" && g.odds) lines.push(["fld__info", "Line " + g.odds]);
+    if (g.state === "post" && info.attendance) lines.push(["fld__info", "Attendance " + info.attendance]);
+  }
+  lines.forEach(function (l) { box.appendChild(el("div", l[0], l[1])); });
+  var wp = ui.cast && ui.cast.winProb;
+  if (g.state === "in" && typeof wp === "number") {
+    var h = Math.round(wp * 100), a = 100 - h;
+    var row = el("div", "wp");
+    row.appendChild(el("span", "", g.away.abbr + " " + a + "%"));
+    var bar = el("div", "wp__bar");
+    var ia = el("i"); ia.style.width = a + "%"; ia.style.background = g.away.color;
+    var ih = el("i"); ih.style.width = h + "%"; ih.style.background = g.home.color;
+    bar.appendChild(ia); bar.appendChild(ih);
+    row.appendChild(bar);
+    row.appendChild(el("span", "", h + "% " + g.home.abbr));
+    box.appendChild(row);
+    box.appendChild(el("div", "wp__label", "Win probability"));
+  }
+}
+
+function castTabs(g) {
+  var show = g.state === "pre" ? { leaders: 1 } : { drive: 1, scoring: 1, leaders: 1, stats: 1 };
+  if (!show[ui.tab]) ui.tab = "leaders";
+  Array.prototype.forEach.call(document.querySelectorAll(".cast__tab"), function (b) {
+    b.hidden = !show[b.dataset.tab];
+    b.classList.toggle("on", b.dataset.tab === ui.tab);
+    if (b.dataset.tab === "drive") b.textContent = g.state === "in" ? "Drive" : "Last drive";
+  });
+}
+
+function sideOf(g, teamId, abbr) {
+  if (teamId && teamId === g.home.id || abbr && abbr === g.home.abbr) return g.home;
+  if (teamId && teamId === g.away.id || abbr && abbr === g.away.abbr) return g.away;
+  return null;
+}
+
+function castBody(g) {
+  var box = $("castBody");
+  box.innerHTML = "";
+  box.dataset.tab = ui.tab;
+  var c = ui.cast;
+  if (!c) {
+    box.appendChild(el("div", "cb__none", ui.castErr || "Loading Gamecast…"));
+    return;
+  }
+  var none = function (t) { box.appendChild(el("div", "cb__none", t)); };
+  if (ui.tab === "drive") {
+    var d = c.drive;
+    if (!d) return none("No drives yet");
+    var team = sideOf(g, d.team, d.abbr);
+    var hd = el("div", "drv__head");
+    hd.appendChild(chip(team ? team.color : "#888"));
+    hd.appendChild(el("b", "", d.abbr || (team && team.abbr) || ""));
+    hd.appendChild(el("span", "", d.description));
+    if (d.result && !c.live) hd.appendChild(el("em", "", d.result));
+    box.appendChild(hd);
+    var ol = el("ol", "drv");
+    d.plays.slice(0, 8).forEach(function (p) {
+      var li = el("li", p.scoring ? "score" : "");
+      li.appendChild(el("span", "drv__dd", p.dd));
+      li.appendChild(el("span", "drv__text", p.text));
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+  } else if (ui.tab === "scoring") {
+    if (!c.scoring.length) return none("No scoring yet");
+    var ol2 = el("ol", "scr");
+    c.scoring.slice().reverse().forEach(function (p) {
+      var team = sideOf(g, p.team, p.abbr);
+      var li = el("li");
+      li.appendChild(el("span", "scr__when", (p.period > 4 ? "OT" : "Q" + p.period) + " " + p.clock));
+      li.appendChild(chip(team ? team.color : "#888"));
+      li.appendChild(el("b", "", p.abbr || (team && team.abbr) || ""));
+      li.appendChild(el("span", "scr__kind", p.kind));
+      li.appendChild(el("span", "scr__text", p.text));
+      li.appendChild(el("span", "scr__sc", (p.away != null ? p.away : "") + "-" + (p.home != null ? p.home : "")));
+      ol2.appendChild(li);
+    });
+    box.appendChild(ol2);
+  } else if (ui.tab === "leaders") {
+    if (!c.leaders.length) return none("Leaders show up once the game starts");
+    box.appendChild(cmpHead(g));
+    c.leaders.slice(0, 4).forEach(function (l) {
+      var row = el("div", "cmp ldr");
+      [g.away, null, g.home].forEach(function (s) {
+        if (!s) { row.appendChild(el("span", "cmp__label", l.label)); return; }
+        var p = l.teams[s.id];
+        var cell = el("span", "ldr__cell");
+        if (p) { cell.appendChild(el("b", "", p.name)); cell.appendChild(el("span", "", p.value)); }
+        row.appendChild(cell);
+      });
+      box.appendChild(row);
+    });
+  } else {
+    if (!c.stats.length) return none("Team stats show up once the game starts");
+    box.appendChild(cmpHead(g));
+    c.stats.forEach(function (r) {
+      var av = r.teams[g.away.id], hv = r.teams[g.home.id];
+      var row = el("div", "cmp");
+      row.appendChild(el("span", "cmp__v", av != null ? av : "–"));
+      row.appendChild(el("span", "cmp__label", r.label));
+      row.appendChild(el("span", "cmp__v", hv != null ? hv : "–"));
+      var an = parseFloat(av), hn = parseFloat(hv);
+      if (!/-|:/.test(String(av) + hv) && an + hn > 0) {
+        var bar = el("div", "cmp__bar");
+        var ia = el("i"); ia.style.width = (an / (an + hn)) * 100 + "%"; ia.style.background = g.away.color;
+        var ih = el("i"); ih.style.width = (hn / (an + hn)) * 100 + "%"; ih.style.background = g.home.color;
+        bar.appendChild(ia); bar.appendChild(ih);
+        row.appendChild(bar);
+      }
+      box.appendChild(row);
+    });
+  }
+}
+
+function cmpHead(g) {
+  var row = el("div", "cmp cmp--head");
+  [g.away, null, g.home].forEach(function (s) {
+    if (!s) { row.appendChild(el("span", "cmp__label")); return; }
+    var c = el("span", "cmp__v");
+    c.appendChild(chip(s.color));
+    c.appendChild(el("b", "", s.abbr));
+    row.appendChild(c);
+  });
+  return row;
 }
