@@ -22,8 +22,9 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **PAINT RACK** | v0.1, untested on hardware | Paint recipes with swatches and step tick-off: Ultramarines, Blood Angels, Ork skin, metals, bone, flesh, bases, plus your own |
 | **SKETCH** | v0.1, untested on hardware | Finger-drawing chalkboard: chalk colors, eraser, undo, three saved pages |
 | **PIT WALL** | v0.1, untested on hardware | F1 from your F1 dashboard: live timing tower (gaps, tyres, pits, flags), next-race countdown with local session times, driver and constructor standings |
+| **GRIDIRON** | v0.1, untested on hardware | NFL Sunday: every game on the slate with live scores, down and distance, possession, red-zone alerts, scoring plays, division standings |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, and SKETCH is a chalkboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, SKETCH is a chalkboard, and GRIDIRON is a stadium scoreboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -250,6 +251,18 @@ What it shows:
 
 **OpenF1 access:** per [openf1.org/auth.html](https://openf1.org/auth.html), data from 30 minutes before a session to 30 minutes after it needs a paid sponsor account, and free use is limited to 3 requests/s and 30/min. PIT WALL stores no login, so during that window it shows "live timing needs an OpenF1 account" and the weekend view, and it stops polling OpenF1's timing endpoints. Outside the window it uses about 2 OpenF1 requests a minute. (The F1 dashboard's own poll plan assumes 30 requests per 10 s, which is above the free limit.)
 
+## GRIDIRON
+
+NFL Sunday on the Edge. Scores come from ESPN's public scoreboard and standings (`site.api.espn.com`, no key, unofficial and undocumented, so fields are read defensively).
+
+- **Games**: every game this week. Order: your Favorite Team, then live games (red zone first), upcoming by kickoff, then finals. XL fits 16, L 12, M 4, S 2; the rest rotate every 12 s, and a tap on the games flips the page.
+- **Tiles**: team color, record, score, possession ball, quarter and clock, down and distance, kickoff time and network.
+- **Scoring plays**: while games are live, the side panel lists the last 8 scores and a banner pops up for each touchdown or field goal. Worked out from score changes between polls, so a touchdown and its extra point can show as one +7.
+- **Red Zone Alerts** (setting, on by default): red-zone games flash, move to the top and get a banner.
+- **Standings**: when nothing is live the side panel shows division standings. Tap to cycle all 8 divisions; the last one is remembered. On live days, tap the scoring plays to peek at standings for 20 s.
+- **Favorite Team** (optional, e.g. `HOU`): pins that game first and opens standings on its division.
+- **Polling**: every 20 s with games live, 60 s within 30 min of a kickoff, 5 min on a game day, 15 min otherwise. Standings every 6 h. If ESPN is down it keeps the last scores and says how old they are.
+
 ## Layout
 
 ```
@@ -282,6 +295,7 @@ widgets/
   PaintRack/
   Sketch/
   PitWall/
+  Gridiron/
 docs/f1-edge-feed.md   the JSON feed PIT WALL reads from the F1 dashboard
 tools/build.mjs
 RESEARCH.md
@@ -295,5 +309,6 @@ RESEARCH.md
 - Fonts: Bebas Neue (Dharma Type), Share Tech Mono (Carrois), VT323 (Peter Hull), Cinzel (Natanael Gama), Barlow Condensed (Jeremy Tribby), Titillium Web (Accademia di Belle Arti di Urbino), Zilla Slab (Typotheque for Mozilla), Caveat (Impallari Type), Inter (Rasmus Andersson), Oswald (Vernon Adams), JetBrains Mono (JetBrains), Space Grotesk (Florian Karsten), Outfit (Rodrigo Fuenzalida), Saira Stencil One (Omnibus-Type), Press Start 2P (CodeMan38), IM Fell English (Igino Marini), Josefin Sans (Santiago Orozco), Fraunces (Undercase Type), all SIL Open Font License 1.1.
 - Weather data by [Open-Meteo.com](https://open-meteo.com) (CC-BY 4.0).
 - Album art and album names from Apple's iTunes Search API.
+- NFL scores and standings from ESPN's public site API (unofficial). NFL team names are trademarks of the NFL and its teams; GRIDIRON shows abbreviations and colors only, no logos.
 - GRIMOIRE: This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
 - Warhammer 40,000 and Citadel paint names are trademarks of Games Workshop. PAINT RACK swatches are eyeballed approximations for personal reference. WARGAME only tracks numbers; no rules text is included.

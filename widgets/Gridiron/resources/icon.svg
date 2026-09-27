@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GRIDIRON">
+  <rect width="128" height="128" rx="14" fill="#0f3d24"/>
+  <path d="M0 32h128M0 64h128M0 96h128" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <ellipse cx="64" cy="64" rx="38" ry="22" transform="rotate(-30 64 64)" fill="#7a3b16"/>
+  <path d="M46 72 L82 56" stroke="#fff" stroke-width="3"/>
+  <path d="M56 62l4 8M62 60l4 8M68 57l4 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+</svg>
