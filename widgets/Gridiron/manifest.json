@@ -2,12 +2,13 @@
   "author": "Karieo",
   "id": "com.karieo.gridiron",
   "name": "GRIDIRON",
-  "description": "NFL Sunday on the Xeneon Edge: every game on the slate with live scores, down and distance, possession, red-zone alerts and scoring plays, plus division standings on off days.",
-  "version": "0.1.0",
+  "description": "NFL Sunday on the Xeneon Edge: every game on the slate with live scores, down and distance, possession, red-zone alerts, scoring plays and a tap-in Gamecast for each game, plus division standings on off days.",
+  "version": "0.2.0",
   "preview_icon": "resources/icon.svg",
   "min_app_version": "5.47",
   "min_framework_version": "1.0.0",
   "os": [{ "platform": "windows" }],
   "supported_devices": [{ "type": "dashboard_lcd" }],
-  "interactive": true
+  "interactive": true,
+  "required_plugins": ["widgetbuilder.linkprovider:Url:1.0"]
 }
