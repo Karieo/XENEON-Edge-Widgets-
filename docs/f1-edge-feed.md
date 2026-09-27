@@ -1,5 +1,10 @@
 # F1 Edge feed (for PIT WALL)
 
+> PIT WALL's default source doesn't need this feed: it reads OpenF1 and Jolpica directly
+> (`widgets/PitWall/scripts/source.js`), the same way the static F1 dashboard does. This
+> feed is the optional **Dashboard feed URL** source, for a dashboard with a server (for
+> example one that holds an OpenF1 sponsor login and can share live timing).
+
 PIT WALL reads one small JSON document from your F1 dashboard. The dashboard does the
 heavy lifting (OpenF1, Jolpica, caching); the widget only draws what it's given.
 

@@ -5,7 +5,10 @@
   "Dashboard URL": "Dashboard URL",
   "My Driver": "My Driver",
   "24-Hour Clock": "24-Hour Clock",
-  "Paste your F1 dashboard address (it must serve /api/edge with CORS allowed). Leave blank to see sample data. My Driver is a three-letter code like HAM to highlight.": "Paste your F1 dashboard address (it must serve /api/edge with CORS allowed). Leave blank to see sample data. My Driver is a three-letter code like HAM to highlight.",
   "Widget Personalization": "Widget Personalization",
-  "Background Transparency": "Background Transparency"
+  "Background Transparency": "Background Transparency",
+  "Data Source": "Data Source",
+  "F1 APIs, same as the dashboard": "F1 APIs, same as the dashboard",
+  "Dashboard feed URL": "Dashboard feed URL",
+  "F1 APIs reads OpenF1 and Jolpica directly, like the F1 dashboard does. Dashboard feed URL is only for a dashboard that serves /api/edge. My Driver is a three-letter code like HAM to highlight.": "F1 APIs reads OpenF1 and Jolpica directly, like the F1 dashboard does. Dashboard feed URL is only for a dashboard that serves /api/edge. My Driver is a three-letter code like HAM to highlight."
 }

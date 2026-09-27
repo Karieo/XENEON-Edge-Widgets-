@@ -1,5 +1,6 @@
-/* PIT WALL — F1 on the Edge, drawn from the dashboard's /api/edge feed
-   (see docs/f1-edge-feed.md). No URL set: shows PITWALL_SAMPLE. */
+/* PIT WALL — F1 on the Edge. Data comes from the same public APIs as the F1
+   dashboard (scripts/source.js), or from a dashboard's /api/edge feed
+   (docs/f1-edge-feed.md). Outside iCUE with no source set: PITWALL_SAMPLE. */
 
 var POLL_IDLE = 60000;
 var POLL_NEAR = 15000; // within 30 min of a session
@@ -17,13 +18,15 @@ var feed = null; // last good feed
 var fetchedAt = 0;
 var lastError = "";
 var pollTimer = null;
-var ui = null; // { view, tab, pinnedView }
+var ui = null; // { view, tab }
+var prevKey = null;
 
 // ---- Settings ------------------------------------------------------------------
 
 function onIcueDataUpdated() {
-  var prevUrl = cfg.url;
   cfg = {
+    // Browser preview (no iCUE, no source picked) shows the built-in sample.
+    source: Edge.inIcue() || Edge.prop("dataSource", "") ? (Edge.prop("dataSource", "apis") === "feed" ? "feed" : "apis") : "sample",
     url: String(Edge.prop("dashboardUrl", "")).trim(),
     me: String(Edge.prop("myDriver", "")).trim().toUpperCase().slice(0, 3),
     clock24: String(Edge.prop("clock24", false)) === "true",
@@ -33,9 +36,10 @@ function onIcueDataUpdated() {
     var s = Edge.store.load();
     ui = { view: null, tab: s.tab === "constructors" ? "constructors" : "drivers", cached: s.feed || null, cachedAt: s.at || 0 };
     // Show the last feed right away; a fresh one replaces it in a moment.
-    if (ui.cached && cfg.url) { feed = ui.cached; fetchedAt = ui.cachedAt; }
+    if (ui.cached && cfg.source !== "sample") { feed = ui.cached; fetchedAt = ui.cachedAt; }
   }
-  if (cfg.url !== prevUrl) { lastError = ""; poll(); }
+  var key = cfg.source + "|" + cfg.url;
+  if (key !== prevKey) { prevKey = key; lastError = ""; poll(); }
   else render();
 }
 
@@ -48,46 +52,55 @@ function feedUrl(u) {
 
 function poll() {
   clearTimeout(pollTimer);
-  if (!cfg.url) {
+  if (cfg.source === "sample") {
     feed = PITWALL_SAMPLE;
     fetchedAt = Date.now();
     render();
     return; // sample data doesn't change
   }
-  var ctl = typeof AbortController === "function" ? new AbortController() : null;
-  var t = ctl ? setTimeout(function () { ctl.abort(); }, 8000) : null;
-  fetch(feedUrl(cfg.url), { cache: "no-store", signal: ctl ? ctl.signal : undefined })
-    .then(function (r) {
-      if (!r.ok) throw new Error("Dashboard replied " + r.status);
-      return r.json();
-    })
+  getFeed()
     .then(function (data) {
       if (!data || typeof data !== "object") throw new Error("Not a PIT WALL feed");
       feed = data;
       fetchedAt = Date.now();
-      lastError = "";
+      lastError = data.warnings && data.warnings.length ? data.warnings[0] : "";
       Edge.store.save({ tab: ui.tab, feed: data, at: fetchedAt });
     })
     .catch(function (e) {
-      lastError = e && e.name === "AbortError" ? "Dashboard not answering" : (e && e.message) || "Dashboard unreachable";
-      if (/Failed to fetch|NetworkError/i.test(lastError)) lastError = "Can't reach dashboard (check URL and CORS)";
+      var msg = e && e.name === "AbortError" ? "not answering" : (e && e.message) || "unreachable";
+      var who = cfg.source === "feed" ? "Dashboard" : "F1 APIs";
+      lastError = /Failed to fetch|NetworkError/i.test(msg)
+        ? (cfg.source === "feed" ? "Can't reach dashboard (check URL and CORS)" : "Can't reach the F1 APIs")
+        : who + ": " + msg;
     })
     .then(function () {
-      clearTimeout(t);
       render();
       pollTimer = setTimeout(poll, nextDelay());
     });
 }
 
+function getFeed() {
+  if (cfg.source === "apis") return PitSource.build();
+  if (!cfg.url) return Promise.reject(new Error("set the Dashboard URL in settings"));
+  var ctl = typeof AbortController === "function" ? new AbortController() : null;
+  var t = ctl ? setTimeout(function () { ctl.abort(); }, 8000) : null;
+  return fetch(feedUrl(cfg.url), { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+    .then(function (r) {
+      clearTimeout(t);
+      if (!r.ok) throw new Error("replied " + r.status);
+      return r.json();
+    }, function (e) { clearTimeout(t); throw e; });
+}
+
 function nextDelay() {
   if (document.hidden) return POLL_IDLE;
-  if (feed && feed.live) return POLL_LIVE;
+  if (feed && feed.live && !feed.live.final) return POLL_LIVE;
   var n = nextSession();
   if (n && Math.abs(n.at - Date.now()) < NEAR_MS) return POLL_NEAR;
   return POLL_IDLE;
 }
 
-document.addEventListener("visibilitychange", function () { if (!document.hidden && cfg.url) poll(); });
+document.addEventListener("visibilitychange", function () { if (!document.hidden && cfg.source !== "sample") poll(); });
 
 // ---- Render ----------------------------------------------------------------------
 
@@ -99,6 +112,7 @@ function render() {
   var view = hasLive ? (ui.view || "live") : "weekend";
   frame.dataset.view = view;
   frame.dataset.hasLive = hasLive ? "yes" : "no";
+  $("liveTab").textContent = hasLive && feed.live.final ? "Results" : "Live";
   Array.prototype.forEach.call(document.querySelectorAll(".view"), function (b) { b.classList.toggle("on", b.dataset.view === view); });
   renderSource();
   if (!feed) {
@@ -112,14 +126,21 @@ function render() {
 
 function renderSource() {
   var el = $("src");
-  if (!cfg.url) { el.textContent = "Sample data"; el.className = "bar__src warn"; return; }
+  if (cfg.source === "sample") { el.textContent = "Sample data"; el.className = "bar__src warn"; return; }
   if (lastError) {
     el.textContent = lastError + (fetchedAt ? " · showing " + ago(fetchedAt) : "");
     el.className = "bar__src bad";
     return;
   }
-  el.textContent = feed && feed.live ? "Live" : "Updated " + ago(fetchedAt);
-  el.className = "bar__src" + (feed && feed.live ? " live" : "");
+  var from = cfg.source === "apis" ? "OpenF1 · Jolpica" : "Dashboard";
+  if (feed && feed.liveLocked) {
+    el.textContent = (feed.liveLocked.session || "Session") + " is live · live timing needs an OpenF1 account";
+    el.className = "bar__src warn";
+    return;
+  }
+  var isLive = feed && feed.live && !feed.live.final;
+  el.textContent = isLive ? "Live · " + from : from + " · updated " + ago(fetchedAt);
+  el.className = "bar__src" + (isLive ? " live" : "");
 }
 
 function ago(t) {
@@ -268,7 +289,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".view"), function (b) {
 Array.prototype.forEach.call(document.querySelectorAll(".ttab"), function (b) {
   Edge.press(b, function () {
     ui.tab = b.dataset.tab;
-    Edge.store.save({ tab: ui.tab, feed: cfg.url ? feed : null, at: fetchedAt });
+    Edge.store.save({ tab: ui.tab, feed: cfg.source !== "sample" ? feed : null, at: fetchedAt });
     render();
   });
 });
