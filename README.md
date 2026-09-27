@@ -21,6 +21,7 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **JUKEBOX** | v0.1, untested on hardware | Now playing on a spinning record with album art, big controls, recently played wall, playlist buttons |
 | **PAINT RACK** | v0.1, untested on hardware | Paint recipes with swatches and step tick-off: Ultramarines, Blood Angels, Ork skin, metals, bone, flesh, bases, plus your own |
 | **SKETCH** | v0.1, untested on hardware | Finger-drawing chalkboard: chalk colors, eraser, undo, three saved pages |
+| **PIT WALL** | v0.1, untested on hardware | F1 from your F1 dashboard: live timing tower (gaps, tyres, pits, flags), next-race countdown with local session times, driver and constructor standings |
 
 Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, and SKETCH is a chalkboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
 
@@ -233,6 +234,15 @@ Pick a recipe, tap each step as you finish it, and the Up Next card shows the ne
 
 Draw with a finger. Chalk sticks pick the color, the dot button changes line size, then eraser, undo, and trash (hold to wipe). Three pages, all saved.
 
+## PIT WALL
+
+Reads one JSON feed from your F1 dashboard: set **Dashboard URL** (e.g. `https://f1.example.com` or `http://192.168.1.20:3000`) and the widget fetches `<url>/api/edge`. The feed format is in [`docs/f1-edge-feed.md`](docs/f1-edge-feed.md); the dashboard must send `Access-Control-Allow-Origin: *` on that route. With no URL, it shows built-in sample data.
+
+- During a session the live timing tower takes over automatically (tap **Weekend** to peek at standings); it goes back to the weekend view when the session ends.
+- Polls every 60 s, every 15 s within 30 minutes of a session, every 3 s while live.
+- **My Driver** (`HAM`, `NOR`...) highlights that driver in the tower and standings.
+- If the dashboard is unreachable it keeps showing the last feed and says why.
+
 ## Layout
 
 ```
@@ -264,6 +274,8 @@ widgets/
   Jukebox/
   PaintRack/
   Sketch/
+  PitWall/
+docs/f1-edge-feed.md   the JSON feed PIT WALL reads from the F1 dashboard
 tools/build.mjs
 RESEARCH.md
 ```
