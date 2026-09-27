@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('GRIDIRON')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('Mini Forge Dad')" />
+
+  <meta name="x-icue-property" content="favoriteTeam" data-label="tr('Favorite Team')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="redZone" data-label="tr('Red Zone Alerts')" data-type="switch" data-default="true" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('GRIDIRON')",
+      "properties": ["favoriteTeam", "redZone"],
+      "info": "tr('Scores come from the public ESPN scoreboard. Favorite Team is an abbreviation like HOU or DAL (optional): its game is pinned first. Tap the standings to cycle divisions.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <header class="top">
+      <div class="top__week" id="week">NFL</div>
+      <div class="top__counts" id="counts"></div>
+      <div class="top__pages" id="pages"></div>
+      <div class="top__src" id="src"></div>
+    </header>
+    <section class="games" id="games"></section>
+    <aside class="side">
+      <div class="side__panel feed" id="feedPanel">
+        <div class="side__title">Scoring plays</div>
+        <ol class="plays" id="plays"></ol>
+      </div>
+      <button class="side__panel standings" id="standPanel">
+        <div class="side__title"><span id="divName">Division</span><span class="side__hint">tap for next</span></div>
+        <ol class="stand" id="stand"></ol>
+      </button>
+    </aside>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/espn.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>
