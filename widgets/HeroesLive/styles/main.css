@@ -1,0 +1,140 @@
+/* HEROES LIVE theme — dark arena slate with a teal accent (distinct from HEROES DRAFT's gold). */
+
+:root {
+  --hl-panel: color-mix(in srgb, var(--bg-color) 88%, white 4%);
+  --hl-line: color-mix(in srgb, var(--accent-color) 30%, transparent);
+  --hl-win: #57d38c;
+  --hl-loss: #f2555a;
+  --btn-radius: 6px;
+}
+
+body { font-family: "Barlow Condensed", "Segoe UI", sans-serif; }
+
+.frame {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 2.5);
+}
+
+.panel {
+  background: var(--hl-panel);
+  border: 1px solid var(--hl-line);
+  border-radius: 10px;
+  padding: calc(var(--u) * 2);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hd-label {
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: calc(var(--u) * 1.5);
+}
+
+.hd-label span { color: color-mix(in srgb, var(--text-color) 60%, transparent); font-size: calc(var(--u) * 2.4); text-transform: none; letter-spacing: 0; }
+
+/* ---- Picker + personal panel ---- */
+
+.panel--pick { gap: calc(var(--u) * 1.5); position: relative; }
+
+.pick__label {
+  font-size: calc(var(--u) * 2.4);
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--text-color) 60%, transparent);
+}
+
+.pick__row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+}
+
+.stepper {
+  min-height: calc(var(--u) * 8);
+  min-width: calc(var(--u) * 8);
+  padding: 0;
+  font-size: calc(var(--u) * 5);
+  flex: none;
+}
+
+.pick__name {
+  flex: 1;
+  text-align: center;
+  font-size: calc(var(--u) * 6);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mode { font-size: calc(var(--u) * 2.6); }
+
+.tag {
+  position: absolute;
+  top: calc(var(--u) * 2);
+  right: calc(var(--u) * 2);
+  font-size: calc(var(--u) * 2.2);
+  letter-spacing: 0.08em;
+  padding: calc(var(--u) * 0.4) calc(var(--u) * 1.2);
+  border-radius: 999px;
+  border: 1px solid var(--hl-line);
+  color: color-mix(in srgb, var(--text-color) 60%, transparent);
+}
+
+.tag[data-state="on"] { color: var(--hl-win); border-color: var(--hl-win); }
+.tag[data-state="off"] { color: var(--hl-loss); border-color: var(--hl-loss); }
+
+.personal { margin-top: auto; }
+
+.personal__row {
+  display: flex;
+  gap: calc(var(--u) * 3);
+}
+
+.stat { display: flex; flex-direction: column; align-items: flex-start; }
+.stat b { font-size: calc(var(--u) * 6); line-height: 1; }
+.stat span { font-size: calc(var(--u) * 2); letter-spacing: 0.08em; color: color-mix(in srgb, var(--text-color) 55%, transparent); }
+
+/* ---- Talent build panel ---- */
+
+.panel--build { justify-content: center; }
+
+.talent-line {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.4);
+}
+
+.talent {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--u) * 1.6);
+  padding-bottom: calc(var(--u) * 1.2);
+  border-bottom: 1px solid var(--hl-line);
+}
+
+.talent:last-child { border-bottom: none; }
+
+.talent__lvl {
+  font-size: calc(var(--u) * 2.6);
+  font-weight: 700;
+  color: var(--accent-color);
+  min-width: calc(var(--u) * 5);
+}
+
+.talent__name {
+  font-size: calc(var(--u) * 3.4);
+  font-weight: 700;
+}
+
+.build-empty {
+  font-size: calc(var(--u) * 2.2);
+  color: color-mix(in srgb, var(--text-color) 55%, transparent);
+}

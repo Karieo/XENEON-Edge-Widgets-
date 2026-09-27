@@ -1,0 +1,171 @@
+/* HEROES DRAFT theme — dark arena slate with a gold accent. */
+
+:root {
+  --hd-panel: color-mix(in srgb, var(--bg-color) 88%, white 4%);
+  --hd-line: color-mix(in srgb, var(--accent-color) 30%, transparent);
+  --hd-win: #57d38c;
+  --hd-loss: #f2555a;
+  --btn-radius: 6px;
+}
+
+body { font-family: "Barlow Condensed", "Segoe UI", sans-serif; }
+
+.frame {
+  display: grid;
+  grid-template-columns: 1.1fr 0.8fr 1.4fr;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 2.5);
+}
+
+.panel {
+  background: var(--hd-panel);
+  border: 1px solid var(--hd-line);
+  border-radius: 10px;
+  padding: calc(var(--u) * 2);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hd-label {
+  font-size: calc(var(--u) * 3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  margin-bottom: calc(var(--u) * 1.5);
+}
+
+/* ---- Picker panel ---- */
+
+.panel--pick { gap: calc(var(--u) * 1.5); position: relative; }
+
+.pick__label {
+  font-size: calc(var(--u) * 2.4);
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--text-color) 60%, transparent);
+  margin-bottom: calc(var(--u) * 0.6);
+}
+
+.pick__row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+}
+
+.stepper {
+  min-height: calc(var(--u) * 8);
+  min-width: calc(var(--u) * 8);
+  padding: 0;
+  font-size: calc(var(--u) * 5);
+  flex: none;
+}
+
+.pick__name {
+  flex: 1;
+  text-align: center;
+  font-size: calc(var(--u) * 6);
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mode {
+  margin-top: auto;
+  font-size: calc(var(--u) * 2.6);
+}
+
+.tag {
+  position: absolute;
+  top: calc(var(--u) * 2);
+  right: calc(var(--u) * 2);
+  font-size: calc(var(--u) * 2.2);
+  letter-spacing: 0.08em;
+  padding: calc(var(--u) * 0.4) calc(var(--u) * 1.2);
+  border-radius: 999px;
+  border: 1px solid var(--hd-line);
+  color: color-mix(in srgb, var(--text-color) 60%, transparent);
+}
+
+.tag[data-state="on"] { color: var(--hd-win); border-color: var(--hd-win); }
+.tag[data-state="off"] { color: var(--hd-loss); border-color: var(--hd-loss); }
+
+/* ---- Matchup panel ---- */
+
+.panel--matchup { align-items: center; text-align: center; justify-content: center; }
+
+.matchup__wr {
+  font-size: calc(var(--u) * 12);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-color);
+}
+
+.matchup__games {
+  font-size: calc(var(--u) * 2.6);
+  color: color-mix(in srgb, var(--text-color) 60%, transparent);
+  margin-top: calc(var(--u) * 1);
+}
+
+.matchup__empty {
+  font-size: calc(var(--u) * 2.2);
+  color: color-mix(in srgb, var(--text-color) 55%, transparent);
+  margin-top: calc(var(--u) * 1.5);
+}
+
+/* ---- Builds panel ---- */
+
+.panel--builds { overflow: hidden; }
+
+.builds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.2);
+  overflow-y: auto;
+}
+
+.build {
+  background: color-mix(in srgb, var(--accent-color) 6%, transparent);
+  border: 1px solid var(--hd-line);
+  border-radius: 8px;
+  padding: calc(var(--u) * 1) calc(var(--u) * 1.4);
+}
+
+.build--empty {
+  color: color-mix(in srgb, var(--text-color) 55%, transparent);
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.build__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: calc(var(--u) * 2.6);
+  font-weight: 700;
+  color: var(--hd-win);
+  margin-bottom: calc(var(--u) * 0.6);
+}
+
+.build__head span:last-child { color: color-mix(in srgb, var(--text-color) 55%, transparent); font-weight: 400; }
+
+.build__talents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) * 0.6) calc(var(--u) * 1.2);
+}
+
+.build__t {
+  font-size: calc(var(--u) * 2);
+  color: color-mix(in srgb, var(--text-color) 85%, transparent);
+  white-space: nowrap;
+}
+
+.build__t b {
+  color: var(--accent-color);
+  margin-right: calc(var(--u) * 0.4);
+}

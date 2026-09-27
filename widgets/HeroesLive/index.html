@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tr('HEROES LIVE')</title>
+  <link rel="icon" href="resources/icon.svg" type="image/svg+xml" />
+  <meta name="x-icue-widget-group" content="tr('HEROES LIVE')" />
+
+  <meta name="x-icue-property" content="backendUrl" data-label="tr('Backend URL')" data-type="textfield" data-default="''" />
+  <meta name="x-icue-property" content="gameType" data-label="tr('Game Type')" data-type="combobox" data-default="'Storm League'" data-values="[{'key':'Storm League','value':tr('Storm League')},{'key':'Quick Match','value':tr('Quick Match')}]" />
+
+  <meta name="x-icue-property" content="textColor" data-label="tr('Text Color')" data-type="color" data-default="'#eef2f7'" />
+  <meta name="x-icue-property" content="accentColor" data-label="tr('Accent Color')" data-type="color" data-default="'#3ad6c8'" />
+  <meta name="x-icue-property" content="backgroundColor" data-label="tr('Background Color')" data-type="color" data-default="'#0d1117'" />
+  <meta name="x-icue-property" content="transparency" data-label="tr('Background Transparency')" data-type="slider" data-default="0" data-min="0" data-max="100" data-step="1" data-unit-label="'%'" />
+
+  <script id="x-icue-groups" type="application/json">
+  [
+    {
+      "title": "tr('Heroes Tracker Link')",
+      "properties": ["backendUrl", "gameType"],
+      "info": "tr('Read-only. Point this at your Heroes Tracker backend on bastion (see BASTION_SETUP.md). No API keys go here.')"
+    },
+    {
+      "title": "tr('Widget Personalization')",
+      "properties": ["textColor", "accentColor", "backgroundColor", "transparency"]
+    }
+  ]
+  </script>
+
+  <link rel="stylesheet" href="shared/styles/base.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+  <main id="frame" class="frame">
+    <section class="panel panel--pick">
+      <div class="pick__label">MY HERO</div>
+      <div class="pick__row">
+        <button class="btn stepper" id="myPrev">&#8249;</button>
+        <div class="pick__name" id="myName">&mdash;</div>
+        <button class="btn stepper" id="myNext">&#8250;</button>
+      </div>
+      <button class="btn mode" id="modeBtn">STORM LEAGUE</button>
+      <div class="tag" id="linkTag">NO LINK</div>
+
+      <div class="personal">
+        <div class="hd-label">YOUR RECORD</div>
+        <div class="personal__row">
+          <div class="stat"><b id="personalGames">&mdash;</b><span>GAMES</span></div>
+          <div class="stat"><b id="personalWr">&mdash;</b><span>WIN RATE</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel panel--build">
+      <div class="hd-label">BEST BUILD <span id="buildWr"></span></div>
+      <ol class="talent-line" id="talentLine"></ol>
+      <div class="build-empty" id="buildEmpty">&gt; SET BACKEND URL IN SETTINGS</div>
+    </section>
+  </main>
+
+  <script src="shared/scripts/icue-adapter.js"></script>
+  <script src="scripts/main.js"></script>
+  <script>
+    icueEvents = {
+      onICUEInitialized: onIcueDataUpdated,
+      onDataUpdated: onIcueDataUpdated
+    };
+
+    onIcueDataUpdated();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "widget_name": "HEROES DRAFT",
+  "HEROES DRAFT": "HEROES DRAFT",
+  "Heroes Tracker Link": "Heroes Tracker Link",
+  "Backend URL": "Backend URL",
+  "Game Type": "Game Type",
+  "Storm League": "Storm League",
+  "Quick Match": "Quick Match",
+  "Widget Personalization": "Widget Personalization",
+  "Text Color": "Text Color",
+  "Accent Color": "Accent Color",
+  "Background Color": "Background Color",
+  "Background Transparency": "Background Transparency",
+  "Read-only. Point this at your Heroes Tracker backend on bastion (see BASTION_SETUP.md). No API keys go here.": "Read-only. Point this at your Heroes Tracker backend on bastion (see BASTION_SETUP.md). No API keys go here."
+}
