@@ -23,8 +23,10 @@ Custom iCUE widgets for the Corsair Xeneon Edge (14.5" touch strip under the mai
 | **SKETCH** | v0.1, untested on hardware | Finger-drawing chalkboard: chalk colors, eraser, undo, three saved pages |
 | **PIT WALL** | v0.1, untested on hardware | F1 from your F1 dashboard: live timing tower (gaps, tyres, pits, flags), next-race countdown with local session times, driver and constructor standings |
 | **GRIDIRON** | v0.1, untested on hardware | NFL Sunday: every game on the slate with live scores, down and distance, possession, red-zone alerts, scoring plays, division standings, and a Gamecast for any game you tap |
+| **HEROES DRAFT** | v0.1, untested on hardware | Heroes of the Storm draft-phase reference, fed by Karieo/Heroes-Tracker: cycle your hero and the enemy hero, see the matchup win rate and top 3 talent builds at your rank |
+| **HEROES LIVE** | v0.1, untested on hardware | In-game quick reference for the hero you're playing: full best-build talent line (levels 1-20) and your personal games/win rate with that hero, same backend as HEROES DRAFT |
 
-Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, SKETCH is a chalkboard, and GRIDIRON is a stadium scoreboard. The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
+Widgets don't all share one look on purpose. DATACORE and STRATUM DM use the DATACORE terminal theme (they're tied to that app), OKTAI has a grim Drakkenheim theme, GAME HUD looks like race telemetry, FORGE looks like a hobby desk, CREATOR looks like a clean creator-studio dashboard (light or dark), ON AIR looks like a broadcast console, LAUNCHPAD is flat bold tiles, DAYBREAK is a sky, WARGAME is a grimdark command bunker, QUESTS is an 8-bit RPG menu, GRIMOIRE is an open rulebook, AMBIENCE is a 1970s hi-fi, JUKEBOX is a turntable, PAINT RACK is a wet palette, SKETCH is a chalkboard, GRIDIRON is a stadium scoreboard, and HEROES DRAFT / HEROES LIVE are a dark arena slate (gold accent for DRAFT, teal for LIVE, so they're easy to tell apart at a glance). The first themes live in `shared/styles/` on top of a common `base.css`; the newer widgets keep their theme in their own `styles/main.css`.
 
 Read `RESEARCH.md` before changing anything. Section 0 lists what this repo learned about the iCUE widget rules and corrects a few wrong assumptions.
 
@@ -181,7 +183,7 @@ Slot sizes: XL shows everything. L and S show on-air + scenes. M shows the on-ai
 - **Touch focus: tested, not a problem.** On 2026-09-25, tapping the Edge during a full-screen game did not take focus, so the widgets stay as native iCUE widgets. (All iCUE calls still live in `shared/scripts/icue-adapter.js`, in case that ever changes.)
 - **Media:** song and artist only. No play state, album art, volume, or playlist switching. (JUKEBOX looks up art on the iTunes Search API and guesses play state.)
 - **Sensors:** confirmed on hardware 2026-09-25: Ryzen 9900X (Temp #1/#2, Load), RTX 5080 (Temp #1/#2, fans, Load, Memory Load), the 9900X's built-in Radeon, and RAM temps. Auto-pick prefers the RTX over the built-in Radeon.
-- **Network widgets** (DAYBREAK weather, JUKEBOX art, CREATOR, STRATUM DM) need the Edge's network test (test 6) to pass. They show a clear message when offline.
+- **Network widgets** (DAYBREAK weather, JUKEBOX art, CREATOR, STRATUM DM, HEROES DRAFT, HEROES LIVE) need the Edge's network test (test 6) to pass. They show a clear message when offline.
 - **Sound** (AMBIENCE) is untested inside iCUE. It starts on the first tap.
 - The ASK CLAUDE button just opens a link. No API keys anywhere in this repo.
 
@@ -264,6 +266,18 @@ NFL Sunday on the Edge. Scores come from ESPN's public scoreboard and standings 
 - **Favorite Team** (optional, e.g. `HOU`): pins that game first and opens standings on its division.
 - **Polling**: every 20 s with games live, 60 s within 30 min of a kickoff, 5 min on a game day, 15 min otherwise. Standings every 6 h. If ESPN is down it keeps the last scores and says how old they are.
 
+## HEROES DRAFT / HEROES LIVE
+
+Heroes of the Storm reference widgets fed by [Karieo/Heroes-Tracker](https://github.com/Karieo/Heroes-Tracker) — a small Flask/SQLite backend on bastion that polls the HeroesProfile API on a schedule and caches personal match history, hero stats, talent builds, and matchup win rates (filtered to Clay's rank bracket). Neither widget ever talks to HeroesProfile directly or holds an API key — see [`docs/heroes-edge-feed.md`](docs/heroes-edge-feed.md) for the exact JSON shape both widgets read.
+
+**Setup:** in either widget's settings, fill in **Backend URL** (e.g. `https://heroes.yourdomain.com` or bastion's Tailscale address — see Heroes-Tracker's `BASTION_SETUP.md`). **Game Type** toggles between Storm League and Quick Match (also tappable on the widget itself, top of the picker panel).
+
+**HEROES DRAFT** — cycle **My Hero** and **Enemy Hero** with the &lsaquo;/&rsaquo; buttons (alphabetical, built from the backend's cached hero list — no hardcoded roster to go stale on a new hero release). Shows the matchup win rate between them and the top 3 talent builds for My Hero, each build's 7 picks (levels 1/4/7/10/13/16/20) with its own win rate and sample size.
+
+**HEROES LIVE** — cycle **My Hero**, see your single best-win-rate talent build laid out level by level (a build to actually reference mid-game, not just a summary), plus your personal games-played and win-rate with that hero. Hero selection and the Game Type toggle are saved per widget instance, so HEROES DRAFT and HEROES LIVE remember their own last pick independently.
+
+Both show a LIVE/OFFLINE/NO LINK tag like STRATUM DM's, and keep the last good data on screen if the backend goes offline mid-game.
+
 ## Layout
 
 ```
@@ -297,7 +311,10 @@ widgets/
   Sketch/
   PitWall/
   Gridiron/
-docs/f1-edge-feed.md   the JSON feed PIT WALL reads from the F1 dashboard
+  HeroesDraft/
+  HeroesLive/
+docs/f1-edge-feed.md       the JSON feed PIT WALL reads from the F1 dashboard
+docs/heroes-edge-feed.md  the JSON feed HEROES DRAFT / HEROES LIVE read from Heroes-Tracker
 tools/build.mjs
 RESEARCH.md
 ```
@@ -311,5 +328,6 @@ RESEARCH.md
 - Weather data by [Open-Meteo.com](https://open-meteo.com) (CC-BY 4.0).
 - Album art and album names from Apple's iTunes Search API.
 - NFL scores and standings from ESPN's public site API (unofficial). NFL team names are trademarks of the NFL and its teams; GRIDIRON shows abbreviations and colors only, no logos.
+- Heroes of the Storm stats (hero win rates, talent builds, matchups) via [HeroesProfile](https://www.heroesprofile.com), fetched and cached server-side by Karieo/Heroes-Tracker — see that repo for HeroesProfile's own terms. Heroes of the Storm is a trademark of Blizzard Entertainment; HEROES DRAFT and HEROES LIVE show hero and talent names only, no game assets.
 - GRIMOIRE: This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
 - Warhammer 40,000 and Citadel paint names are trademarks of Games Workshop. PAINT RACK swatches are eyeballed approximations for personal reference. WARGAME only tracks numbers; no rules text is included.
